@@ -1,4 +1,4 @@
-package pk.edu.nust.seecs.manzil;
+package manzil;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
