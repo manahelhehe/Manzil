@@ -2,10 +2,7 @@ package manzil.controller;
 
 import manzil.model.Place;
 import manzil.service.PlaceService;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -20,6 +17,12 @@ public class PlaceController
 
     @GetMapping
     public List<Place> getAllPlaces() {return service.fetchPlaces();}
+
+    @GetMapping("/search")
+    public List<Place> getBook(@RequestParam String query)
+    {
+        return service.findBook(query);
+    }
 
 
 

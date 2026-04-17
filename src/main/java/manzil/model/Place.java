@@ -27,7 +27,7 @@ public class Place
     @Column(columnDefinition = "VARCHAR(16)", nullable = false)
     private String city;
 
-    @Pattern(regexp = "^(0[0-9]|1[0-9]|2[0-3]):([0-5][0-9])-(0[0-9]|1[0-9]|2[0-3]):([0-5][0-9])$")
+    @Pattern(regexp = "^([0-1][0-9]|2[0-3]):([0-5][0-9])-(0[0-9]|1[0-9]|2[0-3]):([0-5][0-9])$")
     private String openingHours;
 
     private int minCost;
