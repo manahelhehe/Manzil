@@ -31,6 +31,8 @@ public class User {
 
     private String profilePhoto;
 
+    private boolean activityStatus; //can either be online or offline
+
     @Min(8)
     private String password;
 
