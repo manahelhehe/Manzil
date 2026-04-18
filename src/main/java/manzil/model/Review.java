@@ -10,12 +10,13 @@ import java.time.LocalDate;
 
 @Entity
 @Data
-public class Review{
+public class Review
+{
     @Id
     @GeneratedValue( strategy = GenerationType.IDENTITY)
     private long reviewID;
 
-    @Column(columnDefinition = "TEXT")
+    @Column
     private String comments;
 
     @Column(nullable = false)
@@ -34,45 +35,6 @@ public class Review{
     @ManyToOne
     @JoinColumn(name = "registeredUser")
     private RegisteredUser reviewRegisteredUser;
-
-    Review(String comments, LocalDate reviewDate, int likesCount, int ratingScore){
-        this.ratingScore = ratingScore;
-        this.likesCount = likesCount;
-        this.reviewDate = reviewDate;
-        this.comments = comments;
-    }
-
-    int getLikesCount(){
-        return likesCount;
-    }
-
-    LocalDate getReviewDate(){
-        return reviewDate;
-    }
-
-    int getRatingScore(){
-        return ratingScore;
-    }
-
-    String comments(){
-        return comments;
-    }
-
-    void setLikesCount(int likesCount){
-        this.likesCount = likesCount;
-    }
-
-    void setRatingScore(int ratingScore){
-        this.ratingScore = ratingScore;
-    }
-
-    void setreviewDate(LocalDate reviewDate){
-        this.reviewDate = reviewDate;
-    }
-
-    void setComments(String comments){
-        this.comments = comments;
-    }
 
 }
 
