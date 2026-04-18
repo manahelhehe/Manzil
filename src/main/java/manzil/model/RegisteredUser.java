@@ -10,6 +10,7 @@ import java.util.List;
 @Data
 public class RegisteredUser
 {
+    private List<String> preferences;
     private LocalDate dateJoined;
 
 }
