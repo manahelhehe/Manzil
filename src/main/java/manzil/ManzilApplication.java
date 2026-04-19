@@ -8,6 +8,4 @@ public class ManzilApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(ManzilApplication.class, args);
-	}
-
-}
+	}}
