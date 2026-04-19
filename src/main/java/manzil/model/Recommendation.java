@@ -23,16 +23,16 @@ public class Recommendation {
     private Place place;
 
     @ManyToOne
-    @JoinColumn(name = "guest_session_id")
-    private GuestSession guestsession;
+    @JoinColumn(name = "sessionID")
+    private GuestSession guestSession;
 
     @ManyToOne
-    @JoinColumn(name = "registered_user_id")
-    private RegisteredUser registereduser;
+    @JoinColumn(name = "user_id")
+    private RegisteredUser recRegisteredUser;
 
-    private LocalDateTime data;
+    private LocalDateTime date;
 
     @Column(columnDefinition = "TEXT")
-    private String recommendationreason;
+    private String recommendationReason;
 
     private boolean clickStatus;}
