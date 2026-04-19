@@ -8,8 +8,8 @@ import java.util.List;
 
 @Entity
 @Data
-public class RegisteredUser
+public class RegisteredUser extends User
 {
     private LocalDate dateJoined;
-
+    
 }
