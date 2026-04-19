@@ -14,6 +14,9 @@ public class PlaceService
 
     public List<Place> fetchPlaces() {return repo.findAll();}
 
-    public List<>
+    public List<Place> findPlace(String query)
+    {
+
+    }
 
 }

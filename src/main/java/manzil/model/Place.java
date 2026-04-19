@@ -45,7 +45,7 @@ public class Place
             joinColumns = @JoinColumn(name = "place_id"),
             inverseJoinColumns = @JoinColumn(name = "vibe_id")
     )
-    private List<Vibe> placeVibe;
+    private List<Vibe> vibe;
 
     @ManyToOne
     @JoinColumn(name = "category_id")

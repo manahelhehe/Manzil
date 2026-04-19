@@ -19,9 +19,9 @@ public class PlaceController
     public List<Place> getAllPlaces() {return service.fetchPlaces();}
 
     @GetMapping("/search")
-    public List<Place> getBook(@RequestParam String query)
+    public List<Place> getPlace(@RequestParam String query)
     {
-        return service.findBook(query);
+        return service.findPlace(query);
     }
 
 
