@@ -14,7 +14,7 @@ import lombok.Data;
 public class GuestSession {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int SessionID;
+    private int SessionId;
 
     @Column(nullable = false)
     private LocalDateTime sessionStart;

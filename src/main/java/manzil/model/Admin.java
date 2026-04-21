@@ -7,6 +7,7 @@ import java.util.List;
 @Entity
 @Data
 public class Admin extends User {
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Role roles;
 

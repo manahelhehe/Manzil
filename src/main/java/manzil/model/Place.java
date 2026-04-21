@@ -16,7 +16,7 @@ public class Place
 {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long placeID;
+    private long placeId;
 
     @Column(nullable = false)
     private String name;
@@ -33,8 +33,6 @@ public class Place
     private int minCost;
 
     private int maxCost;
-
-    private int budgetRange;
 
     @Column(columnDefinition = "geometry(Point, 4326)")
     private Point location;
