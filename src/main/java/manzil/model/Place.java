@@ -8,6 +8,7 @@ import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.PrecisionModel;
 import jakarta.validation.constraints.Pattern;
 
+import java.time.LocalTime;
 import java.util.List;
 
 @Entity
@@ -27,14 +28,11 @@ public class Place
     @Column(columnDefinition = "VARCHAR(16)", nullable = false)
     private String city;
 
-    @Pattern(regexp = "^([0-1][0-9]|2[0-3]):([0-5][0-9])-(0[0-9]|1[0-9]|2[0-3]):([0-5][0-9])$")
-    private String openingHours;
+    private LocalTime openingTime;
+    private LocalTime closingTime;
 
-    private int minCost;
-
-    private int maxCost;
-
-    private int budgetRange;
+    private int minCost = -1;
+    private int maxCost = -1;
 
     @Column(columnDefinition = "geometry(Point, 4326)")
     private Point location;
@@ -49,7 +47,7 @@ public class Place
 
     @ManyToOne
     @JoinColumn(name = "category_id")
-    private Category placeCategory;
+    private Category category;
 
 
     public void mapLocation(double lat, double lng)
