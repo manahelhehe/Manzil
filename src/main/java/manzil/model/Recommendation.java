@@ -28,7 +28,7 @@ public class Recommendation {
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    private RegisteredUser recRegisteredUser;
+    private RegisteredManzilUser recRegisteredUser;
 
     private LocalDateTime date;
 

@@ -34,7 +34,7 @@ public class Review
 
     @ManyToOne
     @JoinColumn(name = "registeredUser")
-    private RegisteredUser reviewRegisteredUser;
+    private RegisteredManzilUser reviewRegisteredUser;
 
 }
 

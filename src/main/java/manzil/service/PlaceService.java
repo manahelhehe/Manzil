@@ -18,7 +18,7 @@ public class PlaceService
     private final PlaceRepository repo;
     private final CategoryRepository crepo;
     private final VibeRepository vrepo;
-    PlaceService(PlaceRepository repo, CategoryRepository crepo, VibeRepository vrepo)
+    public PlaceService(PlaceRepository repo, CategoryRepository crepo, VibeRepository vrepo)
     {
         this.repo = repo;
         this.crepo = crepo;
@@ -156,7 +156,5 @@ public class PlaceService
     {
         return repo.saveAll(places);
     }
-
-
 
 }

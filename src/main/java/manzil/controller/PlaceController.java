@@ -16,12 +16,12 @@ import java.util.Optional;
 public class PlaceController
 {
     private final PlaceService service;
-    PlaceController(PlaceService service) {this.service = service;}
+    public PlaceController(PlaceService service) {this.service = service;}
 
     @GetMapping
     public List<Place> getAllPlaces() {return service.fetchPlaces();}
 
-    @GetMapping("/{}id")
+    @GetMapping("/{id}")
     public ResponseEntity<Place> getPlace(@PathVariable long id)
     {
         Optional<Place> place = service.fetchPlaceById(id); // Tries to find Place
