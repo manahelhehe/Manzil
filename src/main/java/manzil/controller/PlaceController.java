@@ -77,4 +77,27 @@ public class PlaceController
         return ResponseEntity.ok(place.get());
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deletePlace(@PathVariable long id)
+    {
+        Optional<String> response = service.dropPlace(id);
+
+        if(response.isEmpty())
+            return ResponseEntity.notFound().build();
+
+        return ResponseEntity.ok(response.get());
+    }
+
+    @PostMapping
+    public Place addPlace(Place place)
+    {
+        return service.postPlace(place);
+    }
+
+    @PostMapping("/list")
+    public List<Place> addPlaceList(List<Place> places)
+    {
+        return service.postPlaceList(places);
+    }
+
 }
