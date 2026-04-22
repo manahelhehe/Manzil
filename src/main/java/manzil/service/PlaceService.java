@@ -102,7 +102,7 @@ public class PlaceService
 
         if(updatedPlace.getCategory() != null)
         {
-            int cId = updatedPlace.getCategory().getCategoryID();  // Gets the ID of the new category
+            int cId = updatedPlace.getCategory().getCategoryId();  // Gets the ID of the new category
             Optional<Category> category = crepo.findById(cId);  // Tries to find the associated category
 
             if(category.isEmpty())
@@ -118,7 +118,7 @@ public class PlaceService
 
             for(Vibe v: updatedPlace.getVibe()) // Checks for all vibes within the Vibe List of the updatedPlace
             {
-                int vId = v.getVibeID();
+                int vId = v.getVibeId();
                 Optional<Vibe> vibe = vrepo.findById(vId);
 
                 if(vibe.isEmpty())
