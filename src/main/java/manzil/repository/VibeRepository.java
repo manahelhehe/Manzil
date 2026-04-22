@@ -1,11 +1,11 @@
 package manzil.repository;
 
-import manzil.model.Category;
+import manzil.model.Vibe;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface CategoryRepository extends JpaRepository<Category, Integer>
+public interface VibeRepository extends JpaRepository<Vibe, Integer>
 {
 
 }

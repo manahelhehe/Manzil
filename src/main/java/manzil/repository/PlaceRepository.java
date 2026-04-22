@@ -9,7 +9,8 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface PlaceRepository extends JpaRepository<Place, Long>
+public interface PlaceRepository extends JpaRepository<Place, Long>    /* Tells the interface the entity it refers to,
+                                                                        and its associated ID's datatype */
 {
     List<Place> findPlaceByName(String name);   // SELECT * FROM PLACE WHERE name = name
     List<Place> findPlaceByCity(String city);
