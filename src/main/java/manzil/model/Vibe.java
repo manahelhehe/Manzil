@@ -9,7 +9,7 @@ public class Vibe
 {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int vibeID;
+    private int vibeId;
 
     @Column(nullable = false)
     private String name;
