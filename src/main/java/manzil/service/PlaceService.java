@@ -8,7 +8,6 @@ import manzil.model.Vibe;
 import manzil.repository.CategoryRepository;
 import manzil.repository.PlaceRepository;
 import manzil.repository.VibeRepository;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -127,7 +126,7 @@ public class PlaceService
                 newVibes.add(v);    // If found, the vibe will be added to the newVibes List
             }
 
-            existingPlace.setVibe(newVibes);    // The final list will be set as the vibes for existing place
+            existingPlace.setVibe(newVibes);    // The final list will be set as the vibes for the existing place
         }
 
         return Optional.of(repo.save(existingPlace));
@@ -135,6 +134,29 @@ public class PlaceService
         // repo.save(existingPlace): saves the changes to existingPlace to our db and returns the newly saved Place
         // Optional.of(): wraps the newly saved Place in an Optional to match the return type constraint
     }
+
+    public Optional<String> dropPlace(long id)
+    {
+        Optional<Place> result = fetchPlaceById(id);
+
+        if(result.isEmpty())
+            return Optional.empty();
+
+        repo.delete(result.get());
+        return Optional.of("Place Deleted Successfully (ID: " + id + ")");
+
+    }
+
+    public Place postPlace(Place place)
+    {
+        return repo.save(place);
+    }
+
+    public List<Place> postPlaceList(List<Place> places)
+    {
+        return repo.saveAll(places);
+    }
+
 
 
 }
