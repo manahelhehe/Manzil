@@ -1,0 +1,23 @@
+# Compiled class file
+/target/
+*.class
+
+# Log files
+*.log
+
+# IntelliJ IDEA
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+
+# Maven
+mvnw
+mvnw.cmd
+.mvn/
+
+# Windows
+Thumbs.db
+
+application-local.proprties
