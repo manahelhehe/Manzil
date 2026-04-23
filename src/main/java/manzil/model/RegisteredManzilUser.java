@@ -8,7 +8,7 @@ import java.util.List;
 
 @Entity
 @Data
-public class RegisteredUser extends User
+public class RegisteredManzilUser extends ManzilUser
 {
     private List<String> preferences;
     private LocalDate dateJoined;

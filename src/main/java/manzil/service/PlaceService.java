@@ -1,11 +1,13 @@
 package manzil.service;
 
+import jakarta.transaction.Transactional;
+import manzil.exceptions.ResourceNotFoundException;
 import manzil.model.Category;
 import manzil.model.Place;
 import manzil.model.Vibe;
 import manzil.repository.CategoryRepository;
 import manzil.repository.PlaceRepository;
-import org.springframework.http.ResponseEntity;
+import manzil.repository.VibeRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -15,24 +17,19 @@ public class PlaceService
 {
     private final PlaceRepository repo;
     private final CategoryRepository crepo;
-    PlaceService(PlaceRepository repo, CategoryRepository crepo)
+    private final VibeRepository vrepo;
+    public PlaceService(PlaceRepository repo, CategoryRepository crepo, VibeRepository vrepo)
     {
         this.repo = repo;
         this.crepo = crepo;
+        this.vrepo = vrepo;
     }
 
     public List<Place> fetchPlaces() {return repo.findAll();}
 
-    public ResponseEntity<Place> fetchPlaceById(long id)
+    public Optional<Place> fetchPlaceById(long id)
     {
-        Optional<Place> result = repo.findById(id); // If place is found, it'll store it. If not, it'll be empty
-
-        if(result.isEmpty())
-            return ResponseEntity.notFound().build();   // Sends "404 Not Found" Error through ResponseEntity object
-
-        // .build() is used to build the ResponseEntity object with the status "Not Found"
-
-        return ResponseEntity.ok(result.get());
+        return repo.findById(id);
     }
 
     public List<Place> fetchOpenPlaces()
@@ -69,13 +66,14 @@ public class PlaceService
         return new ArrayList<>(results);
     }
 
-    public ResponseEntity<Place> updatePlace(long id, Place updatedPlace)
-    {
-        ResponseEntity<Place> result = fetchPlaceById(id);
-        Place existingPlace = result.getBody();
+    @Transactional  // Ensures a transactional process; either EVERYTHING executes or NOTHING does
+    public Optional<Place> updatePlace(long id, Place updatedPlace) throws ResourceNotFoundException {
+        Optional<Place> result = fetchPlaceById(id);
 
-        if(!result.hasBody() && existingPlace == null)
+        if(result.isEmpty())
             return result;
+
+        Place existingPlace = result.get();
 
         if(updatedPlace.getName() != null)
             existingPlace.setName(updatedPlace.getName());
@@ -103,17 +101,60 @@ public class PlaceService
 
         if(updatedPlace.getCategory() != null)
         {
-            Category newCategory = crepo.findById(updatedPlace.getCategory().getCategoryID())
+            int cId = updatedPlace.getCategory().getCategoryId();  // Gets the ID of the new category
+            Optional<Category> category = crepo.findById(cId);  // Tries to find the associated category
+
+            if(category.isEmpty())
+                throw new ResourceNotFoundException("Category Not Found!");
+
+            existingPlace.setCategory(category.get());  /* If found, the category will be extracted from the optional
+                                                         and set as the category for the existing Place */
         }
-            existingPlace.setCategory(updatedPlace.getCategory());
 
         if(updatedPlace.getVibe() != null)
         {
-            Vibe newVibe =
+            List<Vibe> newVibes = new ArrayList<>();
+
+            for(Vibe v: updatedPlace.getVibe()) // Checks for all vibes within the Vibe List of the updatedPlace
+            {
+                int vId = v.getVibeId();
+                Optional<Vibe> vibe = vrepo.findById(vId);
+
+                if(vibe.isEmpty())
+                    throw new ResourceNotFoundException("Vibe Not Found");
+
+                newVibes.add(v);    // If found, the vibe will be added to the newVibes List
+            }
+
+            existingPlace.setVibe(newVibes);    // The final list will be set as the vibes for the existing place
         }
-            existingPlace.setVibe(updatedPlace.getVibe());
+
+        return Optional.of(repo.save(existingPlace));
+        // Does two things:
+        // repo.save(existingPlace): saves the changes to existingPlace to our db and returns the newly saved Place
+        // Optional.of(): wraps the newly saved Place in an Optional to match the return type constraint
+    }
+
+    public Optional<String> dropPlace(long id)
+    {
+        Optional<Place> result = fetchPlaceById(id);
+
+        if(result.isEmpty())
+            return Optional.empty();
+
+        repo.delete(result.get());
+        return Optional.of("Place Deleted Successfully (ID: " + id + ")");
 
     }
 
+    public Place postPlace(Place place)
+    {
+        return repo.save(place);
+    }
+
+    public List<Place> postPlaceList(List<Place> places)
+    {
+        return repo.saveAll(places);
+    }
 
 }

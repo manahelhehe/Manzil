@@ -7,13 +7,11 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Pattern;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Inheritance(strategy = InheritanceType.JOINED)
 @Entity
 @Data
 @NoArgsConstructor
-public class User {
+public class ManzilUser {
 
     @Id
     @GeneratedValue (strategy = GenerationType.IDENTITY)
@@ -38,7 +36,7 @@ public class User {
     @Min(8)
     private String password;
 
-    public User(String name, String email, String phoneNumber, String profilePhoto, String password) {
+    public ManzilUser(String name, String email, String phoneNumber, String profilePhoto, String password) {
         this.name = name;
         this.email = email;
         this.phoneNumber = phoneNumber;

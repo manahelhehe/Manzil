@@ -1,5 +1,6 @@
 package manzil.controller;
 
+import manzil.exceptions.ResourceNotFoundException;
 import manzil.model.Place;
 import manzil.service.PlaceService;
 import org.springframework.http.ResponseEntity;
@@ -15,15 +16,24 @@ import java.util.Optional;
 public class PlaceController
 {
     private final PlaceService service;
-    PlaceController(PlaceService service) {this.service = service;}
+    public PlaceController(PlaceService service) {this.service = service;}
 
     @GetMapping
     public List<Place> getAllPlaces() {return service.fetchPlaces();}
 
-    @GetMapping("/{}id")
+    @GetMapping("/{id}")
     public ResponseEntity<Place> getPlace(@PathVariable long id)
     {
-        return service.fetchPlaceById(id);
+        Optional<Place> place = service.fetchPlaceById(id); // Tries to find Place
+
+        if(place.isEmpty())
+            return ResponseEntity.notFound().build();
+        // Returns 404 NOT FOUND error if Optional is empty
+        // .build() finalizes the construction of the ResponseEntity
+
+        return ResponseEntity.ok(place.get());
+        // Extracts Place from Optional if it isn't empty and sends an "OK" response entity
+        // No .build() required as the presence of data indicates the finalization of the entity
     }
 
     @GetMapping("/search")
@@ -57,9 +67,37 @@ public class PlaceController
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Place> updatePlace(@PathVariable long id, Place updatedPlace)
+    public ResponseEntity<Place> updatePlace(@PathVariable long id, Place updatedPlace) throws ResourceNotFoundException
     {
-        ResponseEntity<Place> = service.fetchPlaceById(id);
+        Optional<Place> place = service.updatePlace(id, updatedPlace);  // Exception is handled by Spring's Exception Handler
+
+        if(place.isEmpty())
+            return ResponseEntity.notFound().build();
+
+        return ResponseEntity.ok(place.get());
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deletePlace(@PathVariable long id)
+    {
+        Optional<String> response = service.dropPlace(id);
+
+        if(response.isEmpty())
+            return ResponseEntity.notFound().build();
+
+        return ResponseEntity.ok(response.get());
+    }
+
+    @PostMapping
+    public Place addPlace(Place place)
+    {
+        return service.postPlace(place);
+    }
+
+    @PostMapping("/list")
+    public List<Place> addPlaceList(List<Place> places)
+    {
+        return service.postPlaceList(places);
     }
 
 }

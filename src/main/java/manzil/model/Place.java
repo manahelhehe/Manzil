@@ -17,7 +17,7 @@ public class Place
 {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long placeId;
+    private long placeID;
 
     @Column(nullable = false)
     private String name;
