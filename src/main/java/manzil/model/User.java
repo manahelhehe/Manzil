@@ -5,12 +5,14 @@ import lombok.Data;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Pattern;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Inheritance(strategy = InheritanceType.JOINED)
 @Entity
 @Data
+@NoArgsConstructor
 public class User {
 
     @Id

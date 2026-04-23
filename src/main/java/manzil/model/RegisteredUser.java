@@ -10,6 +10,7 @@ import java.util.List;
 @Data
 public class RegisteredUser extends User
 {
+    private List<String> preferences;
     private LocalDate dateJoined;
     
     @OneToMany(mappedBy = "recRegisteredUser", cascade = CascadeType.ALL, orphanRemoval = true)
