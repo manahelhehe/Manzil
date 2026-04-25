@@ -15,7 +15,7 @@ public class ManzilUser {
 
     @Id
     @GeneratedValue (strategy = GenerationType.IDENTITY)
-    private long userID;
+    private long userId;
     
     private String name;
 
