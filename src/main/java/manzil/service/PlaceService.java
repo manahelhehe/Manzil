@@ -10,6 +10,7 @@ import manzil.repository.PlaceRepository;
 import manzil.repository.VibeRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -34,17 +35,17 @@ public class PlaceService
 
     public List<Place> fetchOpenPlaces()
     {
-        return repo.findPlaceByClosingTimeBeforeAndOpeningTimeAfter();
+        return repo.findPlaceByClosingTimeBeforeAndOpeningTimeAfter(LocalDateTime.now(), LocalDateTime.now());
     }
 
     public List<Place> fetchPlacesByVibe(int vibeID)
     {
-        return repo.findPlaceByVibeId(vibeID);
+        return repo.findPlaceByVibeVibeId(vibeID);
     }
 
     public List<Place> fetchPlacesByCategory(int categoryID)
     {
-        return repo.findPlaceByCategoryId(categoryID);
+        return repo.findPlaceByCategoryCategoryId(categoryID);
     }
 
     public List<Place> fetchPlacesByCity(String city)

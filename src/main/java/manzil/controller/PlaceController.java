@@ -1,11 +1,14 @@
 package manzil.controller;
 
+import manzil.dto.PlaceDTO;
 import manzil.exceptions.ResourceNotFoundException;
+import manzil.model.Category;
 import manzil.model.Place;
 import manzil.service.PlaceService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -89,13 +92,29 @@ public class PlaceController
     }
 
     @PostMapping
-    public Place addPlace(Place place)
+    public Place addPlace(@RequestBody PlaceDTO dto)
     {
-        return service.postPlace(place);
+        Place place = new Place();
+
+        place.setName(dto.getName());
+        place.setDescription(dto.getDescription());
+        place.setCity(dto.getCity());
+        place.setOpeningTime(LocalTime.parse(dto.getOpeningTime()));
+        place.setClosingTime(LocalTime.parse(dto.getClosingTime()));
+        place.setMinCost(dto.getMinCost());
+        place.setMaxCost(dto.getMaxCost());
+
+        place.mapLocation(dto.getLatitude(), dto.getLongitude());
+
+        Category c = new Category();
+        c.setCategoryId(dto.getCategoryID());
+        place.setCategory(c);
+
+        ResponseEntity.ok()
     }
 
     @PostMapping("/list")
-    public List<Place> addPlaceList(List<Place> places)
+    public List<Place> addPlaceList(@RequestBody List<Place> places)
     {
         return service.postPlaceList(places);
     }

@@ -1,9 +1,9 @@
 package manzil.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Pattern;
 import lombok.NoArgsConstructor;
 
@@ -31,17 +31,10 @@ public class ManzilUser {
 
     private String profilePhoto;
 
-    private boolean activityStatus; //can either be online or offline
+    private boolean activityStatus; // can either be online or offline
 
-    @Min(8)
+    @Size(min = 8)
     private String password;
 
-    public ManzilUser(String name, String email, String phoneNumber, String profilePhoto, String password) {
-        this.name = name;
-        this.email = email;
-        this.phoneNumber = phoneNumber;
-        this.profilePhoto = profilePhoto;
-        this.password = password;
-    }
 }
 //testing
