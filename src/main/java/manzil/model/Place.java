@@ -11,6 +11,8 @@ import jakarta.validation.constraints.Pattern;
 import java.time.LocalTime;
 import java.util.List;
 
+import static manzil.util.SpatialUtil.mapLocation;
+
 @Entity
 @Data
 @NoArgsConstructor
@@ -51,13 +53,6 @@ public class Place
     @JoinColumn(name = "category_id")
     private Category category;
 
-
-    public Point mapLocation(double lat, double lng)
-    {
-        GeometryFactory geoFactory = new GeometryFactory(new PrecisionModel(), 4326);
-        return geoFactory.createPoint(new Coordinate(lng, lat));
-    }
-
     public Place (PlaceDTO dto)
     {
         this.name = dto.getName();
@@ -69,6 +64,4 @@ public class Place
         this.maxCost = dto.getMaxCost();
         this.location = mapLocation(dto.getLatitude(), dto.getLongitude());
     }
-
-
 }

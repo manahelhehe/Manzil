@@ -11,7 +11,7 @@ public class SpatialUtil
 
     private SpatialUtil() {}
 
-    public static Point mapLocation(int lat, int lng)
+    public static Point mapLocation(double lat, double lng)
     {
         return geoFactory.createPoint(new Coordinate(lat, lng));
     }
