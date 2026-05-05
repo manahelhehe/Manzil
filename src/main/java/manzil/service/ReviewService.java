@@ -28,6 +28,14 @@ public class ReviewService {
 
     // Get review by ID
     public Review fetchReviewById(long reviewId) {
+
+
+//        Optional<Review> result = reviewRepository.findById(reviewId);
+//        if (result.isEmpty())
+//            throw new RuntimeException("Review not found with id: " + reviewId);
+//
+//        return result.get();
+
         return reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new RuntimeException("Review not found with id: " + reviewId));
     }
