@@ -92,8 +92,7 @@ public class PlaceController
     }
 
     @PostMapping
-    public Place addPlace(@RequestBody PlaceDTO dto)
-    {
+    public Place addPlace(@RequestBody PlaceDTO dto) {
         Place place = new Place();
 
         place.setName(dto.getName());
@@ -110,13 +109,8 @@ public class PlaceController
         c.setCategoryId(dto.getCategoryID());
         place.setCategory(c);
 
-        ResponseEntity.ok()
-    }
+        ResponseEntity.ok();}
 
     @PostMapping("/list")
-    public List<Place> addPlaceList(@RequestBody List<Place> places)
-    {
-        return service.postPlaceList(places);
-    }
-
-}
+    public List<Place> addPlaceList(@RequestBody List<Place> places) {
+        return service.postPlaceList(places);}}

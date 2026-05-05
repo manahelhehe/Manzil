@@ -13,3 +13,4 @@ public class UniversityDiscount extends DiscountOffer{
     @Enumerated(EnumType.STRING)
     private AvailableFor availableFor;
 }
+ 

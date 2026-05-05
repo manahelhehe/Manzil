@@ -11,5 +11,4 @@ public class GroupDiscount extends DiscountOffer{
     
     @Positive
     @Column(nullable = false)
-    private int minGroupSize;
-}
+    private int minGroupSize;}

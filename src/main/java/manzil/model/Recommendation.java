@@ -19,7 +19,7 @@ public class Recommendation {
     private int recommendationId;
 
     @ManyToOne
-    @JoinColumn(name = "place_id", nullable = false)
+    @JoinColumn(name = "placeId", nullable = false)
     private Place place;
 
     @ManyToOne
@@ -27,7 +27,7 @@ public class Recommendation {
     private GuestSession guestSession;
 
     @ManyToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "UserId")
     private RegisteredManzilUser recRegisteredUser;
 
     private LocalDateTime date;
