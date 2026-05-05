@@ -27,25 +27,31 @@ public class UniversityDiscountService {
         return repo.findById(id);
     }
 
-    public List<UniversityDiscount> fetchByUniversityName(String universityName) {
-        return repo.findByUniversityNameIgnoreCase(universityName);
+    public List<UniversityDiscount> fetchByUniversityName(String name) {
+        return repo.findByUniversityNameIgnoreCase(name);
     }
 
     public List<UniversityDiscount> fetchByAvailableFor(AvailableFor availableFor) {
         return repo.findByAvailableFor(availableFor);
     }
 
-    public UniversityDiscount postUniversityDiscount(UniversityDiscount universityDiscount) {
-        return repo.save(universityDiscount);
+    public UniversityDiscount postUniversityDiscount(
+            UniversityDiscount discount
+    ) {
+        return repo.save(discount);
     }
 
-    public List<UniversityDiscount> postUniversityDiscountList(List<UniversityDiscount> universityDiscounts) {
-        return repo.saveAll(universityDiscounts);
+    public List<UniversityDiscount> postUniversityDiscountList(
+            List<UniversityDiscount> discounts
+    ) {
+        return repo.saveAll(discounts);
     }
 
     @Transactional
-    public Optional<UniversityDiscount> updateUniversityDiscount(long id,
-            UniversityDiscount updatedUniversityDiscount) {
+    public Optional<UniversityDiscount> updateUniversityDiscount(
+            long id,
+            UniversityDiscount updated
+    ) {
 
         Optional<UniversityDiscount> result = fetchUniversityDiscountById(id);
 
@@ -54,49 +60,50 @@ public class UniversityDiscountService {
 
         UniversityDiscount existing = result.get();
 
-        // Parent fields
-        if (updatedUniversityDiscount.getTitle() != null)
-            existing.setTitle(updatedUniversityDiscount.getTitle());
+        if (updated.getTitle() != null)
+            existing.setTitle(updated.getTitle());
 
-        if (updatedUniversityDiscount.getDescription() != null)
-            existing.setDescription(updatedUniversityDiscount.getDescription());
+        if (updated.getDescription() != null)
+            existing.setDescription(updated.getDescription());
 
-        if (updatedUniversityDiscount.getPercentage() != -1)
-            existing.setPercentage(updatedUniversityDiscount.getPercentage());
+        if (updated.getPercentage() != -1)
+            existing.setPercentage(updated.getPercentage());
 
-        if (updatedUniversityDiscount.getMinSpend() != -1)
-            existing.setMinSpend(updatedUniversityDiscount.getMinSpend());
+        if (updated.getMinSpend() != -1)
+            existing.setMinSpend(updated.getMinSpend());
 
-        if (updatedUniversityDiscount.getValidFrom() != null)
-            existing.setValidFrom(updatedUniversityDiscount.getValidFrom());
+        if (updated.getValidFrom() != null)
+            existing.setValidFrom(updated.getValidFrom());
 
-        if (updatedUniversityDiscount.getValidTo() != null)
-            existing.setValidTo(updatedUniversityDiscount.getValidTo());
+        if (updated.getValidTo() != null)
+            existing.setValidTo(updated.getValidTo());
 
-        if (updatedUniversityDiscount.getBranch() != null)
-            existing.setBranch(updatedUniversityDiscount.getBranch());
+        // ✅ PLACE FIX
+        if (updated.getPlace() != null)
+            existing.setPlace(updated.getPlace());
 
-        if (updatedUniversityDiscount.getStatus() != null)
-            existing.setStatus(updatedUniversityDiscount.getStatus());
+        if (updated.getStatus() != null)
+            existing.setStatus(updated.getStatus());
 
-        // Child fields
-        if (updatedUniversityDiscount.getUniversityName() != null)
-            existing.setUniversityName(updatedUniversityDiscount.getUniversityName());
+        if (updated.getUniversityName() != null)
+            existing.setUniversityName(updated.getUniversityName());
 
-        if (updatedUniversityDiscount.getAvailableFor() != null)
-            existing.setAvailableFor(updatedUniversityDiscount.getAvailableFor());
+        if (updated.getAvailableFor() != null)
+            existing.setAvailableFor(updated.getAvailableFor());
 
         return Optional.of(repo.save(existing));
     }
 
     public Optional<String> dropUniversityDiscount(long id) {
-
-        Optional<UniversityDiscount> result = fetchUniversityDiscountById(id);
+        Optional<UniversityDiscount> result =
+                fetchUniversityDiscountById(id);
 
         if (result.isEmpty())
             return Optional.empty();
 
         repo.delete(result.get());
-        return Optional.of("University Discount Deleted Successfully (ID: " + id + ")");
+        return Optional.of(
+                "University Discount Deleted Successfully (ID: " + id + ")"
+        );
     }
 }

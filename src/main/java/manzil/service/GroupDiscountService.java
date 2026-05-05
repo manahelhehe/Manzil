@@ -1,38 +1,50 @@
 package manzil.service;
 
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.stereotype.Service;
+
 import jakarta.transaction.Transactional;
 import manzil.exceptions.ResourceNotFoundException;
 import manzil.model.GroupDiscount;
 import manzil.repository.GroupDiscountRepository;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.Optional;
 
 @Service
 public class GroupDiscountService {
+
     private final GroupDiscountRepository repo;
 
     public GroupDiscountService(GroupDiscountRepository repo) {
-        this.repo = repo; }
+        this.repo = repo;
+    }
 
     public List<GroupDiscount> fetchAllGroupDiscounts() {
-        return repo.findAll();}
+        return repo.findAll();
+    }
 
     public Optional<GroupDiscount> fetchGroupDiscountById(long id) {
-        return repo.findById(id);}
+        return repo.findById(id);
+    }
 
-    public List<GroupDiscount> fetchGroupDiscountsByMaxSize(int groupSize){
-        return repo.findByMinGroupSizeLessThanEqual(groupSize);}
+    public List<GroupDiscount> fetchGroupDiscountsByMaxSize(int groupSize) {
+        return repo.findByMinGroupSizeLessThanEqual(groupSize);
+    }
 
     public GroupDiscount postGroupDiscount(GroupDiscount groupDiscount) {
-        return repo.save(groupDiscount);}
+        return repo.save(groupDiscount);
+    }
 
     public List<GroupDiscount> postGroupDiscountList(List<GroupDiscount> groupDiscounts) {
-        return repo.saveAll(groupDiscounts);}
+        return repo.saveAll(groupDiscounts);
+    }
 
     @Transactional
-    public Optional<GroupDiscount> updateGroupDiscount(long id, GroupDiscount updatedGroupDiscount) throws ResourceNotFoundException     {
+    public Optional<GroupDiscount> updateGroupDiscount(
+            long id,
+            GroupDiscount updated
+    ) throws ResourceNotFoundException {
+
         Optional<GroupDiscount> result = fetchGroupDiscountById(id);
 
         if (result.isEmpty())
@@ -40,35 +52,35 @@ public class GroupDiscountService {
 
         GroupDiscount existing = result.get();
 
-        if (updatedGroupDiscount.getTitle() != null)
-            existing.setTitle(updatedGroupDiscount.getTitle());
+        if (updated.getTitle() != null)
+            existing.setTitle(updated.getTitle());
 
-        if (updatedGroupDiscount.getDescription() != null)
-            existing.setDescription(updatedGroupDiscount.getDescription());
+        if (updated.getDescription() != null)
+            existing.setDescription(updated.getDescription());
 
-        if (updatedGroupDiscount.getPercentage() != -1)
-            existing.setPercentage(updatedGroupDiscount.getPercentage());
+        if (updated.getPercentage() != -1)
+            existing.setPercentage(updated.getPercentage());
 
-        if (updatedGroupDiscount.getMinSpend() != -1)
-            existing.setMinSpend(updatedGroupDiscount.getMinSpend());
+        if (updated.getMinSpend() != -1)
+            existing.setMinSpend(updated.getMinSpend());
 
-        if (updatedGroupDiscount.getValidFrom() != null)
-            existing.setValidFrom(updatedGroupDiscount.getValidFrom());
+        if (updated.getValidFrom() != null)
+            existing.setValidFrom(updated.getValidFrom());
 
-        if (updatedGroupDiscount.getValidTo() != null)
-            existing.setValidTo(updatedGroupDiscount.getValidTo());
+        if (updated.getValidTo() != null)
+            existing.setValidTo(updated.getValidTo());
+        
+        if (updated.getPlace() != null)
+            existing.setPlace(updated.getPlace());
 
-        if (updatedGroupDiscount.getBranch() != null)
-            existing.setBranch(updatedGroupDiscount.getBranch());
+        if (updated.getStatus() != null)
+            existing.setStatus(updated.getStatus());
 
-        if (updatedGroupDiscount.getStatus() != null)
-            existing.setStatus(updatedGroupDiscount.getStatus());
+        if (updated.getMinGroupSize() > 0)
+            existing.setMinGroupSize(updated.getMinGroupSize());
 
-
-        if (updatedGroupDiscount.getMinGroupSize() > 0)
-            existing.setMinGroupSize(updatedGroupDiscount.getMinGroupSize());
-
-        return Optional.of(repo.save(existing));}
+        return Optional.of(repo.save(existing));
+    }
 
     public Optional<String> dropGroupDiscount(long id) {
         Optional<GroupDiscount> result = fetchGroupDiscountById(id);
@@ -77,4 +89,8 @@ public class GroupDiscountService {
             return Optional.empty();
 
         repo.delete(result.get());
-        return Optional.of("Group Discount Deleted Successfully (ID: " + id + ")");}}
+        return Optional.of(
+                "Group Discount Deleted Successfully (ID: " + id + ")"
+        );
+    }
+}

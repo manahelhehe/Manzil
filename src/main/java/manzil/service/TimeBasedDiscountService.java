@@ -1,114 +1,103 @@
 package manzil.service;
 
-import jakarta.transaction.Transactional;
-import manzil.exceptions.ResourceNotFoundException;
-import manzil.model.TimeBasedDiscount;
-import manzil.repository.TimeBasedDiscountRepository;
-import org.springframework.stereotype.Service;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.stereotype.Service;
+
+import jakarta.transaction.Transactional;
+import manzil.model.TimeBasedDiscount;
+import manzil.repository.TimeBasedDiscountRepository;
+
 @Service
-public class TimeBasedDiscountService
-{
+public class TimeBasedDiscountService {
+
     private final TimeBasedDiscountRepository repo;
 
-    public TimeBasedDiscountService(TimeBasedDiscountRepository repo)
-    {
+    public TimeBasedDiscountService(TimeBasedDiscountRepository repo) {
         this.repo = repo;
     }
 
-    public List<TimeBasedDiscount> fetchAllTimeBasedDiscounts()
-    {
+    public List<TimeBasedDiscount> fetchAllTimeBasedDiscounts() {
         return repo.findAll();
     }
 
-    public Optional<TimeBasedDiscount> fetchTimeBasedDiscountById(long id)
-    {
+    public Optional<TimeBasedDiscount> fetchTimeBasedDiscountById(long id) {
         return repo.findById(id);
     }
 
-    public List<TimeBasedDiscount> fetchCurrentlyActiveDiscounts()
-    {
-        // Discounts whose window covers right now
-        return repo.findByStartTimeBeforeAndEndTimeAfter(LocalDateTime.now(), LocalDateTime.now());
+    public List<TimeBasedDiscount> fetchCurrentlyActiveDiscounts() {
+        return repo.findByStartTimeBeforeAndEndTimeAfter(
+                LocalDateTime.now(),
+                LocalDateTime.now()
+        );
     }
 
-    public List<TimeBasedDiscount> fetchDiscountsStartingAfter(LocalDateTime startTime)
-    {
-        return repo.findByStartTimeAfter(startTime);
-    }
-
-    public List<TimeBasedDiscount> fetchDiscountsEndingBefore(LocalDateTime endTime)
-    {
-        return repo.findByEndTimeBefore(endTime);
-    }
-
-    public TimeBasedDiscount postTimeBasedDiscount(TimeBasedDiscount timeBasedDiscount)
-    {
-        return repo.save(timeBasedDiscount);
-    }
-
-    public List<TimeBasedDiscount> postTimeBasedDiscountList(List<TimeBasedDiscount> timeBasedDiscounts)
-    {
-        return repo.saveAll(timeBasedDiscounts);
+    public TimeBasedDiscount postTimeBasedDiscount(
+            TimeBasedDiscount discount
+    ) {
+        return repo.save(discount);
     }
 
     @Transactional
-    public Optional<TimeBasedDiscount> updateTimeBasedDiscount(long id, TimeBasedDiscount updatedTimeBasedDiscount) throws ResourceNotFoundException
-    {
-        Optional<TimeBasedDiscount> result = fetchTimeBasedDiscountById(id);
+    public Optional<TimeBasedDiscount> updateTimeBasedDiscount(
+            long id,
+            TimeBasedDiscount updated
+    ) {
+
+        Optional<TimeBasedDiscount> result =
+                fetchTimeBasedDiscountById(id);
 
         if (result.isEmpty())
             return result;
 
         TimeBasedDiscount existing = result.get();
 
-        // Parent fields
-        if (updatedTimeBasedDiscount.getTitle() != null)
-            existing.setTitle(updatedTimeBasedDiscount.getTitle());
+        if (updated.getTitle() != null)
+            existing.setTitle(updated.getTitle());
 
-        if (updatedTimeBasedDiscount.getDescription() != null)
-            existing.setDescription(updatedTimeBasedDiscount.getDescription());
+        if (updated.getDescription() != null)
+            existing.setDescription(updated.getDescription());
 
-        if (updatedTimeBasedDiscount.getPercentage() != -1)
-            existing.setPercentage(updatedTimeBasedDiscount.getPercentage());
+        if (updated.getPercentage() != -1)
+            existing.setPercentage(updated.getPercentage());
 
-        if (updatedTimeBasedDiscount.getMinSpend() != -1)
-            existing.setMinSpend(updatedTimeBasedDiscount.getMinSpend());
+        if (updated.getMinSpend() != -1)
+            existing.setMinSpend(updated.getMinSpend());
 
-        if (updatedTimeBasedDiscount.getValidFrom() != null)
-            existing.setValidFrom(updatedTimeBasedDiscount.getValidFrom());
+        if (updated.getValidFrom() != null)
+            existing.setValidFrom(updated.getValidFrom());
 
-        if (updatedTimeBasedDiscount.getValidTo() != null)
-            existing.setValidTo(updatedTimeBasedDiscount.getValidTo());
+        if (updated.getValidTo() != null)
+            existing.setValidTo(updated.getValidTo());
 
-        if (updatedTimeBasedDiscount.getBranch() != null)
-            existing.setBranch(updatedTimeBasedDiscount.getBranch());
+        // ✅ PLACE FIX
+        if (updated.getPlace() != null)
+            existing.setPlace(updated.getPlace());
 
-        if (updatedTimeBasedDiscount.getStatus() != null)
-            existing.setStatus(updatedTimeBasedDiscount.getStatus());
+        if (updated.getStatus() != null)
+            existing.setStatus(updated.getStatus());
 
-        // Subtype fields
-        if (updatedTimeBasedDiscount.getStartTime() != null)
-            existing.setStartTime(updatedTimeBasedDiscount.getStartTime());
+        if (updated.getStartTime() != null)
+            existing.setStartTime(updated.getStartTime());
 
-        if (updatedTimeBasedDiscount.getEndTime() != null)
-            existing.setEndTime(updatedTimeBasedDiscount.getEndTime());
+        if (updated.getEndTime() != null)
+            existing.setEndTime(updated.getEndTime());
 
         return Optional.of(repo.save(existing));
     }
 
-    public Optional<String> dropTimeBasedDiscount(long id)
-    {
-        Optional<TimeBasedDiscount> result = fetchTimeBasedDiscountById(id);
+    public Optional<String> dropTimeBasedDiscount(long id) {
+        Optional<TimeBasedDiscount> result =
+                fetchTimeBasedDiscountById(id);
 
         if (result.isEmpty())
             return Optional.empty();
 
         repo.delete(result.get());
-        return Optional.of("Time-Based Discount Deleted Successfully (ID: " + id + ")");
+        return Optional.of(
+                "Time-Based Discount Deleted Successfully (ID: " + id + ")"
+        );
     }
 }

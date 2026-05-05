@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -36,16 +35,15 @@ public class DiscountOffer {
     @Positive
     private double minSpend;
 
-    private String status;   // ACTIVE / INACTIVE etc
+    private String status;      // ACTIVE / INACTIVE
     private boolean active;
 
     private LocalDateTime validFrom;
     private LocalDateTime validTo;
     private LocalDateTime createdAt;
 
-
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "branch_id")   // IMPORTANT: explicit FK column
-    private Branch branch;
+    // ✅ REPLACED BRANCH WITH PLACE
+    @ManyToOne
+    @JoinColumn(name = "place_id")
+    private Place place;
 }
