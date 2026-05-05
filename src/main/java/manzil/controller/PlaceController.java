@@ -2,14 +2,14 @@ package manzil.controller;
 
 import manzil.dto.PlaceDTO;
 import manzil.exceptions.ResourceNotFoundException;
-import manzil.model.Category;
 import manzil.model.Place;
 import manzil.service.PlaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.time.LocalTime;
+import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 
@@ -70,8 +70,14 @@ public class PlaceController
         return service.fetchOpenPlaces();
     }
 
+    @GetMapping("/near")
+    public List<Place> getNearPlaces(@RequestParam double lat, @RequestParam double lng, @RequestParam double radius)
+    {
+        return service.fetchNearPlaces(lat, lng, radius);
+    }
+
     @PutMapping("/{id}")
-    public ResponseEntity<Place> updatePlace(@PathVariable long id, Place updatedPlace) throws ResourceNotFoundException
+    public ResponseEntity<Place> updatePlace(@PathVariable long id, @RequestBody Place updatedPlace) throws ResourceNotFoundException
     {
         Optional<Place> place = service.updatePlace(id, updatedPlace);  // Exception is handled by Spring's Exception Handler
 
@@ -93,25 +99,17 @@ public class PlaceController
     }
 
     @PostMapping
-    public Place addPlace(@RequestBody PlaceDTO dto)
+    public ResponseEntity<Place> addPlace(@RequestBody PlaceDTO dto) throws ResourceNotFoundException
     {
-        try
-        {
-            service.postPlace(dto);
-        } catch (ResourceNotFoundException e)
-        {
+        Place savedPlace = service.postPlace(dto);
 
-        }
+        URI path = ServletUriComponentsBuilder
+                .fromCurrentRequest() // Starts with /api/places
+                .path("/{id}")        // Appends /{id}
+                .buildAndExpand(savedPlace.getPlaceId()) // Replaces {id} with actual ID
+                .toUri();
 
-
-        Category c = categoryRepository
-
-
-        Category c = new Category();
-        c.setCategoryId(dto.getCategoryID());
-        place.setCategory(c);
-
-        ResponseEntity.ok()
+        return ResponseEntity.created(path).body(savedPlace);   // created status (201) requires URI
     }
 
     @PostMapping("/list")

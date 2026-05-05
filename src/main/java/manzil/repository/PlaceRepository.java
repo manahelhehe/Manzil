@@ -27,6 +27,18 @@ public interface PlaceRepository extends JpaRepository<Place, Long>    /* Tells 
             "    ST_GeogFromWKB(ST_AsBinary(:point)), \n" +
             "    :meterDistance\n" +
             ")", nativeQuery = true)
+
+    // == PARAMETER 1: location::geography ==
+    // converts place's geometry attribute (location) to geography (flat 2D plane to spherical coordinates)
+
+    // == PARAMETER 2: ST_GeogFromWKB(ST_AsBinary(:point)) ==
+    // :point : parameter point
+    // ST_asBinary: converts point into Well-Known Binary (WKB)
+    // ST_GeogFromWKB: geography from wkb (converts the wkb into geography)
+
+    // == PARAMETER 3: meterDistance ==
+    // represents the radius in which places are to be selected
+
     List<Place> findPlaceByLocation(@Param("point") Point point, @Param("meterDistance") double meterDistance);
     List<Place> findPlaceByVibeVibeId(int vibeID);
     List<Place> findPlaceByCategoryCategoryId(int categoryID);

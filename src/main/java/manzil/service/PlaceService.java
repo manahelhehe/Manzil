@@ -15,6 +15,8 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.*;
 
+import static manzil.util.SpatialUtil.mapLocation;
+
 @Service
 public class PlaceService
 {
@@ -35,6 +37,11 @@ public class PlaceService
     public List<Place> fetchOpenPlaces()
     {
         return repo.findPlaceByClosingTimeBeforeAndOpeningTimeAfter(LocalDateTime.now(), LocalDateTime.now());
+    }
+
+    public List<Place> fetchNearPlaces(double lat, double lng, double radius)
+    {
+        return repo.findPlaceByLocation(mapLocation(lat, lng), radius);
     }
 
     public List<Place> fetchPlacesByVibe(int vibeID)
