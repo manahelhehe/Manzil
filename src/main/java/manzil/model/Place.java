@@ -1,16 +1,23 @@
 package manzil.model;
 
-import jakarta.persistence.*;
+import java.time.LocalTime;
+import java.util.List;
+
+import org.locationtech.jts.geom.Point;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import manzil.dto.PlaceDTO;
-import org.locationtech.jts.geom.*;
-import jakarta.validation.constraints.Pattern;
-
-import java.time.LocalTime;
-import java.util.List;
-
 import static manzil.util.SpatialUtil.mapLocation;
 
 @Entity
