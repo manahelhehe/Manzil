@@ -4,10 +4,8 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.Point;
-import org.locationtech.jts.geom.PrecisionModel;
+import manzil.dto.PlaceDTO;
+import org.locationtech.jts.geom.*;
 import jakarta.validation.constraints.Pattern;
 
 import java.time.LocalTime;
@@ -54,10 +52,22 @@ public class Place
     private Category category;
 
 
-    public void mapLocation(double lat, double lng)
+    public Point mapLocation(double lat, double lng)
     {
         GeometryFactory geoFactory = new GeometryFactory(new PrecisionModel(), 4326);
-        this.location = geoFactory.createPoint(new Coordinate(lng, lat));
+        return geoFactory.createPoint(new Coordinate(lng, lat));
+    }
+
+    public Place (PlaceDTO dto)
+    {
+        this.name = dto.getName();
+        this.description = dto.getDescription();
+        this.city = dto.getCity();
+        this.openingTime = LocalTime.parse(dto.getOpeningTime());
+        this.closingTime = LocalTime.parse(dto.getClosingTime());
+        this.minCost = dto.getMinCost();
+        this.maxCost = dto.getMaxCost();
+        this.location = mapLocation(dto.getLatitude(), dto.getLongitude());
     }
 
 

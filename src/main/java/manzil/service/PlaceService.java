@@ -1,6 +1,7 @@
 package manzil.service;
 
 import jakarta.transaction.Transactional;
+import manzil.dto.PlaceDTO;
 import manzil.exceptions.ResourceNotFoundException;
 import manzil.model.Category;
 import manzil.model.Place;
@@ -8,6 +9,7 @@ import manzil.model.Vibe;
 import manzil.repository.CategoryRepository;
 import manzil.repository.PlaceRepository;
 import manzil.repository.VibeRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -16,15 +18,12 @@ import java.util.*;
 @Service
 public class PlaceService
 {
-    private final PlaceRepository repo;
-    private final CategoryRepository crepo;
-    private final VibeRepository vrepo;
-    public PlaceService(PlaceRepository repo, CategoryRepository crepo, VibeRepository vrepo)
-    {
-        this.repo = repo;
-        this.crepo = crepo;
-        this.vrepo = vrepo;
-    }
+    @Autowired
+    private PlaceRepository repo;
+    @Autowired
+    private CategoryRepository crepo;
+    @Autowired
+    private VibeRepository vrepo;
 
     public List<Place> fetchPlaces() {return repo.findAll();}
 
@@ -148,8 +147,16 @@ public class PlaceService
 
     }
 
-    public Place postPlace(Place place)
+    @Transactional
+    public Place postPlace(PlaceDTO dto) throws ResourceNotFoundException
     {
+        Place place = new Place(dto);
+
+        Category c = crepo.findById(dto.getCategoryID()).orElseThrow(
+                () -> new ResourceNotFoundException("Category Not Found!") );
+
+        place.setCategory(c);
+
         return repo.save(place);
     }
 

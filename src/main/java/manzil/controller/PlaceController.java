@@ -5,6 +5,7 @@ import manzil.exceptions.ResourceNotFoundException;
 import manzil.model.Category;
 import manzil.model.Place;
 import manzil.service.PlaceService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,8 +19,8 @@ import java.util.Optional;
 
 public class PlaceController
 {
-    private final PlaceService service;
-    public PlaceController(PlaceService service) {this.service = service;}
+    @Autowired
+    private PlaceService service;
 
     @GetMapping
     public List<Place> getAllPlaces() {return service.fetchPlaces();}
@@ -92,7 +93,8 @@ public class PlaceController
     }
 
     @PostMapping
-    public Place addPlace(@RequestBody PlaceDTO dto) {
+    public Place addPlace(@RequestBody PlaceDTO dto)
+    {
         Place place = new Place();
 
         place.setName(dto.getName());
