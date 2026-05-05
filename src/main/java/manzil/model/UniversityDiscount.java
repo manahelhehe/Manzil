@@ -14,3 +14,4 @@ public class UniversityDiscount extends DiscountOffer{
     private AvailableFor availableFor;
 }
  
+ 
