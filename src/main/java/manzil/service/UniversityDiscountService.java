@@ -1,57 +1,52 @@
 package manzil.service;
 
-import jakarta.transaction.Transactional;
-import manzil.exceptions.ResourceNotFoundException;
-import manzil.model.UniversityDiscount;
-import manzil.repository.UniversityDiscountRepository;
-import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.stereotype.Service;
+
+import jakarta.transaction.Transactional;
+import manzil.model.AvailableFor;
+import manzil.model.UniversityDiscount;
+import manzil.repository.UniversityDiscountRepository;
+
 @Service
-public class UniversityDiscountService
-{
+public class UniversityDiscountService {
+
     private final UniversityDiscountRepository repo;
 
-    public UniversityDiscountService(UniversityDiscountRepository repo)
-    {
+    public UniversityDiscountService(UniversityDiscountRepository repo) {
         this.repo = repo;
     }
 
-    public List<UniversityDiscount> fetchAllUniversityDiscounts()
-    {
+    public List<UniversityDiscount> fetchAllUniversityDiscounts() {
         return repo.findAll();
     }
 
-    public Optional<UniversityDiscount> fetchUniversityDiscountById(long id)
-    {
+    public Optional<UniversityDiscount> fetchUniversityDiscountById(long id) {
         return repo.findById(id);
     }
 
-    public List<UniversityDiscount> fetchByUniversityName(String universityName)
-    {
+    public List<UniversityDiscount> fetchByUniversityName(String universityName) {
         return repo.findByUniversityNameIgnoreCase(universityName);
     }
 
-    public List<UniversityDiscount> fetchByAvailableFor(UniversityDiscount.AvailableFor availableFor)
-    {
+    public List<UniversityDiscount> fetchByAvailableFor(AvailableFor availableFor) {
         return repo.findByAvailableFor(availableFor);
     }
 
-    public UniversityDiscount postUniversityDiscount(UniversityDiscount universityDiscount)
-    {
+    public UniversityDiscount postUniversityDiscount(UniversityDiscount universityDiscount) {
         return repo.save(universityDiscount);
     }
 
-    public List<UniversityDiscount> postUniversityDiscountList(List<UniversityDiscount> universityDiscounts)
-    {
+    public List<UniversityDiscount> postUniversityDiscountList(List<UniversityDiscount> universityDiscounts) {
         return repo.saveAll(universityDiscounts);
     }
 
     @Transactional
-    public Optional<UniversityDiscount> updateUniversityDiscount(long id, UniversityDiscount updatedUniversityDiscount) throws ResourceNotFoundException
-    {
+    public Optional<UniversityDiscount> updateUniversityDiscount(long id,
+            UniversityDiscount updatedUniversityDiscount) {
+
         Optional<UniversityDiscount> result = fetchUniversityDiscountById(id);
 
         if (result.isEmpty())
@@ -84,7 +79,7 @@ public class UniversityDiscountService
         if (updatedUniversityDiscount.getStatus() != null)
             existing.setStatus(updatedUniversityDiscount.getStatus());
 
-        // Subtype fields
+        // Child fields
         if (updatedUniversityDiscount.getUniversityName() != null)
             existing.setUniversityName(updatedUniversityDiscount.getUniversityName());
 
@@ -94,8 +89,8 @@ public class UniversityDiscountService
         return Optional.of(repo.save(existing));
     }
 
-    public Optional<String> dropUniversityDiscount(long id)
-    {
+    public Optional<String> dropUniversityDiscount(long id) {
+
         Optional<UniversityDiscount> result = fetchUniversityDiscountById(id);
 
         if (result.isEmpty())
