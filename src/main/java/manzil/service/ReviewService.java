@@ -55,8 +55,6 @@ public class ReviewService {
         Place place = placeRepository.findById(placeId)
                 .orElseThrow(() -> new RuntimeException("Place not found with id: " + placeId));
 
-       
-
         review.setReviewPlace(place);
         review.setReviewRegisteredUser(user);
         review.setReviewDate(LocalDate.now());
