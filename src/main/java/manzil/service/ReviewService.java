@@ -21,6 +21,9 @@ public class ReviewService {
     @Autowired
     private PlaceRepository placeRepository;
 
+    @Autowired 
+    private RegisteredManzilUserRepository userRepository;
+
     // Get all reviews
     public List<Review> fetchReviews() {
         return reviewRepository.findAll();
@@ -51,7 +54,7 @@ public class ReviewService {
     }
 
     // Add a new review
-    public Review addReview(Review review, long placeId, long userId) {
+    public Review addReview(Review review, long placeId, long userId, List<String> user) {
         Place place = placeRepository.findById(placeId)
                 .orElseThrow(() -> new RuntimeException("Place not found with id: " + placeId));
 
