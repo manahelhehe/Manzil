@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static manzil.util.SpatialUtil.mapLocation;
 
@@ -160,15 +161,25 @@ public class PlaceService
         Place place = new Place(dto);
 
         Category c = crepo.findById(dto.getCategoryID()).orElseThrow(
-                () -> new ResourceNotFoundException("Category Not Found!") );
+                () -> new ResourceNotFoundException("Category Not Found: ID = " + dto.getCategoryID()) );
 
         place.setCategory(c);
 
         return repo.save(place);
     }
 
-    public List<Place> postPlaceList(List<Place> places)
+    @Transactional
+    public List<Place> postPlaceList(List<PlaceDTO> dtos) throws ResourceNotFoundException
     {
+        List<Place> places = dtos.stream().map(dto ->
+        {
+            Place place = new Place(dto);
+            Category c = crepo.findById(dto.getCategoryID()).orElseThrow(()
+                    -> new ResourceNotFoundException("Category Not Found: ID = " + dto.getCategoryID()));
+            place.setCategory(c);
+            return place;
+        }).collect(Collectors.toList());
+
         return repo.saveAll(places);
     }
 

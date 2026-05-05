@@ -1,27 +1,18 @@
 package manzil.controller;
 
-import java.net.URI;
-import java.util.List;
-import java.util.Optional;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-
+import jakarta.validation.Valid;
 import manzil.dto.PlaceDTO;
 import manzil.exceptions.ResourceNotFoundException;
 import manzil.model.Place;
 import manzil.service.PlaceService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
+import java.net.URI;
+import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/places")
@@ -81,7 +72,9 @@ public class PlaceController
     }
 
     @GetMapping("/near")
-    public List<Place> getNearPlaces(@RequestParam double lat, @RequestParam double lng, @RequestParam double radius)
+    public List<Place> getNearPlaces(@RequestParam double lat, @RequestParam double lng,
+                                     @RequestParam(defaultValue = "5000") double radius)
+    // Searches for places in a 5km radius by default
     {
         return service.fetchNearPlaces(lat, lng, radius);
     }
@@ -109,7 +102,7 @@ public class PlaceController
     }
 
     @PostMapping
-    public ResponseEntity<Place> addPlace(@RequestBody PlaceDTO dto) throws ResourceNotFoundException
+    public ResponseEntity<Place> addPlace(@Valid @RequestBody PlaceDTO dto) throws ResourceNotFoundException
     {
         Place savedPlace = service.postPlace(dto);
 
@@ -123,5 +116,9 @@ public class PlaceController
     }
 
     @PostMapping("/list")
-    public List<Place> addPlaceList(@RequestBody List<Place> places) {
-        return service.postPlaceList(places);}}
+    public List<Place> addPlaceList(@RequestBody List<PlaceDTO> places)
+    {
+        return service.postPlaceList(places);
+    }
+
+}
