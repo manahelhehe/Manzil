@@ -1,8 +1,10 @@
 package manzil.service;
 
+import manzil.exceptions.ResourceNotFoundException;
 import manzil.model.Review;
 import manzil.model.Place;
 import manzil.model.RegisteredManzilUser;
+import manzil.repository.RegisteredManzilUserRepository;
 import manzil.repository.ReviewRepository;
 import manzil.repository.PlaceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,33 +32,27 @@ public class ReviewService {
     }
 
     // Get review by ID
-    public Review fetchReviewById(long reviewId) {
-
-
-//        Optional<Review> result = reviewRepository.findById(reviewId);
-//        if (result.isEmpty())
-//            throw new RuntimeException("Review not found with id: " + reviewId);
-//
-//        return result.get();
-
-        return reviewRepository.findById(reviewId)
-                .orElseThrow(() -> new RuntimeException("Review not found with id: " + reviewId));
+    public Optional<Review> fetchReviewById(long reviewId) throws ResourceNotFoundException
+    {
+        return reviewRepository.findById(reviewId);
     }
 
     // Get all reviews for a specific place
-    public List<Review> fetchReviewsByPlace(long placeId) {
-        return reviewRepository.findByReviewPlace(placeId);
+    public List<Review> fetchReviewsByPlace(long placeId)
+    {
+        return reviewRepository.findByReviewPlace_PlaceId(placeId);
     }
 
     // Get all reviews by a specific user
-    public List<Review> getReviewsByUser(long userId) {
-        return reviewRepository.findByReviewRegisteredUser(userId);
+    public List<Review> getReviewsByUser(long userId)
+    {
+        return reviewRepository.findByReviewRegisteredUser_UserId(userId);
     }
 
     // Add a new review
-    public Review addReview(Review review, long placeId, long userId, List<String> user) {
+    public Review addReview(Review review, long placeId, long userId, List<String> user) throws ResourceNotFoundException {
         Place place = placeRepository.findById(placeId)
-                .orElseThrow(() -> new RuntimeException("Place not found with id: " + placeId));
+                .orElseThrow(() -> new ResourceNotFoundException("Place not found with id: " + placeId));
 
         review.setReviewPlace(place);
         review.setReviewRegisteredUser(user);
@@ -67,7 +63,7 @@ public class ReviewService {
     }
 
     // Update an existing review
-    public Review updateReview(long reviewId, Review updatedReview) {
+    public Review updateReview(long reviewId, Review updatedReview) throws ResourceNotFoundException {
         Review existing = fetchReviewById(reviewId);
 
         existing.setComments(updatedReview.getComments());
@@ -78,15 +74,17 @@ public class ReviewService {
     }
 
     // Like a review (increment likes)
-    public Review likeReview(long reviewId) {
+    public Review likeReview(long reviewId) throws ResourceNotFoundException
+    {
         Review review = fetchReviewById(reviewId);
         review.setLikesCount(review.getLikesCount() + 1);
         return reviewRepository.save(review);
     }
 
     // Delete a review
-    public void deleteReview(long reviewId) {
-        Review review = fetchReviewById(reviewId);
+    public Optional<String> deleteReview(long reviewId) throws ResourceNotFoundException
+    {
+        Optional<Review> review = fetchReviewById(reviewId);
         reviewRepository.delete(review);
     }
 

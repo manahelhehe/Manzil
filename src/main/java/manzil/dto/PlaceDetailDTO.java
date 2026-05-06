@@ -1,18 +1,13 @@
 package manzil.dto;
 
-import jakarta.persistence.*;
 import lombok.Data;
-import manzil.model.Category;
-import manzil.model.Vibe;
-import org.locationtech.jts.geom.Point;
-
-import java.time.LocalTime;
 import java.util.List;
 
 @Data
-public class PlaceDTO
+public class PlaceDetailDTO
 {
-    private long placeID;
+    // -- Place Flattened Info --
+    private long placeId;
     private String name;
     private String description;
     private String city;
@@ -22,6 +17,13 @@ public class PlaceDTO
     private int maxCost = -1;
     private double latitude;
     private double longitude;
-    private int categoryID;
-    private List<Integer> vibeIDs;
+
+    // -- Flattened Category Data --
+    private int categoryId;
+    private String cName;
+    private String cDescription;
+
+    // -- Flattened Vibe List --
+    private List<String> vibes;
+
 }

@@ -1,7 +1,7 @@
 package manzil.service;
 
 import jakarta.transaction.Transactional;
-import manzil.dto.PlaceDTO;
+import manzil.dto.PlaceCreateDTO;
 import manzil.exceptions.ResourceNotFoundException;
 import manzil.model.Category;
 import manzil.model.Place;
@@ -156,7 +156,7 @@ public class PlaceService
     }
 
     @Transactional
-    public Place postPlace(PlaceDTO dto) throws ResourceNotFoundException
+    public Place postPlace(PlaceCreateDTO dto) throws ResourceNotFoundException
     {
         Place place = new Place(dto);
 
@@ -169,7 +169,7 @@ public class PlaceService
     }
 
     @Transactional
-    public List<Place> postPlaceList(List<PlaceDTO> dtos) throws ResourceNotFoundException
+    public List<Place> postPlaceList(List<PlaceCreateDTO> dtos) throws ResourceNotFoundException
     {
         List<Place> places = dtos.stream().map(dto ->
         {

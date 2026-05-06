@@ -5,8 +5,12 @@ import lombok.Data;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import manzil.dto.ReviewDTO;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
+
+import static manzil.util.SpatialUtil.mapLocation;
 
 @Entity
 @Data
@@ -33,8 +37,20 @@ public class Review
     private Place reviewPlace;
 
     @ManyToOne
-    @JoinColumn(name = "registeredUser")
+    @JoinColumn(name = "registered_user")
     private RegisteredManzilUser reviewRegisteredUser;
+
+    public Review (ReviewDTO dto)
+    {
+        this.name = dto.getName();
+        this.description = dto.getDescription();
+        this.city = dto.getCity();
+        this.openingTime = LocalTime.parse(dto.getOpeningTime());
+        this.closingTime = LocalTime.parse(dto.getClosingTime());
+        this.minCost = dto.getMinCost();
+        this.maxCost = dto.getMaxCost();
+        this.location = mapLocation(dto.getLatitude(), dto.getLongitude());
+    }
 
 }
 

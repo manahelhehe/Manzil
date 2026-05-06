@@ -6,7 +6,8 @@ import lombok.Data;
 import java.util.List;
 @Entity
 @Data
-public class Admin extends ManzilUser {
+public class Admin extends ManzilUser
+{
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Role roles;

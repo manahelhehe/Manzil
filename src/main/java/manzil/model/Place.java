@@ -17,7 +17,7 @@ import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import manzil.dto.PlaceDTO;
+import manzil.dto.PlaceCreateDTO;
 import static manzil.util.SpatialUtil.mapLocation;
 
 @Entity
@@ -60,7 +60,7 @@ public class Place
     @JoinColumn(name = "category_id")
     private Category category;
 
-    public Place (PlaceDTO dto)
+    public Place (PlaceCreateDTO dto)
     {
         this.name = dto.getName();
         this.description = dto.getDescription();

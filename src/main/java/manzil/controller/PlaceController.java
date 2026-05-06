@@ -1,7 +1,7 @@
 package manzil.controller;
 
 import jakarta.validation.Valid;
-import manzil.dto.PlaceDTO;
+import manzil.dto.PlaceCreateDTO;
 import manzil.exceptions.ResourceNotFoundException;
 import manzil.model.Place;
 import manzil.service.PlaceService;
@@ -102,7 +102,7 @@ public class PlaceController
     }
 
     @PostMapping
-    public ResponseEntity<Place> addPlace(@Valid @RequestBody PlaceDTO dto) throws ResourceNotFoundException
+    public ResponseEntity<Place> addPlace(@Valid @RequestBody PlaceCreateDTO dto) throws ResourceNotFoundException
     {
         Place savedPlace = service.postPlace(dto);
 
@@ -116,7 +116,7 @@ public class PlaceController
     }
 
     @PostMapping("/list")
-    public List<Place> addPlaceList(@RequestBody List<PlaceDTO> places)
+    public List<Place> addPlaceList(@RequestBody List<PlaceCreateDTO> places) throws ResourceNotFoundException
     {
         return service.postPlaceList(places);
     }
