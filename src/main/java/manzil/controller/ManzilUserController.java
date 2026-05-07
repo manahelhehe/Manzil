@@ -15,47 +15,39 @@ public class ManzilUserController {
     @Autowired
     private ManzilUserService manzilUserService;
 
-    // GET all users
     @GetMapping
     public ResponseEntity<List<ManzilUser>> getAllUsers() {
         return ResponseEntity.ok(manzilUserService.fetchAllUsers());
     }
 
-    // GET user by ID
-    @GetMapping("/{userId}")
-    public ResponseEntity<ManzilUser> getUserById(@PathVariable long userId) {
-        return ResponseEntity.ok(manzilUserService.fetchUserById(userId));
+    @GetMapping("/{id}")
+    public ResponseEntity<ManzilUser> getUserById(@PathVariable long id) {
+        return ResponseEntity.ok(manzilUserService.fetchUserById(id));
     }
 
-    // GET user by email
     @GetMapping("/email/{email}")
     public ResponseEntity<ManzilUser> getUserByEmail(@PathVariable String email) {
         return ResponseEntity.ok(manzilUserService.fetchUserByEmail(email));
     }
 
-    // PUT update user
-    @PutMapping("/{userId}")
-    public ResponseEntity<ManzilUser> updateUser(@PathVariable long userId,
-                                                  @RequestBody ManzilUser updatedUser) {
-        return ResponseEntity.ok(manzilUserService.updateUser(userId, updatedUser));
+    @PutMapping("/{id}")
+    public ResponseEntity<ManzilUser> updateUser(@PathVariable long id, @RequestBody ManzilUser updatedUser) {
+        return ResponseEntity.ok(manzilUserService.updateUser(id, updatedUser));
     }
 
-    // DELETE user
-    @DeleteMapping("/{userId}")
-    public ResponseEntity<String> deleteUser(@PathVariable long userId) {
-        manzilUserService.deleteUser(userId);
-        return ResponseEntity.ok("User deleted successfully");
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteUser(@PathVariable long id) {
+        manzilUserService.deleteUser(id);
+        return ResponseEntity.noContent().build();
     }
 
-    // PATCH set online
-    @PatchMapping("/{userId}/online")
-    public ResponseEntity<ManzilUser> setOnline(@PathVariable long userId) {
-        return ResponseEntity.ok(manzilUserService.setUserOnline(userId));
+    @PatchMapping("/{id}/online")
+    public ResponseEntity<ManzilUser> setOnline(@PathVariable long id) {
+        return ResponseEntity.ok(manzilUserService.setUserOnline(id));
     }
 
-    // PATCH set offline
-    @PatchMapping("/{userId}/offline")
-    public ResponseEntity<ManzilUser> setOffline(@PathVariable long userId) {
-        return ResponseEntity.ok(manzilUserService.setUserOffline(userId));
+    @PatchMapping("/{id}/offline")
+    public ResponseEntity<ManzilUser> setOffline(@PathVariable long id) {
+        return ResponseEntity.ok(manzilUserService.setUserOffline(id));
     }
 }
