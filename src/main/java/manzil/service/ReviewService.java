@@ -3,6 +3,7 @@ package manzil.service;
 import jakarta.transaction.Transactional;
 import manzil.dto.ReviewDTO;
 import manzil.exceptions.ResourceNotFoundException;
+import manzil.model.RegisteredManzilUser;
 import manzil.model.Review;
 import manzil.model.Place;
 import manzil.repository.RegisteredManzilUserRepository;
@@ -55,11 +56,15 @@ public class ReviewService {
     {
         Review review = new Review(dto);
 
+        Place p = pRepo.findById(dto.getPlaceId()).orElseThrow( () -> new
+                ResourceNotFoundException("Place Not Found (ID: " + dto.getPlaceId()));
 
+        RegisteredManzilUser u = uRepo.findById(dto.getUserId()).orElseThrow(
+                () -> new ResourceNotFoundException("User Not Found (ID: " + dto.getUserId() + ")") );
 
-        review.setReviewPlace(place);
-        review.setReviewRegisteredUser(user);
-        review.setReviewDate(LocalDate.now());
+        review.setReviewPlace(p);
+        review.setReviewUser(u);
+
         review.setLikesCount(0);
 
         return rRepo.save(review);

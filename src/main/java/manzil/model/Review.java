@@ -38,12 +38,12 @@ public class Review
 
     @ManyToOne
     @JoinColumn(name = "registered_user")
-    private RegisteredManzilUser reviewRegisteredUser;
+    private RegisteredManzilUser reviewUser;
 
     public Review (ReviewDTO dto)
     {
         this.comments = dto.getComments();
-        this.reviewDate = LocalDate.parse(dto.getReviewDate());
+        this.reviewDate = LocalDate.now();
         this.likesCount = dto.getLikesCount();
         this.ratingScore = dto.getRatingScore();
     }
