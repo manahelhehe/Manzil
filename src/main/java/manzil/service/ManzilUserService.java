@@ -2,12 +2,14 @@ package manzil.service;
 
 import manzil.model.ManzilUser;
 import manzil.repository.ManzilUserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
+import java.util.List;
 
 @Service
-public class ManzilUser{
+public class ManzilUserService {
+
     @Autowired
     private ManzilUserRepository manzilUserRepository;
 
@@ -27,19 +29,16 @@ public class ManzilUser{
 
     public ManzilUser updateUser(long userId, ManzilUser updatedUser) {
         ManzilUser existing = fetchUserById(userId);
-
         existing.setName(updatedUser.getName());
         existing.setEmail(updatedUser.getEmail());
         existing.setPhoneNumber(updatedUser.getPhoneNumber());
         existing.setProfilePhoto(updatedUser.getProfilePhoto());
         existing.setActivityStatus(updatedUser.isActivityStatus());
-
         return manzilUserRepository.save(existing);
     }
 
     public void deleteUser(long userId) {
-        ManzilUser user = fetchUserById(userId);
-        manzilUserRepository.delete(user);
+        manzilUserRepository.delete(fetchUserById(userId));
     }
 
     public ManzilUser setUserOnline(long userId) {
