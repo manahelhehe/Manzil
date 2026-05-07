@@ -1,6 +1,7 @@
 package manzil.model;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -9,16 +10,12 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.validation.constraints.Positive;
-import lombok.Data;
+import jakarta.persistence.ManyToMany;
 
 @Entity
-@Data
 @Inheritance(strategy = InheritanceType.JOINED)
-public class DiscountOffer {
-
+public class DiscountOffer
+{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long discountId;
@@ -28,22 +25,79 @@ public class DiscountOffer {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @Positive
-    private double percentage;
 
-    @Column(nullable = false)
-    @Positive
     private double minSpend;
 
-    private String status;      // ACTIVE / INACTIVE
+
     private boolean active;
+
 
     private LocalDateTime validFrom;
     private LocalDateTime validTo;
     private LocalDateTime createdAt;
 
-    // ✅ REPLACED BRANCH WITH PLACE
-    @ManyToOne
-    @JoinColumn(name = "place_id")
-    private Place place;
-}
+
+
+    @ManyToMany
+    private List<Place> places;
+
+
+    // getters and setters
+    public long getDiscountId() {
+        return discountId; }
+
+
+
+    public String getTitle() {
+        return title; }
+    public void setTitle(String title) {
+    this.title = title; }
+
+
+
+    public String getDescription() {
+        return description; }
+    public void setDescription(String description) { 
+        this.description = description; }
+
+
+
+    public double getMinSpend() {
+        return minSpend; }
+    public void setMinSpend(double minSpend) {
+        this.minSpend = minSpend; }
+
+
+
+    public boolean isActive() {
+        return active; }
+    public void setActive(boolean active) { 
+        this.active = active; }
+
+
+
+    public LocalDateTime getValidFrom() {
+        return validFrom; }
+    public void setValidFrom(LocalDateTime validFrom) {
+        this.validFrom = validFrom; }
+
+
+
+    public LocalDateTime getValidTo() { 
+        return validTo; }
+    public void setValidTo(LocalDateTime validTo) { 
+        this.validTo = validTo; }
+
+
+
+    public LocalDateTime getCreatedAt() { 
+        return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { 
+        this.createdAt = createdAt; }
+
+
+
+    public List<Place> getPlaces() {
+        return places; }
+    public void setPlaces(List<Place> places) { 
+        this.places = places; }}
