@@ -1,5 +1,6 @@
 package manzil.controller;
 
+import jakarta.validation.Valid;
 import manzil.exceptions.ResourceNotFoundException;
 import manzil.model.Review;
 import manzil.service.ReviewService;
@@ -58,16 +59,18 @@ public class ReviewController {
 
     // GET average rating for a place
     @GetMapping("/place/{placeId}/average-rating")
-    public ResponseEntity<Double> getAverageRating(@PathVariable long placeId) {
+    public ResponseEntity<Double> getAverageRating(@PathVariable long placeId)
+    {
         return ResponseEntity.ok(service.getAverageRatingForPlace(placeId));
     }
 
     // POST add a new review
     @PostMapping("/place/{placeId}/user/{userId}")
-    public ResponseEntity<Review> addReview(@RequestBody Review review,
+    public ResponseEntity<Review> addReview(@Valid @RequestBody Review review,
                                             @PathVariable long placeId,
                                             @PathVariable long userId)
     {
+
 
         URI path = ServletUriComponentsBuilder
                 .fromCurrentRequest() // Starts with /api/places

@@ -42,14 +42,10 @@ public class Review
 
     public Review (ReviewDTO dto)
     {
-        this.name = dto.getName();
-        this.description = dto.getDescription();
-        this.city = dto.getCity();
-        this.openingTime = LocalTime.parse(dto.getOpeningTime());
-        this.closingTime = LocalTime.parse(dto.getClosingTime());
-        this.minCost = dto.getMinCost();
-        this.maxCost = dto.getMaxCost();
-        this.location = mapLocation(dto.getLatitude(), dto.getLongitude());
+        this.comments = dto.getComments();
+        this.reviewDate = LocalDate.parse(dto.getReviewDate());
+        this.likesCount = dto.getLikesCount();
+        this.ratingScore = dto.getRatingScore();
     }
 
 }

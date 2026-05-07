@@ -1,9 +1,10 @@
 package manzil.service;
 
+import jakarta.transaction.Transactional;
+import manzil.dto.ReviewDTO;
 import manzil.exceptions.ResourceNotFoundException;
 import manzil.model.Review;
 import manzil.model.Place;
-import manzil.model.RegisteredManzilUser;
 import manzil.repository.RegisteredManzilUserRepository;
 import manzil.repository.ReviewRepository;
 import manzil.repository.PlaceRepository;
@@ -18,74 +19,93 @@ import java.util.Optional;
 public class ReviewService {
 
     @Autowired
-    private ReviewRepository reviewRepository;
+    private ReviewRepository rRepo;
 
     @Autowired
-    private PlaceRepository placeRepository;
+    private PlaceRepository pRepo;
 
     @Autowired 
-    private RegisteredManzilUserRepository userRepository;
+    private RegisteredManzilUserRepository uRepo;
 
     // Get all reviews
     public List<Review> fetchReviews() {
-        return reviewRepository.findAll();
+        return rRepo.findAll();
     }
 
     // Get review by ID
     public Optional<Review> fetchReviewById(long reviewId) throws ResourceNotFoundException
     {
-        return reviewRepository.findById(reviewId);
+        return rRepo.findById(reviewId);
     }
 
     // Get all reviews for a specific place
     public List<Review> fetchReviewsByPlace(long placeId)
     {
-        return reviewRepository.findByReviewPlace_PlaceId(placeId);
+        return rRepo.findByReviewPlace_PlaceId(placeId);
     }
 
     // Get all reviews by a specific user
     public List<Review> getReviewsByUser(long userId)
     {
-        return reviewRepository.findByReviewRegisteredUser_UserId(userId);
+        return rRepo.findByReviewRegisteredUser_UserId(userId);
     }
 
     // Add a new review
-    public Review addReview(Review review, long placeId, long userId, List<String> user) throws ResourceNotFoundException {
-        Place place = placeRepository.findById(placeId)
-                .orElseThrow(() -> new ResourceNotFoundException("Place not found with id: " + placeId));
+    public Review addReview(ReviewDTO dto) throws ResourceNotFoundException
+    {
+        Review review = new Review(dto);
+
+
 
         review.setReviewPlace(place);
         review.setReviewRegisteredUser(user);
         review.setReviewDate(LocalDate.now());
         review.setLikesCount(0);
 
-        return reviewRepository.save(review);
+        return rRepo.save(review);
     }
 
     // Update an existing review
-    public Review updateReview(long reviewId, Review updatedReview) throws ResourceNotFoundException {
-        Review existing = fetchReviewById(reviewId);
+    @Transactional
+    public Optional<Review> updateReview(long reviewId, Review updatedReview) throws ResourceNotFoundException
+    {
+        Optional<Review> existing = fetchReviewById(reviewId);
 
         existing.setComments(updatedReview.getComments());
         existing.setRatingScore(updatedReview.getRatingScore());
         existing.setReviewDate(LocalDate.now());
 
-        return reviewRepository.save(existing);
+        return rRepo.save(existing);
     }
 
     // Like a review (increment likes)
-    public Review likeReview(long reviewId) throws ResourceNotFoundException
+    public Optional<Review> likeReview(long reviewId) throws ResourceNotFoundException
     {
-        Review review = fetchReviewById(reviewId);
-        review.setLikesCount(review.getLikesCount() + 1);
-        return reviewRepository.save(review);
+        Optional<Review> review = fetchReviewById(reviewId);
+`
+        if(review.isEmpty())
+        {
+            return review;
+        }
+
+        review.get().setLikesCount(review.get().getLikesCount() + 1);
+        return Optional.of(rRepo.save(review.get()));
     }
 
     // Delete a review
     public Optional<String> deleteReview(long reviewId) throws ResourceNotFoundException
     {
         Optional<Review> review = fetchReviewById(reviewId);
-        reviewRepository.delete(review);
+
+        if(review.isEmpty())
+        {
+            return Optional.empty();
+        }
+
+        rRepo.delete(review.get());
+
+        return Optional.of("Review Deleted Successfully (ID: " + reviewId + ")");
+
     }
 
     // Get average rating for a place
