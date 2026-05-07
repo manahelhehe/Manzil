@@ -3,10 +3,11 @@ package manzil.service;
 import jakarta.transaction.Transactional;
 import manzil.dto.ReviewDTO;
 import manzil.exceptions.ResourceNotFoundException;
+import manzil.model.ManzilUser;
 import manzil.model.RegisteredManzilUser;
 import manzil.model.Review;
 import manzil.model.Place;
-import manzil.repository.RegisteredManzilUserRepository;
+import manzil.repository.ManzilUserRepository;
 import manzil.repository.ReviewRepository;
 import manzil.repository.PlaceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +27,7 @@ public class ReviewService {
     private PlaceRepository pRepo;
 
     @Autowired 
-    private RegisteredManzilUserRepository uRepo;
+    private ManzilUserRepository uRepo;
 
     // Get all reviews
     public List<Review> fetchReviews() {
@@ -61,11 +62,14 @@ public class ReviewService {
         Place p = pRepo.findById(dto.getPlaceId()).orElseThrow( () -> new
                 ResourceNotFoundException("Place Not Found (ID: " + dto.getPlaceId()));
 
-        RegisteredManzilUser u = uRepo.findById(dto.getUserId()).orElseThrow(
+        ManzilUser u = uRepo.findById(dto.getUserId()).orElseThrow(
                 () -> new ResourceNotFoundException("User Not Found (ID: " + dto.getUserId() + ")") );
 
+        if(! (u instanceof RegisteredManzilUser))
+            throw new ResourceNotFoundException("User is not a Registered User! (ID: " + dto.getUserId() + ")");
+
         review.setReviewPlace(p);
-        review.setReviewUser(u);
+        review.setReviewUser( (RegisteredManzilUser) u);
 
         double oldAvg = p.getAvgRating();
         double nRating = review.getRatingScore();
@@ -86,7 +90,7 @@ public class ReviewService {
 
     // Update an existing review
     @Transactional
-    public Optional<Review> updateReview(long reviewId, Review updatedReview) throws ResourceNotFoundException
+    public Review updateReview(long reviewId, Review updatedReview) throws ResourceNotFoundException
     {
         Review existing = fetchReviewById(reviewId).orElseThrow(
                 () -> new ResourceNotFoundException("Review Not Found (ID: " + reviewId + ")") );
@@ -94,22 +98,19 @@ public class ReviewService {
         if(updatedReview.getComments() != null)
             existing.setComments(updatedReview.getComments());
 
-        if(updatedReview.getRatingScore() != null)
-            existing.setRatingScore(updatedReview.getRatingScore());
-
         existing.setReviewDate(LocalDate.now());
 
-        return Optional.of(rRepo.save(existing));
+        return rRepo.save(existing);
     }
 
     // Like a review (increment likes)
-    public Optional<Review> likeReview(long reviewId) throws ResourceNotFoundException
+    public Review likeReview(long reviewId) throws ResourceNotFoundException
     {
         Review review = fetchReviewById(reviewId).orElseThrow( () ->
                 new ResourceNotFoundException("Review Not Found (ID: " + reviewId + ")"));
 
         review.setLikesCount(review.getLikesCount() + 1);
-        return Optional.of(rRepo.save(review));
+        return rRepo.save(review);
     }
 
     // Delete a review
@@ -120,10 +121,11 @@ public class ReviewService {
                 new ResourceNotFoundException("Review Not Found (ID:" + reviewId + ")"));
 
         rRepo.delete(review);
+        rRepo.flush(); // Forces the delete to happen in DB before we query for average
 
         Place p = review.getReviewPlace();
-        p.setAvgRating(getAverageRatingForPlace(p.getPlaceId()));
         p.setNumberOfReviews(p.getNumberOfReviews()-1);
+        p.setAvgRating(getAverageRatingForPlace(p.getPlaceId()));
 
         return Optional.of("Review Deleted Successfully (ID: " + reviewId + ")");
     }

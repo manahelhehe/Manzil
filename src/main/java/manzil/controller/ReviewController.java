@@ -5,6 +5,7 @@ import manzil.dto.ReviewDTO;
 import manzil.exceptions.ResourceNotFoundException;
 import manzil.model.Review;
 import manzil.service.ReviewService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -18,11 +19,8 @@ import java.util.Optional;
 @CrossOrigin(origins = "*")
 public class ReviewController {
 
-    private final ReviewService service;
-
-    public ReviewController(ReviewService service) {
-        this.service = service;
-    }
+    @Autowired
+    private ReviewService service;
 
     // GET all reviews
     @GetMapping
@@ -34,7 +32,7 @@ public class ReviewController {
     @GetMapping("/{id}")
     public ResponseEntity<Review> getReviewById(@PathVariable long id) throws ResourceNotFoundException
     {
-        Review review = service.fetchReviewById(id).get();
+        Optional<Review> review = service.fetchReviewById(id);
 
         return ResponseEntity.ok(review.get());
     }
@@ -54,27 +52,25 @@ public class ReviewController {
     }
 
     // GET average rating for a place
-    @GetMapping("/place/{placeId}/average-rating")
-    public ResponseEntity<Double> getAverageRating(@PathVariable long placeId)
+    @GetMapping("/avg/{placeId}")
+    public ResponseEntity<Double> getAverageRating(@PathVariable long placeId) throws ResourceNotFoundException
     {
-
         return ResponseEntity.ok(service.getAverageRatingForPlace(placeId));
     }
 
     // POST add a new review
-    @PostMapping("/place/{placeId}/user/{userId}")
-    public ResponseEntity<Review> addReview(@Valid @RequestBody ReviewDTO review) throws ResourceNotFoundException
+    @PostMapping
+    public ResponseEntity<Review> addReview(@Valid @RequestBody ReviewDTO dto) throws ResourceNotFoundException
     {
-        Review review = service.addReview(review);
+        Review savedReview = service.addReview(dto);
 
         URI path = ServletUriComponentsBuilder
                 .fromCurrentRequest() // Starts with /api/places
                 .path("/{id}")        // Appends /{id}
-                .buildAndExpand(savedPlace.getPlaceId()) // Replaces {id} with actual ID
+                .buildAndExpand(savedReview.getReviewId()) // Replaces {id} with actual ID
                 .toUri();
-            Review created = service.addReview(review, placeId, userId);
-            return ResponseEntity.ok(created);
 
+        return ResponseEntity.created(path).body(savedReview);
     }
 
     // PUT update a review
@@ -87,15 +83,14 @@ public class ReviewController {
 
     // PUT like a review
     @PutMapping("/{id}/like")
-    public ResponseEntity<Review> likeReview(@PathVariable long id)
-    {
+    public ResponseEntity<Review> likeReview(@PathVariable long id) throws ResourceNotFoundException {
         Review liked = service.likeReview(id);
         return ResponseEntity.ok(liked);
     }
 
     // DELETE a review
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteReview(@PathVariable long id)
+    public ResponseEntity<Void> deleteReview(@PathVariable long id) throws ResourceNotFoundException
     {
         service.deleteReview(id);
         return ResponseEntity.noContent().build();

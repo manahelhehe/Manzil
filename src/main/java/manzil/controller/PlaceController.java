@@ -34,7 +34,6 @@ public class PlaceController
         Optional<Place> place = service.fetchPlaceById(id);
 
         return ResponseEntity.ok(place.get());
-        // Extracts Place from Optional if it isn't empty and sends an "OK" response entity
     }
 
     @GetMapping("/search")
@@ -70,7 +69,6 @@ public class PlaceController
     @GetMapping("/near")
     public List<Place> getNearPlaces(@RequestParam double lat, @RequestParam double lng,
                                      @RequestParam(defaultValue = "5000") double radius)
-    // Searches for places in a 5km radius by default
     {
         return service.fetchNearPlaces(lat, lng, radius);
     }
@@ -105,10 +103,13 @@ public class PlaceController
     }
 
     @PostMapping("/list")
-    @ResponseStatus(HttpStatus.CREATED)
-    public List<Place> addPlaceList(@Valid @RequestBody List<PlaceCreateDTO> places) throws ResourceNotFoundException
+    public ResponseEntity<List<Place>> addPlaceList(@Valid @RequestBody List<PlaceCreateDTO> places) throws ResourceNotFoundException
     {
-        return service.postPlaceList(places);
+        URI path = ServletUriComponentsBuilder.
+                fromCurrentRequest().
+                build().
+                toUri();
+        return ResponseEntity.created(path).body(service.postPlaceList(places));
     }
 
 }
