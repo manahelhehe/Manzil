@@ -1,17 +1,26 @@
 package manzil.model;
 
-import jakarta.persistence.*;
-import lombok.Data;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+
 
 @Entity
-@Data
-public class UniversityDiscount extends DiscountOffer{
 
-    @Column(columnDefinition = "VARCHAR(90)", nullable = false)
+public class UniversityDiscount extends DiscountOffer {
+
     private String universityName;
+
 
     @Enumerated(EnumType.STRING)
     private AvailableFor availableFor;
-}
- 
- 
+
+
+
+    public String getUniversityName() { return universityName; }
+    public void setUniversityName(String universityName) { this.universityName = universityName; }
+
+
+
+    public AvailableFor getAvailableFor() { return availableFor; }
+    public void setAvailableFor(AvailableFor availableFor) { this.availableFor = availableFor; }}
