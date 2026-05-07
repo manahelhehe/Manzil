@@ -30,7 +30,7 @@ public class Review
 
     @Min(1)
     @Max(5)
-    private int ratingScore;
+    private Integer ratingScore;    // Using wrapper class "Integer" to have the attribute be null if not initialized instead of 0
 
     @ManyToOne
     @JoinColumn(name = "place_id", nullable = false)
@@ -44,7 +44,7 @@ public class Review
     {
         this.comments = dto.getComments();
         this.reviewDate = LocalDate.now();
-        this.likesCount = dto.getLikesCount();
+        this.likesCount = 0;
         this.ratingScore = dto.getRatingScore();
     }
 

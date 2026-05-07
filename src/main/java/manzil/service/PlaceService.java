@@ -30,9 +30,12 @@ public class PlaceService
 
     public List<Place> fetchPlaces() {return repo.findAll();}
 
-    public Optional<Place> fetchPlaceById(long id)
+    public Optional<Place> fetchPlaceById(long id) throws ResourceNotFoundException
     {
-        return repo.findById(id);
+        Place p = repo.findById(id).orElseThrow(() ->
+                new ResourceNotFoundException("Place Not Found (ID: " + id + ")"));
+
+        return Optional.of(p);
     }
 
     public List<Place> fetchOpenPlaces()
@@ -75,13 +78,10 @@ public class PlaceService
     }
 
     @Transactional  // Ensures a transactional process; either EVERYTHING executes or NOTHING does
-    public Optional<Place> updatePlace(long id, Place updatedPlace) throws ResourceNotFoundException {
-        Optional<Place> result = fetchPlaceById(id);
-
-        if(result.isEmpty())
-            return result;
-
-        Place existingPlace = result.get();
+    public Optional<Place> updatePlace(long id, Place updatedPlace) throws ResourceNotFoundException
+    {
+        Place existingPlace = fetchPlaceById(id).orElseThrow(() ->
+                new ResourceNotFoundException("Place Not Found (ID: " + id + ")"));
 
         if(updatedPlace.getName() != null)
             existingPlace.setName(updatedPlace.getName());
@@ -98,10 +98,10 @@ public class PlaceService
         if(updatedPlace.getClosingTime() != null)
             existingPlace.setClosingTime(updatedPlace.getClosingTime());
 
-        if(updatedPlace.getMinCost() != -1)
+        if(updatedPlace.getMinCost() != null)
             existingPlace.setMinCost(updatedPlace.getMinCost());
 
-        if(updatedPlace.getMaxCost() != -1)
+        if(updatedPlace.getMaxCost() != null)
             existingPlace.setMaxCost(updatedPlace.getMaxCost());
 
         if(updatedPlace.getLocation() != null)
@@ -110,12 +110,10 @@ public class PlaceService
         if(updatedPlace.getCategory() != null)
         {
             int cId = updatedPlace.getCategory().getCategoryId();  // Gets the ID of the new category
-            Optional<Category> category = crepo.findById(cId);  // Tries to find the associated category
+            Category category = crepo.findById(cId).orElseThrow(() ->
+                    new ResourceNotFoundException("Category Not Found! (ID: " + cId + ")"));
 
-            if(category.isEmpty())
-                throw new ResourceNotFoundException("Category Not Found!");
-
-            existingPlace.setCategory(category.get());  /* If found, the category will be extracted from the optional
+            existingPlace.setCategory(category);  /* If found, the category will be extracted from the optional
                                                          and set as the category for the existing Place */
         }
 
@@ -126,10 +124,9 @@ public class PlaceService
             for(Vibe v: updatedPlace.getVibe()) // Checks for all vibes within the Vibe List of the updatedPlace
             {
                 int vId = v.getVibeId();
-                Optional<Vibe> vibe = vrepo.findById(vId);
 
-                if(vibe.isEmpty())
-                    throw new ResourceNotFoundException("Vibe Not Found");
+                if(!vrepo.existsById(vId))
+                    throw new ResourceNotFoundException("Vibe Not Found! (ID: " + vId + ")");
 
                 newVibes.add(v);    // If found, the vibe will be added to the newVibes List
             }
@@ -143,16 +140,13 @@ public class PlaceService
         // Optional.of(): wraps the newly saved Place in an Optional to match the return type constraint
     }
 
-    public Optional<String> dropPlace(long id)
+    public Optional<String> dropPlace(long id) throws ResourceNotFoundException
     {
-        Optional<Place> result = fetchPlaceById(id);
+        Place p = fetchPlaceById(id).orElseThrow(() ->
+                new ResourceNotFoundException("Place Not Found! (ID: " + id + ")"));
 
-        if(result.isEmpty())
-            return Optional.empty();
-
-        repo.delete(result.get());
+        repo.delete(p);
         return Optional.of("Place Deleted Successfully (ID: " + id + ")");
-
     }
 
     @Transactional
@@ -163,6 +157,17 @@ public class PlaceService
         Category c = crepo.findById(dto.getCategoryID()).orElseThrow(
                 () -> new ResourceNotFoundException("Category Not Found (ID: " + dto.getCategoryID() + ")") );
 
+        if(dto.getVibeIDs() != null && !dto.getVibeIDs().isEmpty())
+        {
+            List<Vibe> vibes = new ArrayList<>();
+            for (int id : dto.getVibeIDs()) {
+                Vibe v = vrepo.findById(id).orElseThrow(() ->
+                        new ResourceNotFoundException("Vibe Not Found (ID: " + id + ")"));
+
+                vibes.add(v);
+            }
+            place.setVibe(vibes);
+        }
         place.setCategory(c);
 
         return repo.save(place);
@@ -176,6 +181,20 @@ public class PlaceService
             Place place = new Place(dto);
             Category c = crepo.findById(dto.getCategoryID()).orElseThrow(()
                     -> new ResourceNotFoundException("Category Not Found: ID = " + dto.getCategoryID()));
+
+            if(dto.getVibeIDs() != null && !dto.getVibeIDs().isEmpty())
+            {
+                List<Vibe> vibes = new ArrayList<>();
+                for(int id: dto.getVibeIDs())
+                {
+                    Vibe v = vrepo.findById(id).orElseThrow(() ->
+                            new ResourceNotFoundException("Vibe Not Found (ID: " + id + ")"));
+
+                    vibes.add(v);
+                }
+                place.setVibe(vibes);
+            }
+
             place.setCategory(c);
             return place;
         }).collect(Collectors.toList());

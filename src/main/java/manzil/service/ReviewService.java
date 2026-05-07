@@ -51,7 +51,9 @@ public class ReviewService {
         return rRepo.findByReviewRegisteredUser_UserId(userId);
     }
 
+
     // Add a new review
+    @Transactional
     public Review addReview(ReviewDTO dto) throws ResourceNotFoundException
     {
         Review review = new Review(dto);
@@ -65,61 +67,83 @@ public class ReviewService {
         review.setReviewPlace(p);
         review.setReviewUser(u);
 
-        review.setLikesCount(0);
+        double oldAvg = p.getAvgRating();
+        double nRating = review.getRatingScore();
 
-        return rRepo.save(review);
+        rRepo.save(review);
+
+        p.setNumberOfReviews(p.getNumberOfReviews() + 1);
+
+        long nCount = p.getNumberOfReviews();
+        double nAvg = oldAvg + (nRating - oldAvg)/nCount;
+
+        // New Average: Old Avg + (New Rating - Old Avg)/New Count
+
+        p.setAvgRating(nAvg);
+
+        return review;
     }
 
     // Update an existing review
     @Transactional
     public Optional<Review> updateReview(long reviewId, Review updatedReview) throws ResourceNotFoundException
     {
-        Optional<Review> existing = fetchReviewById(reviewId);
+        Review existing = fetchReviewById(reviewId).orElseThrow(
+                () -> new ResourceNotFoundException("Review Not Found (ID: " + reviewId + ")") );
 
-        existing.setComments(updatedReview.getComments());
-        existing.setRatingScore(updatedReview.getRatingScore());
+        if(updatedReview.getComments() != null)
+            existing.setComments(updatedReview.getComments());
+
+        if(updatedReview.getRatingScore() != null)
+            existing.setRatingScore(updatedReview.getRatingScore());
+
         existing.setReviewDate(LocalDate.now());
 
-        return rRepo.save(existing);
+        return Optional.of(rRepo.save(existing));
     }
 
     // Like a review (increment likes)
     public Optional<Review> likeReview(long reviewId) throws ResourceNotFoundException
     {
-        Optional<Review> review = fetchReviewById(reviewId);
-`
-        if(review.isEmpty())
-        {
-            return review;
-        }
+        Review review = fetchReviewById(reviewId).orElseThrow( () ->
+                new ResourceNotFoundException("Review Not Found (ID: " + reviewId + ")"));
 
-        review.get().setLikesCount(review.get().getLikesCount() + 1);
-        return Optional.of(rRepo.save(review.get()));
+        review.setLikesCount(review.getLikesCount() + 1);
+        return Optional.of(rRepo.save(review));
     }
 
     // Delete a review
+    @Transactional
     public Optional<String> deleteReview(long reviewId) throws ResourceNotFoundException
     {
-        Optional<Review> review = fetchReviewById(reviewId);
+        Review review = fetchReviewById(reviewId).orElseThrow(() ->
+                new ResourceNotFoundException("Review Not Found (ID:" + reviewId + ")"));
 
-        if(review.isEmpty())
-        {
-            return Optional.empty();
-        }
+        rRepo.delete(review);
 
-        rRepo.delete(review.get());
+        Place p = review.getReviewPlace();
+        p.setAvgRating(getAverageRatingForPlace(p.getPlaceId()));
+        p.setNumberOfReviews(p.getNumberOfReviews()-1);
 
         return Optional.of("Review Deleted Successfully (ID: " + reviewId + ")");
-
     }
 
     // Get average rating for a place
-    public double getAverageRatingForPlace(long placeId) {
+    public double getAverageRatingForPlace(long placeId) throws ResourceNotFoundException {
+
+        Place p = pRepo.findById(placeId).orElseThrow(() ->
+                new ResourceNotFoundException("Place Not Found (ID:" + placeId + ")"));
+
         List<Review> reviews = fetchReviewsByPlace(placeId);
-        if (reviews.isEmpty()) return 0.0;
-        return reviews.stream()
-                .mapToInt(Review::getRatingScore)
-                .average()
-                .orElse(0.0);
+
+        if (reviews.isEmpty())
+            return 0.0;
+
+        return reviews.stream() // Converts the review list into a stream of objects
+                    .mapToInt(Review::getRatingScore)  // Extracts each review's rating scores to an intStream
+                    .average()  // Computes the average of the entire stream's ratingScores
+                    .orElse(0.0);   // If no ratingScores are found
+
+
     }
 }

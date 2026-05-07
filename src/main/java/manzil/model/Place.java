@@ -42,8 +42,11 @@ public class Place
     private LocalTime openingTime;
     private LocalTime closingTime;
 
-    private int minCost = -1;
-    private int maxCost = -1;
+    private Integer minCost;
+    private Integer maxCost;
+
+    private double avgRating = 0.0;
+    private long numberOfReviews = 0;
 
     @Column(columnDefinition = "geometry(Point, 4326)")
     private Point location;

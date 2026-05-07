@@ -1,11 +1,13 @@
 package manzil.controller;
 
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import manzil.dto.PlaceCreateDTO;
 import manzil.exceptions.ResourceNotFoundException;
 import manzil.model.Place;
 import manzil.service.PlaceService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -27,18 +29,12 @@ public class PlaceController
     public List<Place> getAllPlaces() {return service.fetchPlaces();}
 
     @GetMapping("/{id}")
-    public ResponseEntity<Place> getPlace(@PathVariable long id)
+    public ResponseEntity<Place> getPlace(@PathVariable long id) throws ResourceNotFoundException
     {
-        Optional<Place> place = service.fetchPlaceById(id); // Tries to find Place
-
-        if(place.isEmpty())
-            return ResponseEntity.notFound().build();
-        // Returns 404 NOT FOUND error if Optional is empty
-        // .build() finalizes the construction of the ResponseEntity
+        Optional<Place> place = service.fetchPlaceById(id);
 
         return ResponseEntity.ok(place.get());
         // Extracts Place from Optional if it isn't empty and sends an "OK" response entity
-        // No .build() required as the presence of data indicates the finalization of the entity
     }
 
     @GetMapping("/search")
@@ -53,10 +49,10 @@ public class PlaceController
         return service.fetchPlacesByVibe(vibeID);
     }
 
-    @GetMapping("/category")
-    public List<Place> getPlaceByCategory(@RequestParam int categoryID)
+    @GetMapping("/category/{id}")
+    public List<Place> getPlaceByCategory(@PathVariable int id)
     {
-        return service.fetchPlacesByCategory(categoryID);
+        return service.fetchPlacesByCategory(id);
     }
 
     @GetMapping("/city")
@@ -84,19 +80,12 @@ public class PlaceController
     {
         Optional<Place> place = service.updatePlace(id, updatedPlace);  // Exception is handled by Spring's Exception Handler
 
-        if(place.isEmpty())
-            return ResponseEntity.notFound().build();
-
         return ResponseEntity.ok(place.get());
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deletePlace(@PathVariable long id)
-    {
+    public ResponseEntity<String> deletePlace(@PathVariable long id) throws ResourceNotFoundException {
         Optional<String> response = service.dropPlace(id);
-
-        if(response.isEmpty())
-            return ResponseEntity.notFound().build();
 
         return ResponseEntity.ok(response.get());
     }
@@ -116,7 +105,8 @@ public class PlaceController
     }
 
     @PostMapping("/list")
-    public List<Place> addPlaceList(@RequestBody List<PlaceCreateDTO> places) throws ResourceNotFoundException
+    @ResponseStatus(HttpStatus.CREATED)
+    public List<Place> addPlaceList(@Valid @RequestBody List<PlaceCreateDTO> places) throws ResourceNotFoundException
     {
         return service.postPlaceList(places);
     }
