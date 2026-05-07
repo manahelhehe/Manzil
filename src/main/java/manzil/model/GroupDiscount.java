@@ -1,14 +1,13 @@
 package manzil.model;
 
-import jakarta.persistence.*;
-import lombok.Data;
-import jakarta.validation.constraints.Positive;
-
+import jakarta.persistence.Entity;
 
 @Entity
-@Data
-public class GroupDiscount extends DiscountOffer{
-    
-    @Positive
-    @Column(nullable = false)
-    private int minGroupSize;}
+public class GroupDiscount extends DiscountOffer
+{
+    private int minGroupSize;
+
+    public int getMinGroupSize() { 
+        return minGroupSize; }
+    public void setMinGroupSize(int minGroupSize) {
+        this.minGroupSize = minGroupSize; }}

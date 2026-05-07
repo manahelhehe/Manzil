@@ -1,31 +1,47 @@
 package manzil.model;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.validation.constraints.Positive;
-import lombok.Data;
-
 
 @Entity
-@Data
-public class PaymentDiscount extends DiscountOffer{
-    
-    @Positive
-    @Column
+public class PaymentDiscount extends DiscountOffer
+{
     private double cashbackAmount;
 
-    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private CardScheme cardScheme;
 
-    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private CardType cardType;
 
-    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private PaymentPartner paymentPartner;
 
-}
+    public double getCashbackAmount() { 
+        return cashbackAmount; }
+    public void setCashbackAmount(double cashbackAmount) { 
+        this.cashbackAmount = cashbackAmount; }
+
+
+
+
+    public CardScheme getCardScheme() { 
+        return cardScheme; }
+    public void setCardScheme(CardScheme cardScheme) { 
+        this.cardScheme = cardScheme; }
+
+
+
+
+    public CardType getCardType() { 
+        return cardType; }
+    public void setCardType(CardType cardType) { 
+        this.cardType = cardType; }
+
+
+
+    public PaymentPartner getPaymentPartner() { 
+        return paymentPartner; }
+    public void setPaymentPartner(PaymentPartner paymentPartner) {
+        this.paymentPartner = paymentPartner; }}
