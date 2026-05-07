@@ -161,7 +161,7 @@ public class PlaceService
         Place place = new Place(dto);
 
         Category c = crepo.findById(dto.getCategoryID()).orElseThrow(
-                () -> new ResourceNotFoundException("Category Not Found: ID = " + dto.getCategoryID()) );
+                () -> new ResourceNotFoundException("Category Not Found (ID: " + dto.getCategoryID() + ")") );
 
         place.setCategory(c);
 

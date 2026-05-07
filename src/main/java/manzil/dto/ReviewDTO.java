@@ -14,7 +14,6 @@ public class ReviewDTO
 {
     private long reviewId;
     private String comments;
-    private String reviewDate;
     private int likesCount;
     private int ratingScore;
     private long placeId;
