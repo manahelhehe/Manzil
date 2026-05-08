@@ -77,8 +77,7 @@ public class PlaceService
     @Transactional  // Ensures a transactional process; either EVERYTHING executes or NOTHING does
     public Optional<Place> updatePlace(long id, Place updatedPlace) throws ResourceNotFoundException
     {
-        Place existingPlace = fetchPlaceById(id).orElseThrow(() ->
-                new ResourceNotFoundException("Place Not Found (ID: " + id + ")"));
+        Place existingPlace = fetchPlaceById(id);
 
         if(updatedPlace.getName() != null)
             existingPlace.setName(updatedPlace.getName());
@@ -139,8 +138,7 @@ public class PlaceService
 
     public Optional<String> dropPlace(long id) throws ResourceNotFoundException
     {
-        Place p = fetchPlaceById(id).orElseThrow(() ->
-                new ResourceNotFoundException("Place Not Found! (ID: " + id + ")"));
+        Place p = fetchPlaceById(id);
 
         repo.delete(p);
         return Optional.of("Place Deleted Successfully (ID: " + id + ")");

@@ -1,7 +1,7 @@
 package manzil.controller;
 
 import jakarta.validation.Valid;
-import manzil.dto.ReviewDTO;
+import manzil.dto.ReviewCreateDTO;
 import manzil.exceptions.ResourceNotFoundException;
 import manzil.model.Review;
 import manzil.service.ReviewService;
@@ -12,7 +12,6 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/reviews")
@@ -60,7 +59,7 @@ public class ReviewController {
 
     // POST add a new review
     @PostMapping
-    public ResponseEntity<Review> addReview(@Valid @RequestBody ReviewDTO dto) throws ResourceNotFoundException
+    public ResponseEntity<Review> addReview(@Valid @RequestBody ReviewCreateDTO dto) throws ResourceNotFoundException
     {
         Review savedReview = service.addReview(dto);
 

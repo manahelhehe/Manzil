@@ -31,9 +31,9 @@ public class PlaceController
     @GetMapping("/{id}")
     public ResponseEntity<Place> getPlace(@PathVariable long id) throws ResourceNotFoundException
     {
-        Optional<Place> place = service.fetchPlaceById(id);
+        Place place = service.fetchPlaceById(id);
 
-        return ResponseEntity.ok(place.get());
+        return ResponseEntity.ok(place);
     }
 
     @GetMapping("/search")

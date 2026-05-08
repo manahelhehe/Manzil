@@ -18,4 +18,5 @@ public class GuestSession {
 
     @Column(nullable = false)
     private LocalDateTime sessionStart;
-    private LocalDateTime expiryTime;}
+    private LocalDateTime expiryTime;
+}

@@ -1,6 +1,6 @@
 package manzil.service;
 
-import manzil.model.RegisteredManzilUser;
+import manzil.model.RegisteredUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,30 +14,30 @@ public class RegisteredManzilUserService {
     private RegisteredManzilUserRepository registeredManzilUserRepository;
 
     // Register a new user
-    public RegisteredManzilUser registerUser(RegisteredManzilUser user) {
+    public RegisteredUser registerUser(RegisteredUser user) {
         user.setDateJoined(LocalDate.now());
         user.setActivityStatus(false);
         return registeredManzilUserRepository.save(user);
     }
 
     // Get all registered users
-    public List<RegisteredManzilUser> fetchAllRegisteredUsers() {
+    public List<RegisteredUser> fetchAllRegisteredUsers() {
         return registeredManzilUserRepository.findAll();
     }
 
     // Get registered user by ID
-    public RegisteredManzilUser fetchRegisteredUserById(long userId) {
+    public RegisteredUser fetchRegisteredUserById(long userId) {
         return registeredManzilUserRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Registered user not found with id: " + userId));
     }
 
     // Update preferences
-    public RegisteredManzilUser updatePreferences(long userId, List<String> preferences) {
-        RegisteredManzilUser user = fetchRegisteredUserById(userId);
+    public RegisteredUser updatePreferences(long userId, List<String> preferences) {
+        RegisteredUser user = fetchRegisteredUserById(userId);
         user.setPreferences(preferences);
         return registeredManzilUserRepository.save(user);
     }
-    public List<RegisteredManzilUser> fetchUsersByDateJoined(LocalDate dateJoined) {
+    public List<RegisteredUser> fetchUsersByDateJoined(LocalDate dateJoined) {
     return registeredManzilUserRepository.findByDateJoined(dateJoined);
 }
 }

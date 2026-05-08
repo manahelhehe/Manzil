@@ -1,6 +1,8 @@
 package manzil.service;
 
+import manzil.exceptions.ResourceNotFoundException;
 import manzil.model.ManzilUser;
+import manzil.model.RegisteredUser;
 import manzil.repository.ManzilUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -11,19 +13,29 @@ import java.util.List;
 public class ManzilUserService {
 
     @Autowired
-    private ManzilUserRepository manzilUserRepository;
+    private ManzilUserRepository repo;
 
     public List<ManzilUser> fetchAllUsers() {
-        return manzilUserRepository.findAll();
+        return repo.findAll();
     }
 
     public ManzilUser fetchUserById(long userId) {
-        return manzilUserRepository.findById(userId)
+        return repo.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
     }
 
+    public RegisteredUser fetchRegisteredUserById(long userId) throws ResourceNotFoundException
+    {
+        ManzilUser u = fetchUserById(userId);
+
+        if(!(u instanceof RegisteredUser))
+            throw new ResourceNotFoundException("User is Not Registered (ID: " + userId + ")");
+
+        return (RegisteredUser) u;
+    }
+
     public ManzilUser fetchUserByEmail(String email) {
-        return manzilUserRepository.findByEmail(email)
+        return repo.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
     }
 
@@ -34,22 +46,22 @@ public class ManzilUserService {
         existing.setPhoneNumber(updatedUser.getPhoneNumber());
         existing.setProfilePhoto(updatedUser.getProfilePhoto());
         existing.setActivityStatus(updatedUser.isActivityStatus());
-        return manzilUserRepository.save(existing);
+        return repo.save(existing);
     }
 
     public void deleteUser(long userId) {
-        manzilUserRepository.delete(fetchUserById(userId));
+        repo.delete(fetchUserById(userId));
     }
 
     public ManzilUser setUserOnline(long userId) {
         ManzilUser user = fetchUserById(userId);
         user.setActivityStatus(true);
-        return manzilUserRepository.save(user);
+        return repo.save(user);
     }
 
     public ManzilUser setUserOffline(long userId) {
         ManzilUser user = fetchUserById(userId);
         user.setActivityStatus(false);
-        return manzilUserRepository.save(user);
+        return repo.save(user);
     }
 }

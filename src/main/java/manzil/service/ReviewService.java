@@ -1,10 +1,10 @@
 package manzil.service;
 
 import jakarta.transaction.Transactional;
-import manzil.dto.ReviewDTO;
+import manzil.dto.ReviewCreateDTO;
 import manzil.exceptions.ResourceNotFoundException;
 import manzil.model.ManzilUser;
-import manzil.model.RegisteredManzilUser;
+import manzil.model.RegisteredUser;
 import manzil.model.Review;
 import manzil.model.Place;
 import manzil.repository.ManzilUserRepository;
@@ -57,7 +57,7 @@ public class ReviewService {
 
     // Add a new review
     @Transactional
-    public Review addReview(ReviewDTO dto) throws ResourceNotFoundException
+    public Review addReview(ReviewCreateDTO dto) throws ResourceNotFoundException
     {
         Review review = new Review(dto);
 
@@ -67,11 +67,11 @@ public class ReviewService {
         ManzilUser u = uRepo.findById(dto.getUserId()).orElseThrow(
                 () -> new ResourceNotFoundException("User Not Found (ID: " + dto.getUserId() + ")") );
 
-        if(! (u instanceof RegisteredManzilUser))
+        if(! (u instanceof RegisteredUser))
             throw new ResourceNotFoundException("User is not a Registered User! (ID: " + dto.getUserId() + ")");
 
         review.setReviewPlace(p);
-        review.setReviewUser( (RegisteredManzilUser) u);
+        review.setReviewUser( (RegisteredUser) u);
 
         double oldAvg = p.getAvgRating();
         double nRating = review.getRatingScore();

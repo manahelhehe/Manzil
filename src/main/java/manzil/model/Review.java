@@ -3,14 +3,9 @@ package manzil.model;
 import jakarta.persistence.*;
 import lombok.Data;
 
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
-import manzil.dto.ReviewDTO;
+import manzil.dto.ReviewCreateDTO;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
-
-import static manzil.util.SpatialUtil.mapLocation;
 
 @Entity
 @Data
@@ -20,7 +15,6 @@ public class Review
     @GeneratedValue( strategy = GenerationType.IDENTITY)
     private long reviewId;
 
-    @Column
     private String comments;
 
     @Column(nullable = false)
@@ -28,8 +22,6 @@ public class Review
 
     private int likesCount;
 
-    @Min(1)
-    @Max(5)
     private Integer ratingScore;    // Using wrapper class "Integer" to have the attribute be null if not initialized instead of 0
 
     @ManyToOne
@@ -38,9 +30,9 @@ public class Review
 
     @ManyToOne
     @JoinColumn(name = "registered_user")
-    private RegisteredManzilUser reviewUser;
+    private RegisteredUser reviewUser;
 
-    public Review (ReviewDTO dto)
+    public Review (ReviewCreateDTO dto)
     {
         this.comments = dto.getComments();
         this.reviewDate = LocalDate.now();
