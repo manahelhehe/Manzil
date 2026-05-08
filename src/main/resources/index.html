@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Manzil — Find Your Place</title>
+  <link rel="stylesheet" href="index.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+</head>
+<body>
+
+  <!-- Grain texture overlay -->
+  <div class="grain"></div>
+
+  <!-- ── NAV ── -->
+  <nav class="nav" id="nav">
+    <a href="#" class="nav-logo">M<span>anzil</span></a>
+    <div class="nav-links">
+      <a href="#">Explore</a>
+      <a href="#">Open Now</a>
+      <a href="#">Near Me</a>
+      <a href="#">Vibes</a>
+    </div>
+    <div class="nav-right">
+      <button class="nav-btn-ghost">Log in</button>
+      <button class="nav-btn-solid">Join Free</button>
+    </div>
+  </nav>
+
+  <!-- ── HERO ── -->
+  <header class="hero">
+    <div class="hero-label">
+      <span class="label-line"></span>
+      <span>Premium Place Guide</span>
+      <span class="label-line"></span>
+    </div>
+
+    <h1 class="hero-title">
+      <span class="ht-top">Discover</span>
+      <em class="ht-italic">places</em>
+      <span class="ht-bot">worth visiting</span>
+    </h1>
+
+    <p class="hero-sub">Every city holds hidden gems. Manzil surfaces the ones worth your time — curated, rated, and always up to date.</p>
+
+    <!-- Search -->
+    <div class="search-wrap">
+      <div class="search-box">
+        <div class="sb-field">
+          <label>Where</label>
+          <input type="text" id="searchInput" placeholder="Place name or keyword"/>
+        </div>
+        <div class="sb-sep"></div>
+        <div class="sb-field">
+          <label>City</label>
+          <input type="text" id="cityInput" placeholder="Any city"/>
+        </div>
+        <button class="sb-btn" onclick="handleSearch()">
+          <i class="fa fa-search"></i>
+          <span>Search</span>
+        </button>
+      </div>
+      <div class="search-results" id="searchResults" style="display:none;"></div>
+    </div>
+
+    <!-- Vibe pills -->
+    <div class="vibe-pills" id="vibePills">
+      <span class="pill-skel"></span>
+      <span class="pill-skel"></span>
+      <span class="pill-skel"></span>
+      <span class="pill-skel"></span>
+    </div>
+
+    <!-- Decorative number -->
+    <div class="hero-deco-num" id="placeCount">—</div>
+    <div class="hero-deco-label">places & counting</div>
+
+    <!-- Floating cards column -->
+    <aside class="hero-aside" id="heroAside">
+      <div class="ha-skel"></div>
+      <div class="ha-skel ha-skel--sm"></div>
+      <div class="ha-skel"></div>
+    </aside>
+
+    <!-- Scroll hint -->
+    <div class="scroll-hint">
+      <span>Scroll</span>
+      <div class="sh-line"></div>
+    </div>
+  </header>
+
+  <!-- ── CATEGORIES ── -->
+  <section class="section sect-cats">
+    <div class="sect-tag">Browse by type</div>
+    <h2 class="sect-title">Every kind of place</h2>
+    <div class="cats-grid" id="catsGrid">
+      <div class="skel skel-cat"></div>
+      <div class="skel skel-cat"></div>
+      <div class="skel skel-cat"></div>
+      <div class="skel skel-cat"></div>
+      <div class="skel skel-cat"></div>
+      <div class="skel skel-cat"></div>
+    </div>
+  </section>
+
+  <!-- ── FEATURED ── -->
+  <section class="section sect-featured">
+    <div class="sf-header">
+      <div>
+        <div class="sect-tag">Hand-picked</div>
+        <h2 class="sect-title">Featured places</h2>
+      </div>
+      <a href="#" class="link-arrow">View all <i class="fa fa-arrow-right"></i></a>
+    </div>
+    <div class="feat-grid" id="featGrid">
+      <div class="skel skel-feat-lg"></div>
+      <div class="skel skel-feat-sm"></div>
+      <div class="skel skel-feat-sm"></div>
+      <div class="skel skel-feat-sm"></div>
+    </div>
+  </section>
+
+  <!-- ── VIBES ── -->
+  <section class="section sect-vibes">
+    <div class="sect-tag light">Trending</div>
+    <h2 class="sect-title light">Explore by vibe</h2>
+    <div class="vibes-row" id="vibesRow">
+      <div class="skel skel-vibe"></div>
+      <div class="skel skel-vibe skel-vibe--mid"></div>
+      <div class="skel skel-vibe"></div>
+    </div>
+  </section>
+
+  <!-- ── NEARBY ── -->
+  <section class="section sect-nearby">
+    <div class="sect-tag">Your area</div>
+    <h2 class="sect-title">Nearby recommendations</h2>
+    <div id="nearbyGrid" class="nearby-grid">
+      <div class="skel skel-nearby"></div>
+      <div class="skel skel-nearby"></div>
+      <div class="skel skel-nearby"></div>
+    </div>
+    <div id="locDenied" class="loc-denied" style="display:none;">
+      <div class="loc-icon"><i class="fa fa-location-dot"></i></div>
+      <p>Allow location access to see what's around you</p>
+      <button onclick="requestLocation()" class="nav-btn-solid">Enable Location</button>
+    </div>
+  </section>
+
+  <!-- ── OPEN NOW ── -->
+  <section class="section sect-open">
+    <div class="sf-header">
+      <div>
+        <div class="sect-tag">Live</div>
+        <h2 class="sect-title">Open right now</h2>
+      </div>
+      <a href="#" class="link-arrow">See all <i class="fa fa-arrow-right"></i></a>
+    </div>
+    <div class="open-list" id="openList">
+      <div class="skel skel-open"></div>
+      <div class="skel skel-open"></div>
+      <div class="skel skel-open"></div>
+      <div class="skel skel-open"></div>
+    </div>
+  </section>
+
+  <!-- ── FOOTER ── -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <span class="nav-logo footer-logo">M<span>anzil</span></span>
+        <p>Curating the world's most memorable spaces, one city at a time.</p>
+      </div>
+      <div class="footer-cols">
+        <div>
+          <h5>Discover</h5>
+          <a href="#">All Places</a>
+          <a href="#">Open Now</a>
+          <a href="#">Near Me</a>
+          <a href="#">Top Rated</a>
+        </div>
+        <div>
+          <h5>Company</h5>
+          <a href="#">About</a>
+          <a href="#">For Businesses</a>
+          <a href="#">Contact</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2025 Manzil</span>
+      <span>All rights reserved</span>
+    </div>
+  </footer>
+
+<script>
+  const BASE = 'http://localhost:8080/api';
+  const CAT_ICONS  = ['🏡','🏨','⛺','🏯','🌊','🌿','🍽️','🎭','🛍️','🏋️'];
+  const VIBE_ICONS = ['✨','🔥','🌙','🌿','🎉','💎','🌊','🏔️'];
+  const IMG = 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=700&q=80';
+
+  /* ── helpers ── */
+  const cost = p => p.minCost && p.maxCost
+    ? `PKR ${p.minCost.toLocaleString()} – ${p.maxCost.toLocaleString()}`
+    : p.minCost ? `From PKR ${p.minCost.toLocaleString()}` : 'Price on request';
+
+  const stars = p => p.avgRating > 0
+    ? `<span class="chip chip--star">★ ${p.avgRating.toFixed(1)}</span>` : '';
+
+  const hours = p => p.openingTime && p.closingTime
+    ? `${p.openingTime.slice(0,5)} – ${p.closingTime.slice(0,5)}` : '';
+
+  /* ── search: GET /api/places/search or /api/places/city ── */
+  async function handleSearch() {
+    const q    = document.getElementById('searchInput').value.trim();
+    const city = document.getElementById('cityInput').value.trim();
+    const box  = document.getElementById('searchResults');
+    if (!q && !city) return;
+
+    box.style.display = 'block';
+    box.innerHTML = '<p class="sr-loading">Searching…</p>';
+
+    try {
+      const url = q
+        ? `${BASE}/places/search?query=${encodeURIComponent(q)}`
+        : `${BASE}/places/city?city=${encodeURIComponent(city)}`;
+      const data = await fetch(url).then(r => r.json());
+
+      box.innerHTML = !data.length
+        ? '<p class="sr-loading">No results found.</p>'
+        : data.slice(0,6).map(p => `
+            <div class="sr-item" onclick="location='/place.html?id=${p.placeId}'">
+              <div>
+                <strong>${p.name}</strong>
+                <span>${p.city} · ${cost(p)}</span>
+              </div>
+              ${stars(p)}
+            </div>`).join('');
+    } catch {
+      box.innerHTML = '<p class="sr-loading">Server unreachable.</p>';
+    }
+  }
+
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.search-wrap'))
+      document.getElementById('searchResults').style.display = 'none';
+  });
+  document.getElementById('searchInput').addEventListener('keydown', e => e.key==='Enter' && handleSearch());
+
+  /* ── featured: GET /api/places ── */
+  async function loadFeatured() {
+    try {
+      const places = await fetch(`${BASE}/places`).then(r => r.json());
+
+      // hero aside
+      document.getElementById('heroAside').innerHTML = places.slice(0,3).map(p => `
+        <div class="ha-card" onclick="location='/place.html?id=${p.placeId}'">
+          <img src="${IMG}" alt="${p.name}"/>
+          <div class="ha-info">
+            <strong>${p.name}</strong>
+            <span>${p.city}</span>
+          </div>
+          ${stars(p)}
+        </div>`).join('');
+
+      // place count
+      document.getElementById('placeCount').textContent = places.length;
+
+      // featured grid
+      document.getElementById('featGrid').innerHTML = places.slice(0,4).map((p,i) => `
+        <div class="feat-card ${i===0?'feat-card--lg':''}" onclick="location='/place.html?id=${p.placeId}'">
+          <img src="${IMG}" alt="${p.name}" loading="lazy"/>
+          <div class="feat-overlay">
+            <div class="feat-chips">${stars(p)}${p.numberOfReviews>0?`<span class="chip">${p.numberOfReviews} reviews</span>`:''}</div>
+            <h3>${p.name}</h3>
+            <p>${p.city} · ${cost(p)}</p>
+            <p class="feat-hrs">${hours(p)}</p>
+          </div>
+        </div>`).join('');
+    } catch {
+      document.getElementById('featGrid').innerHTML = '<p class="err-msg">Could not load places.</p>';
+    }
+  }
+
+  /* ── categories: GET /api/places/category/{id} ── */
+  async function loadCategories() {
+    try {
+      const results = await Promise.all(
+        Array.from({length:8},(_,i) =>
+          fetch(`${BASE}/places/category/${i+1}`).then(r=>r.json()).catch(()=>[])
+        )
+      );
+      const cats = results.map((p,i)=>({p,id:i+1})).filter(c=>c.p.length);
+      if (!cats.length) { document.getElementById('catsGrid').innerHTML='<p class="err-msg">No categories yet.</p>'; return; }
+
+      document.getElementById('catsGrid').innerHTML = cats.map((c,i) => {
+        const name = c.p[0].category?.name || `Category ${c.id}`;
+        return `<div class="cat-card" onclick="location='/places.html?category=${c.id}'">
+          <span class="cat-ico">${CAT_ICONS[i]||'📍'}</span>
+          <h4>${name}</h4>
+          <span>${c.p.length} place${c.p.length>1?'s':''}</span>
+        </div>`;
+      }).join('');
+    } catch {
+      document.getElementById('catsGrid').innerHTML = '<p class="err-msg">Could not load.</p>';
+    }
+  }
+
+  /* ── vibes: GET /api/places/vibe?vibeID= ── */
+  async function loadVibes() {
+    try {
+      const results = await Promise.all(
+        Array.from({length:6},(_,i) =>
+          fetch(`${BASE}/places/vibe?vibeID=${i+1}`).then(r=>r.json()).catch(()=>[])
+        )
+      );
+      const vibes = results.map((p,i)=>({p,id:i+1})).filter(v=>v.p.length);
+
+      // vibe pills in hero
+      document.getElementById('vibePills').innerHTML = vibes.slice(0,5).map(v => {
+        const name = v.p[0].vibe?.find(vi=>vi.vibeId===v.id)?.name || `Vibe ${v.id}`;
+        return `<span class="vibe-pill" onclick="location='/places.html?vibe=${v.id}'">${VIBE_ICONS[v.id-1]||'✨'} ${name}</span>`;
+      }).join('');
+
+      // vibes row
+      if (!vibes.length) { document.getElementById('vibesRow').innerHTML='<p class="err-msg light">No vibes yet.</p>'; return; }
+      document.getElementById('vibesRow').innerHTML = vibes.slice(0,3).map((v,i) => {
+        const name = v.p[0].vibe?.find(vi=>vi.vibeId===v.id)?.name || `Vibe ${v.id}`;
+        return `<div class="vibe-card ${i===1?'vibe-card--mid':''}" onclick="location='/places.html?vibe=${v.id}'">
+          <div class="vc-img" style="background-image:url('${IMG}')"></div>
+          <div class="vc-body">
+            <span class="vc-tag">${VIBE_ICONS[i]} Trending</span>
+            <h3>${name}</h3>
+            <p>${v.p.length} place${v.p.length>1?'s':''}</p>
+            <a class="vc-link" href="/places.html?vibe=${v.id}">Explore <i class="fa fa-arrow-right"></i></a>
+          </div>
+        </div>`;
+      }).join('');
+    } catch {
+      document.getElementById('vibesRow').innerHTML = '<p class="err-msg light">Could not load.</p>';
+    }
+  }
+
+  /* ── nearby: GET /api/places/near ── */
+  function requestLocation() {
+    navigator.geolocation.getCurrentPosition(async pos => {
+      const {latitude:lat, longitude:lng} = pos.coords;
+      try {
+        const places = await fetch(`${BASE}/places/near?lat=${lat}&lng=${lng}&radius=5000`).then(r=>r.json());
+        document.getElementById('locDenied').style.display = 'none';
+        if (!places.length) { document.getElementById('nearbyGrid').innerHTML='<p class="err-msg">Nothing nearby yet.</p>'; return; }
+
+        document.getElementById('nearbyGrid').innerHTML = places.slice(0,6).map(p => `
+          <div class="nearby-card" onclick="location='/place.html?id=${p.placeId}'">
+            <div class="nc-img" style="background-image:url('${IMG}')"></div>
+            <div class="nc-body">
+              <h4>${p.name}</h4>
+              <span><i class="fa fa-location-dot"></i> ${p.city}</span>
+              <div class="nc-meta">${stars(p)}<span>${cost(p)}</span></div>
+            </div>
+          </div>`).join('');
+      } catch {
+        document.getElementById('nearbyGrid').innerHTML = '<p class="err-msg">Could not load.</p>';
+      }
+    }, () => {
+      document.getElementById('nearbyGrid').innerHTML = '';
+      document.getElementById('locDenied').style.display = 'flex';
+    });
+  }
+
+  /* ── open now: GET /api/places/open ── */
+  async function loadOpenNow() {
+    try {
+      const places = await fetch(`${BASE}/places/open`).then(r=>r.json());
+      if (!places.length) { document.getElementById('openList').innerHTML='<p class="err-msg">Nothing open right now.</p>'; return; }
+
+      document.getElementById('openList').innerHTML = places.slice(0,5).map(p => `
+        <div class="open-card" onclick="location='/place.html?id=${p.placeId}'">
+          <div class="oc-img" style="background-image:url('${IMG}')"></div>
+          <div class="oc-body">
+            <div class="oc-top">
+              <h4>${p.name}</h4>
+              <span class="chip chip--green">● Open</span>
+            </div>
+            <span class="oc-city"><i class="fa fa-location-dot"></i> ${p.city}</span>
+            <div class="oc-meta">
+              ${stars(p)}
+              <span>${cost(p)}</span>
+              <span class="oc-hrs">Until ${p.closingTime?.slice(0,5)}</span>
+            </div>
+          </div>
+          <i class="fa fa-chevron-right oc-arrow"></i>
+        </div>`).join('');
+    } catch {
+      document.getElementById('openList').innerHTML = '<p class="err-msg">Could not load.</p>';
+    }
+  }
+
+  /* ── sticky nav shadow ── */
+  window.addEventListener('scroll', () => {
+    document.getElementById('nav').classList.toggle('nav--scrolled', window.scrollY > 40);
+  });
+
+  loadFeatured();
+  loadCategories();
+  loadVibes();
+  loadOpenNow();
+  requestLocation();
+</script>
+</body>
+</html>
