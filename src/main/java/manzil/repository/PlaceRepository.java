@@ -7,8 +7,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
@@ -16,12 +14,13 @@ import java.util.List;
 public interface PlaceRepository extends JpaRepository<Place, Long>    /* Tells the interface the entity it refers to,
                                                                         and its associated ID's datatype */
 {
-    List<Place> findPlaceByName(String name);   // SELECT * FROM PLACE WHERE name = name
+    List<Place> findByNameContainingIgnoreCase(String name);   // SELECT * FROM PLACE WHERE name = name
     List<Place> findPlaceByCity(String city);
-    List<Place> findPlaceByDescription(String description);
+    List<Place> findByDescriptionContainingIgnoreCase(String description);
+    List<Place> findByCityContainingIgnoreCase(String city);
     List<Place> findPlaceByMinCost(int minCost);
     List<Place> findPlaceByMaxCost(int maxCost);
-    List<Place> findPlaceByClosingTimeBeforeAndOpeningTimeAfter(LocalTime cTime, LocalTime oTime);
+    List<Place> findByOpeningTimeBeforeAndClosingTimeAfter(LocalTime cTime, LocalTime oTime);
     @Query(value = "SELECT * FROM place \n" +
             "WHERE ST_DWithin(\n" +
             "    location::geography, \n" +

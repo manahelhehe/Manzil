@@ -12,10 +12,8 @@ import manzil.repository.VibeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static manzil.util.SpatialUtil.mapLocation;
 
@@ -31,17 +29,15 @@ public class PlaceService
 
     public List<Place> fetchPlaces() {return repo.findAll();}
 
-    public Optional<Place> fetchPlaceById(long id) throws ResourceNotFoundException
+    public Place fetchPlaceById(long id) throws ResourceNotFoundException
     {
-        Place p = repo.findById(id).orElseThrow(() ->
+        return repo.findById(id).orElseThrow(() ->
                 new ResourceNotFoundException("Place Not Found (ID: " + id + ")"));
-
-        return Optional.of(p);
     }
 
     public List<Place> fetchOpenPlaces()
     {
-        return repo.findPlaceByClosingTimeBeforeAndOpeningTimeAfter(LocalTime.now(), LocalTime.now());
+        return repo.findByOpeningTimeBeforeAndClosingTimeAfter(LocalTime.now(), LocalTime.now());
     }
 
     public List<Place> fetchNearPlaces(double lat, double lng, double radius)
@@ -66,9 +62,9 @@ public class PlaceService
 
     public List<Place> findPlace(String query)
     {
-        List<Place> placesByName = repo.findPlaceByName(query);
-        List<Place> placesByDescription = repo.findPlaceByDescription(query);
-        List<Place> placesByCity = repo.findPlaceByCity(query);
+        List<Place> placesByName = repo.findByNameContainingIgnoreCase(query);
+        List<Place> placesByDescription = repo.findByDescriptionContainingIgnoreCase(query);
+        List<Place> placesByCity = repo.findByCityContainingIgnoreCase(query);
         Set<Place> results = new HashSet<>();
 
         results.addAll(placesByName);

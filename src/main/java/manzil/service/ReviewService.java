@@ -35,9 +35,11 @@ public class ReviewService {
     }
 
     // Get review by ID
-    public Optional<Review> fetchReviewById(long reviewId) throws ResourceNotFoundException
+    public Review fetchReviewById(long reviewId) throws ResourceNotFoundException
     {
-        return rRepo.findById(reviewId);
+        return rRepo.findById(reviewId).orElseThrow(() ->
+                new ResourceNotFoundException("Review Not Found (ID: " + reviewId + ")") );
+
     }
 
     // Get all reviews for a specific place
@@ -92,8 +94,7 @@ public class ReviewService {
     @Transactional
     public Review updateReview(long reviewId, Review updatedReview) throws ResourceNotFoundException
     {
-        Review existing = fetchReviewById(reviewId).orElseThrow(
-                () -> new ResourceNotFoundException("Review Not Found (ID: " + reviewId + ")") );
+        Review existing = fetchReviewById(reviewId);
 
         if(updatedReview.getComments() != null)
             existing.setComments(updatedReview.getComments());
@@ -106,8 +107,7 @@ public class ReviewService {
     // Like a review (increment likes)
     public Review likeReview(long reviewId) throws ResourceNotFoundException
     {
-        Review review = fetchReviewById(reviewId).orElseThrow( () ->
-                new ResourceNotFoundException("Review Not Found (ID: " + reviewId + ")"));
+        Review review = fetchReviewById(reviewId);
 
         review.setLikesCount(review.getLikesCount() + 1);
         return rRepo.save(review);
@@ -117,16 +117,20 @@ public class ReviewService {
     @Transactional
     public Optional<String> deleteReview(long reviewId) throws ResourceNotFoundException
     {
-        Review review = fetchReviewById(reviewId).orElseThrow(() ->
-                new ResourceNotFoundException("Review Not Found (ID:" + reviewId + ")"));
+        Review review = fetchReviewById(reviewId);
 
         rRepo.delete(review);
         rRepo.flush(); // Forces the delete to happen in DB before we query for average
 
         Place p = review.getReviewPlace();
         p.setNumberOfReviews(p.getNumberOfReviews()-1);
-        p.setAvgRating(getAverageRatingForPlace(p.getPlaceId()));
 
+        if (p.getNumberOfReviews() == 0)
+            p.setAvgRating(0.0);
+        else
+            p.setAvgRating(getAverageRatingForPlace(p.getPlaceId()));
+
+        pRepo.save(p);
         return Optional.of("Review Deleted Successfully (ID: " + reviewId + ")");
     }
 

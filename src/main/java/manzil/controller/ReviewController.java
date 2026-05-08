@@ -32,9 +32,9 @@ public class ReviewController {
     @GetMapping("/{id}")
     public ResponseEntity<Review> getReviewById(@PathVariable long id) throws ResourceNotFoundException
     {
-        Optional<Review> review = service.fetchReviewById(id);
+        Review review = service.fetchReviewById(id);
 
-        return ResponseEntity.ok(review.get());
+        return ResponseEntity.ok(review);
     }
 
     // GET all reviews for a place
