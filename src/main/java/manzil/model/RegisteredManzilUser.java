@@ -16,6 +16,6 @@ public class RegisteredManzilUser extends ManzilUser
     @OneToMany(mappedBy = "recRegisteredUser", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Recommendation> recommendations;
 
-    @OneToMany(mappedBy = "reviewRegisteredUser", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "reviewUser", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Review> reviews;
 }

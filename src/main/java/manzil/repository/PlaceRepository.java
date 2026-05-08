@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 @Repository
@@ -20,7 +21,7 @@ public interface PlaceRepository extends JpaRepository<Place, Long>    /* Tells 
     List<Place> findPlaceByDescription(String description);
     List<Place> findPlaceByMinCost(int minCost);
     List<Place> findPlaceByMaxCost(int maxCost);
-    List<Place> findPlaceByClosingTimeBeforeAndOpeningTimeAfter(LocalDateTime cTime, LocalDateTime oTime);
+    List<Place> findPlaceByClosingTimeBeforeAndOpeningTimeAfter(LocalTime cTime, LocalTime oTime);
     @Query(value = "SELECT * FROM place \n" +
             "WHERE ST_DWithin(\n" +
             "    location::geography, \n" +

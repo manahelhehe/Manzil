@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -40,7 +41,7 @@ public class PlaceService
 
     public List<Place> fetchOpenPlaces()
     {
-        return repo.findPlaceByClosingTimeBeforeAndOpeningTimeAfter(LocalDateTime.now(), LocalDateTime.now());
+        return repo.findPlaceByClosingTimeBeforeAndOpeningTimeAfter(LocalTime.now(), LocalTime.now());
     }
 
     public List<Place> fetchNearPlaces(double lat, double lng, double radius)
@@ -174,30 +175,30 @@ public class PlaceService
     }
 
     @Transactional
-    public List<Place> postPlaceList(List<PlaceCreateDTO> dtos) throws ResourceNotFoundException
-    {
-        List<Place> places = dtos.stream().map(dto ->
-        {
+    public List<Place> postPlaceList(List<PlaceCreateDTO> dtos) throws ResourceNotFoundException {
+        List<Place> places = new ArrayList<>();
+
+        for (PlaceCreateDTO dto : dtos) {
             Place place = new Place(dto);
-            Category c = crepo.findById(dto.getCategoryID()).orElseThrow(()
-                    -> new ResourceNotFoundException("Category Not Found: ID = " + dto.getCategoryID()));
 
-            if(dto.getVibeIDs() != null && !dto.getVibeIDs().isEmpty())
-            {
+            // Fetch Category
+            Category c = crepo.findById(dto.getCategoryID())
+                    .orElseThrow(() -> new ResourceNotFoundException("Category Not Found: ID = " + dto.getCategoryID()));
+            place.setCategory(c);
+
+            // Fetch Vibes
+            if (dto.getVibeIDs() != null && !dto.getVibeIDs().isEmpty()) {
                 List<Vibe> vibes = new ArrayList<>();
-                for(int id: dto.getVibeIDs())
-                {
-                    Vibe v = vrepo.findById(id).orElseThrow(() ->
-                            new ResourceNotFoundException("Vibe Not Found (ID: " + id + ")"));
-
+                for (int id : dto.getVibeIDs()) {
+                    Vibe v = vrepo.findById(id)
+                            .orElseThrow(() -> new ResourceNotFoundException("Vibe Not Found (ID: " + id + ")"));
                     vibes.add(v);
                 }
                 place.setVibe(vibes);
             }
 
-            place.setCategory(c);
-            return place;
-        }).collect(Collectors.toList());
+            places.add(place);
+        }
 
         return repo.saveAll(places);
     }

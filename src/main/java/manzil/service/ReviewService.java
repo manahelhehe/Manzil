@@ -49,7 +49,7 @@ public class ReviewService {
     // Get all reviews by a specific user
     public List<Review> getReviewsByUser(long userId)
     {
-        return rRepo.findByReviewRegisteredUser_UserId(userId);
+        return rRepo.findByReviewUser_UserId(userId);
     }
 
 
