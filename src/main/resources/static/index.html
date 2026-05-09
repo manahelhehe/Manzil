@@ -15,16 +15,16 @@
 
   <!-- ── NAV ── -->
   <nav class="nav" id="nav">
-    <a href="/index.html" class="nav-logo">M<span>anzil</span></a>
+    <a href="index.html" class="nav-logo">M<span>anzil</span></a>
     <div class="nav-links" id="navLinks">
-      <a href="/index.html">Home</a>
-      <a href="/places.html">Explore</a>
-      <a href="/places.html?open=true">Open Now</a>
-      <a href="/places.html?nearby=true">Near Me</a>
+      <a href="index.html">Home</a>
+      <a href="places.html">Explore</a>
+      <a href="places.html?open=true">Open Now</a>
+      <a href="places.html?nearby=true">Near Me</a>
     </div>
     <div class="nav-right" id="navRight">
-      <button class="nav-btn-ghost" onclick="location.href='/login.html'">Log in</button>
-      <button class="nav-btn-solid" onclick="location.href='/signup.html'">Join Free</button>
+      <button class="nav-btn-ghost" onclick="location.href='login.html'">Log in</button>
+      <button class="nav-btn-solid" onclick="location.href='signup.html'">Join Free</button>
     </div>
   </nav>
 
@@ -206,16 +206,16 @@
       const userData = JSON.parse(user);
       const userName = userData.fullname || userData.email.split('@')[0];
       navLinks.innerHTML = `
-        <a href="/places.html">Explore</a>
-        <a href="/places.html?open=true">Open Now</a>
-        <a href="/places.html?nearby=true">Near Me</a>
-        <a href="/places.html?vibes=true">Vibes</a>
+        <a href="places.html">Explore</a>
+        <a href="places.html?open=true">Open Now</a>
+        <a href="places.html?nearby=true">Near Me</a>
+        <a href="places.html?vibes=true">Vibes</a>
       `;
       navRight.innerHTML = `
-        <a href="/bookmarks.html" class="nav-links" style="color: var(--moss); font-weight: 500; display: flex; align-items: center; gap: 0.5rem;">
+        <a href="bookmarks.html" class="nav-links" style="color: var(--moss); font-weight: 500; display: flex; align-items: center; gap: 0.5rem;">
           <i class="fas fa-bookmark"></i> Bookmarks
         </a>
-        <a href="/profile.html" class="nav-links" style="color: var(--moss); font-weight: 500; display: flex; align-items: center; gap: 0.5rem;">
+        <a href="profile.html" class="nav-links" style="color: var(--moss); font-weight: 500; display: flex; align-items: center; gap: 0.5rem;">
           <i class="fas fa-user"></i> ${userName}
         </a>
         <button class="nav-btn-ghost" onclick="handleLogout()">Log out</button>
@@ -266,7 +266,7 @@
       box.innerHTML = !data.length
         ? '<p class="sr-loading">No results found.</p>'
         : data.slice(0,6).map(p => `
-            <div class="sr-item" onclick="location='/place.html?id=${p.placeId}'">
+              <div class="sr-item" onclick="location='place.html?id=${p.placeId}'">
               <div>
                 <strong>${p.name}</strong>
                 <span>${p.city} · ${cost(p)}</span>
@@ -291,7 +291,7 @@
 
       // hero aside
       document.getElementById('heroAside').innerHTML = places.slice(0,3).map(p => `
-        <div class="ha-card" onclick="location='/place.html?id=${p.placeId}'">
+        <div class="ha-card" onclick="location='place.html?id=${p.placeId}'">
           <img src="${IMG}" alt="${p.name}"/>
           <div class="ha-info">
             <strong>${p.name}</strong>
@@ -305,7 +305,7 @@
 
       // featured grid
       document.getElementById('featGrid').innerHTML = places.slice(0,4).map((p,i) => `
-        <div class="feat-card ${i===0?'feat-card--lg':''}" onclick="location='/place.html?id=${p.placeId}'">
+        <div class="feat-card ${i===0?'feat-card--lg':''}" onclick="location='place.html?id=${p.placeId}'">
           <img src="${IMG}" alt="${p.name}" loading="lazy"/>
           <div class="feat-overlay">
             <div class="feat-chips">${stars(p)}${p.numberOfReviews>0?`<span class="chip">${p.numberOfReviews} reviews</span>`:''}</div>
@@ -332,7 +332,7 @@
 
       document.getElementById('catsGrid').innerHTML = cats.map((c,i) => {
         const name = c.p[0].category?.name || `Category ${c.id}`;
-        return `<div class="cat-card" onclick="location='/places.html?category=${c.id}'">
+        return `<div class="cat-card" onclick="location='places.html?category=${c.id}'">
           <span class="cat-ico">${CAT_ICONS[i]||'📍'}</span>
           <h4>${name}</h4>
           <span>${c.p.length} place${c.p.length>1?'s':''}</span>
@@ -356,20 +356,20 @@
       // vibe pills in hero
       document.getElementById('vibePills').innerHTML = vibes.slice(0,5).map(v => {
         const name = v.p[0].vibe?.find(vi=>vi.vibeId===v.id)?.name || `Vibe ${v.id}`;
-        return `<span class="vibe-pill" onclick="location='/places.html?vibe=${v.id}'">${VIBE_ICONS[v.id-1]||'✨'} ${name}</span>`;
+        return `<span class="vibe-pill" onclick="location='places.html?vibe=${v.id}'">${VIBE_ICONS[v.id-1]||'✨'} ${name}</span>`;
       }).join('');
 
       // vibes row
       if (!vibes.length) { document.getElementById('vibesRow').innerHTML='<p class="err-msg light">No vibes yet.</p>'; return; }
       document.getElementById('vibesRow').innerHTML = vibes.slice(0,3).map((v,i) => {
         const name = v.p[0].vibe?.find(vi=>vi.vibeId===v.id)?.name || `Vibe ${v.id}`;
-        return `<div class="vibe-card ${i===1?'vibe-card--mid':''}" onclick="location='/places.html?vibe=${v.id}'">
+        return `<div class="vibe-card ${i===1?'vibe-card--mid':''}" onclick="location='places.html?vibe=${v.id}'">
           <div class="vc-img" style="background-image:url('${IMG}')"></div>
           <div class="vc-body">
             <span class="vc-tag">${VIBE_ICONS[i]} Trending</span>
             <h3>${name}</h3>
             <p>${v.p.length} place${v.p.length>1?'s':''}</p>
-            <a class="vc-link" href="/places.html?vibe=${v.id}">Explore <i class="fa fa-arrow-right"></i></a>
+            <a class="vc-link" href="places.html?vibe=${v.id}">Explore <i class="fa fa-arrow-right"></i></a>
           </div>
         </div>`;
       }).join('');
@@ -388,7 +388,7 @@
         if (!places.length) { document.getElementById('nearbyGrid').innerHTML='<p class="err-msg">Nothing nearby yet.</p>'; return; }
 
         document.getElementById('nearbyGrid').innerHTML = places.slice(0,6).map(p => `
-          <div class="nearby-card" onclick="location='/place.html?id=${p.placeId}'">
+          <div class="nearby-card" onclick="location='place.html?id=${p.placeId}'">
             <div class="nc-img" style="background-image:url('${IMG}')"></div>
             <div class="nc-body">
               <h4>${p.name}</h4>
@@ -412,7 +412,7 @@
       if (!places.length) { document.getElementById('openList').innerHTML='<p class="err-msg">Nothing open right now.</p>'; return; }
 
       document.getElementById('openList').innerHTML = places.slice(0,5).map(p => `
-        <div class="open-card" onclick="location='/place.html?id=${p.placeId}'">
+        <div class="open-card" onclick="location='place.html?id=${p.placeId}'">
           <div class="oc-img" style="background-image:url('${IMG}')"></div>
           <div class="oc-body">
             <div class="oc-top">
