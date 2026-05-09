@@ -32,7 +32,7 @@
   <header class="hero">
     <div class="hero-label">
       <span class="label-line"></span>
-      <span>Personalized Guide to Every Cafe, Dhabba or Museum</span>
+      <span>Personalized Guide to Every Cafe, Dhabba, Haleem PLace or Museum</span>
       <span class="label-line"></span>
     </div>
 
@@ -101,23 +101,6 @@
       <div class="skel skel-cat"></div>
       <div class="skel skel-cat"></div>
       <div class="skel skel-cat"></div>
-    </div>
-  </section>
-
-  <!-- ── FEATURED ── -->
-  <section class="section sect-featured">
-    <div class="sf-header">
-      <div>
-        <div class="sect-tag">Hand-picked</div>
-        <h2 class="sect-title">Featured places</h2>
-      </div>
-      <a href="places.html" class="link-arrow">View all <i class="fa fa-arrow-right"></i></a>
-    </div>
-    <div class="feat-grid" id="featGrid">
-      <div class="skel skel-feat-lg"></div>
-      <div class="skel skel-feat-sm"></div>
-      <div class="skel skel-feat-sm"></div>
-      <div class="skel skel-feat-sm"></div>
     </div>
   </section>
 
@@ -284,41 +267,6 @@
   });
   document.getElementById('searchInput').addEventListener('keydown', e => e.key==='Enter' && handleSearch());
 
-  /* ── featured: GET /api/places ── */
-  async function loadFeatured() {
-    try {
-      const places = await fetch(`${BASE}/places`).then(r => r.json());
-
-      // hero aside
-      document.getElementById('heroAside').innerHTML = places.slice(0,3).map(p => `
-        <div class="ha-card" onclick="location='place.html?id=${p.placeId}'">
-          <img src="${IMG}" alt="${p.name}"/>
-          <div class="ha-info">
-            <strong>${p.name}</strong>
-            <span>${p.city}</span>
-          </div>
-          ${stars(p)}
-        </div>`).join('');
-
-      // place count
-      document.getElementById('placeCount').textContent = places.length;
-
-      // featured grid
-      document.getElementById('featGrid').innerHTML = places.slice(0,4).map((p,i) => `
-        <div class="feat-card ${i===0?'feat-card--lg':''}" onclick="location='place.html?id=${p.placeId}'">
-          <img src="${IMG}" alt="${p.name}" loading="lazy"/>
-          <div class="feat-overlay">
-            <div class="feat-chips">${stars(p)}${p.numberOfReviews>0?`<span class="chip">${p.numberOfReviews} reviews</span>`:''}</div>
-            <h3>${p.name}</h3>
-            <p>${p.city} · ${cost(p)}</p>
-            <p class="feat-hrs">${hours(p)}</p>
-          </div>
-        </div>`).join('');
-    } catch {
-      document.getElementById('featGrid').innerHTML = '<p class="err-msg">Could not load places.</p>';
-    }
-  }
-
   /* ── categories: GET /api/places/category/{id} ── */
   async function loadCategories() {
     try {
@@ -438,7 +386,6 @@
     document.getElementById('nav').classList.toggle('nav--scrolled', window.scrollY > 40);
   });
 
-  loadFeatured();
   loadCategories();
   loadVibes();
   loadOpenNow();

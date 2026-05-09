@@ -15,15 +15,15 @@
 
   <nav class="nav" id="nav">
     <a href="index.html" class="nav-logo">M<span>anzil</span></a>
-    <div class="nav-links">
+    <div class="nav-links" id="navLinks">
       <a href="index.html">Home</a>
       <a href="places.html" class="active">Explore</a>
       <a href="places.html?open=true">Open Now</a>
       <a href="places.html?nearby=true">Near Me</a>
     </div>
-    <div class="nav-right">
-      <button class="nav-btn-ghost">Log in</button>
-      <button class="nav-btn-solid">Join Free</button>
+    <div class="nav-right" id="navRight">
+      <button class="nav-btn-ghost" onclick="location.href='login.html'">Log in</button>
+      <button class="nav-btn-solid" onclick="location.href='signup.html'">Join Free</button>
     </div>
   </nav>
 
@@ -99,7 +99,7 @@
             <button class="tag-btn" data-cat-id="8"> Museums</button>
             <button class="tag-btn" data-cat-id="9"> Androon Gems</button>
             <button class="tag-btn" data-cat-id="10"> Beaches</button>
-            <button class="tag-btn" data-cat-id="10"> Qu</button>
+            <button class="tag-btn" data-cat-id="10"> Chai Spots</button>
 
 
           </div>
@@ -201,7 +201,7 @@
       renderPlaces(allPlaces);
       loadVibeFilters();
     } catch {
-      document.getElementById('placesGrid').innerHTML = '<p class="err-msg">Could not load places. Is the backend running?</p>';
+      document.getElementById('placesGrid').innerHTML = '<p class="err-msg">Could not load places. Bilals busy eating Haleem?</p>';
       document.getElementById('resultsCount').textContent = '0 places';
     }
   }
@@ -376,10 +376,48 @@
     });
   }
 
+  function updateNavBar() {
+    const user = localStorage.getItem('manzilUser');
+    const navLinks = document.getElementById('navLinks');
+    const navRight = document.getElementById('navRight');
+
+    if (user) {
+      const userData = JSON.parse(user);
+      const userName = userData.fullname || userData.email.split('@')[0];
+      navLinks.innerHTML = `
+        <a href="index.html">Home</a>
+        <a href="places.html" class="active">Explore</a>
+        <a href="places.html?open=true">Open Now</a>
+        <a href="places.html?nearby=true">Near Me</a>
+        <a href="places.html?vibes=true">Vibes</a>
+      `;
+      navRight.innerHTML = `
+        <a href="bookmarks.html" class="nav-links" style="color: var(--moss); font-weight: 500; display: flex; align-items: center; gap: 0.5rem;">
+          <i class="fas fa-bookmark"></i> Bookmarks
+        </a>
+        <a href="profile.html" class="nav-links" style="color: var(--moss); font-weight: 500; display: flex; align-items: center; gap: 0.5rem;">
+          <i class="fas fa-user"></i> ${userName}
+        </a>
+        <button class="nav-btn-ghost" onclick="handleLogout()">Log out</button>
+      `;
+    } else {
+      navRight.innerHTML = `
+        <button class="nav-btn-ghost" onclick="location.href='login.html'">Log in</button>
+        <button class="nav-btn-solid" onclick="location.href='signup.html'">Join Free</button>
+      `;
+    }
+  }
+
+  function handleLogout() {
+    localStorage.removeItem('manzilUser');
+    window.location.href = 'login.html';
+  }
+
   window.addEventListener('scroll', () => {
     document.getElementById('nav').classList.toggle('nav--scrolled', window.scrollY > 20);
   });
 
+  window.addEventListener('DOMContentLoaded', updateNavBar);
   updateRange();
   loadPlaces();
 </script>
