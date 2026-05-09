@@ -1,6 +1,8 @@
 package manzil.service;
 
+import manzil.exceptions.InvalidCredentialsException;
 import manzil.exceptions.ResourceNotFoundException;
+import manzil.exceptions.UserAlreadyExistsException;
 import manzil.model.Admin;
 import manzil.model.ManzilUser;
 import manzil.model.RegisteredUser;
@@ -10,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class ManzilUserService {
@@ -17,13 +20,36 @@ public class ManzilUserService {
     @Autowired
     private ManzilUserRepository repo;
 
+    public RegisteredUser registerUser(RegisteredUser u)
+    {
+        if(repo.existsByEmail(u.getEmail()))
+        {
+            throw new UserAlreadyExistsException("Email is Already Registered!");
+        }
+        return repo.save(u);
+    }
+
+    public ManzilUser loginUser(String email, String password)
+    {
+        if(!repo.existsByEmail(email))
+            throw new InvalidCredentialsException("Invalid Email!");
+
+        ManzilUser u = fetchUserByEmail(email);
+
+        if(!u.getPassword().equals(password)))
+            throw new InvalidCredentialsException("Invalid Password!");
+
+        return u;
+    }
+
+
     public List<ManzilUser> fetchAllUsers() {
         return repo.findAll();
     }
 
     public ManzilUser fetchUserById(long userId) {
         return repo.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
     }
 
     public RegisteredUser fetchRegisteredUserById(long userId)
@@ -38,7 +64,7 @@ public class ManzilUserService {
 
     public ManzilUser fetchUserByEmail(String email) {
         return repo.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
     }
 
     public List<ManzilUser> fetchUsersByDateJoined(LocalDate dateJoined) {
@@ -51,7 +77,7 @@ public class ManzilUserService {
 
     public Admin fetchAdminById(long userId) {
         return repo.findAdminById(userId)
-                .orElseThrow(() -> new RuntimeException("Admin not found with id: " + userId));
+                .orElseThrow(() -> new ResourceNotFoundException("Admin not found with id: " + userId));
     }
 
     public ManzilUser updateUser(long userId, ManzilUser updatedUser) {
@@ -60,7 +86,6 @@ public class ManzilUserService {
         existing.setEmail(updatedUser.getEmail());
         existing.setPhoneNumber(updatedUser.getPhoneNumber());
         existing.setProfilePhoto(updatedUser.getProfilePhoto());
-        existing.setActivityStatus(updatedUser.isActivityStatus());
         return repo.save(existing);
     }
 
@@ -68,15 +93,4 @@ public class ManzilUserService {
         repo.delete(fetchUserById(userId));
     }
 
-    public ManzilUser setUserOnline(long userId) {
-        ManzilUser user = fetchUserById(userId);
-        user.setActivityStatus(true);
-        return repo.save(user);
-    }
-
-    public ManzilUser setUserOffline(long userId) {
-        ManzilUser user = fetchUserById(userId);
-        user.setActivityStatus(false);
-        return repo.save(user);
-    }
 }
