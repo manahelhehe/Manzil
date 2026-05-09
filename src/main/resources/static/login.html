@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Manzil — Log In</title>
+  <link rel="stylesheet" href="index.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    .login-container {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, rgba(61,90,62,.05) 0%, rgba(155,123,90,.05) 100%);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+    }
+
+    .login-card {
+      background: var(--white);
+      border: 1.5px solid var(--cream-dk);
+      border-radius: var(--r-lg);
+      box-shadow: 0 20px 60px rgba(0,0,0,.12);
+      padding: 3rem 2.5rem;
+      width: 100%;
+      max-width: 400px;
+      animation: slideUp .5s var(--ease) both;
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(40px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .login-card h1 {
+      font-family: var(--serif);
+      font-size: 2.2rem;
+      font-weight: 400;
+      color: var(--ink);
+      margin-bottom: .3rem;
+      text-align: center;
+    }
+
+    .login-card .subtitle {
+      text-align: center;
+      color: var(--ink-soft);
+      font-size: .9rem;
+      margin-bottom: 2rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: .8rem;
+      font-weight: 600;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--moss);
+      margin-bottom: .4rem;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: .85rem 1rem;
+      border: 1.5px solid var(--cream-dk);
+      border-radius: var(--r-md);
+      font-family: var(--sans);
+      font-size: .95rem;
+      color: var(--ink);
+      background: var(--cream);
+      transition: border-color .25s, box-shadow .25s;
+    }
+
+    .form-group input:focus {
+      outline: none;
+      border-color: var(--moss);
+      box-shadow: 0 0 0 3px rgba(61,90,62,.1);
+    }
+
+    .form-group input::placeholder {
+      color: var(--brown-lt);
+    }
+
+    .login-btn {
+      width: 100%;
+      padding: .95rem;
+      background: var(--moss);
+      border: none;
+      color: var(--white);
+      border-radius: var(--r-md);
+      font-family: var(--sans);
+      font-size: .95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .25s, transform .15s;
+      margin-bottom: 1rem;
+    }
+
+    .login-btn:hover {
+      background: var(--moss-lt);
+      transform: translateY(-2px);
+    }
+
+    .login-btn:active {
+      transform: translateY(0);
+    }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin: 1.5rem 0;
+      color: var(--ink-soft);
+      font-size: .8rem;
+    }
+
+    .divider span {
+      flex: 1;
+      height: 1px;
+      background: var(--cream-dk);
+    }
+
+    .signup-link {
+      text-align: center;
+      font-size: .9rem;
+      color: var(--ink-soft);
+    }
+
+    .signup-link a {
+      color: var(--moss);
+      font-weight: 600;
+      transition: color .2s;
+    }
+
+    .signup-link a:hover {
+      color: var(--moss-lt);
+    }
+
+    .error-msg {
+      display: none;
+      background: rgba(155,123,90,.1);
+      border: 1px solid var(--brown);
+      color: var(--ink);
+      padding: .8rem;
+      border-radius: var(--r-md);
+      font-size: .85rem;
+      margin-bottom: 1rem;
+      animation: slideUp .3s var(--ease) both;
+    }
+
+    .error-msg.show {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Grain texture overlay -->
+  <div class="grain"></div>
+
+  <!-- Login Container -->
+  <div class="login-container">
+    <div class="login-card">
+      <h1>Welcome back</h1>
+      <p class="subtitle">Log in to your Manzil account</p>
+
+      <div class="error-msg" id="errorMsg"></div>
+
+      <form id="loginForm" onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            placeholder="your@email.com"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input
+            type="password"
+            id="password"
+            name="password"
+            placeholder="••••••••"
+            required
+          />
+        </div>
+
+        <button type="submit" class="login-btn">Log In</button>
+      </form>
+
+      <div class="divider">
+        <span></span>
+        <span>OR</span>
+        <span></span>
+      </div>
+
+      <div class="signup-link">
+        Don't have an account? <a href="signup.html">Create one</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function handleLogin(event) {
+      event.preventDefault();
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const errorMsg = document.getElementById('errorMsg');
+
+      // Basic validation
+      if (!email || !password) {
+        errorMsg.textContent = 'Please fill in all fields';
+        errorMsg.classList.add('show');
+        return;
+      }
+
+      // Simulate login (in real app, call API)
+      console.log('Attempting login with:', email);
+
+      // Store session info in localStorage
+      localStorage.setItem('manzilUser', JSON.stringify({
+        email: email,
+        loggedIn: true,
+        loginTime: new Date().toISOString()
+      }));
+
+      // Redirect to index.html
+      window.location.href = 'index.html';
+    }
+
+    // Check if already logged in
+    window.addEventListener('load', () => {
+      const user = localStorage.getItem('manzilUser');
+      if (user) {
+        window.location.href = 'index.html';
+      }
+    });
+  </script>
+
+</body>
+</html>

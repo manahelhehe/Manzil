@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Manzil — My Profile</title>
+  <link rel="stylesheet" href="shared.css"/>
+  <link rel="stylesheet" href="profile.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+</head>
+<body>
+
+  <!-- Grain texture overlay -->
+  <div class="grain"></div>
+
+  <!-- ── NAV ── -->
+  <nav class="nav" id="nav">
+    <a href="index.html" class="nav-logo">M<span>anzil</span></a>
+    <div class="nav-links" id="navLinks">
+      <a href="index.html">Home</a>
+      <a href="places.html">Explore</a>
+      <a href="bookmarks.html">My Bookmarks</a>
+      <a href="profile.html">My Profile</a>
+    </div>
+    <div class="nav-right">
+      <button class="nav-btn-ghost" onclick="handleLogout()">Log out</button>
+    </div>
+  </nav>
+
+  <!-- Profile Section -->
+  <main class="profile-container">
+    <div class="profile-header">
+      <div class="profile-avatar">
+        <i class="fas fa-user-circle"></i>
+      </div>
+      <div class="profile-info">
+        <h1 class="profile-name" id="profileName">User Name</h1>
+        <p class="profile-email" id="profileEmail">user@email.com</p>
+        <p class="profile-joined" id="profileJoined">Joined recently</p>
+      </div>
+      <button class="profile-edit-btn" onclick="editProfile()">
+        <i class="fas fa-edit"></i> Edit Profile
+      </button>
+    </div>
+
+    <div class="profile-grid">
+      <!-- Stats Section -->
+      <section class="profile-card">
+        <h2 class="card-title">Your Activity</h2>
+        <div class="stats-grid">
+          <div class="stat">
+            <div class="stat-value" id="reviewCount">0</div>
+            <div class="stat-label">Reviews</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value" id="bookmarkCount">0</div>
+            <div class="stat-label">Bookmarks</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value" id="visitCount">0</div>
+            <div class="stat-label">Places Visited</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Account Settings -->
+      <section class="profile-card">
+        <h2 class="card-title">Account Settings</h2>
+        <div class="settings-list">
+          <div class="setting-item">
+            <div class="setting-label">Email Notifications</div>
+            <input type="checkbox" class="setting-toggle" checked/>
+          </div>
+          <div class="setting-item">
+            <div class="setting-label">Newsletter Subscription</div>
+            <input type="checkbox" class="setting-toggle"/>
+          </div>
+          <div class="setting-item">
+            <div class="setting-label">Two-Factor Authentication</div>
+            <input type="checkbox" class="setting-toggle"/>
+          </div>
+        </div>
+      </section>
+
+      <!-- Preferences -->
+      <section class="profile-card">
+        <h2 class="card-title">Preferences</h2>
+        <div class="preferences-grid">
+          <div class="pref-item">
+            <span class="pref-label">Favorite Vibe</span>
+            <select class="pref-select">
+              <option>Cozy & Intimate</option>
+              <option>Trendy & Modern</option>
+              <option>Casual & Relaxed</option>
+            </select>
+          </div>
+          <div class="pref-item">
+            <span class="pref-label">Price Range</span>
+            <select class="pref-select">
+              <option>Budget-Friendly</option>
+              <option>Mid-Range</option>
+              <option>Premium</option>
+            </select>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    // Check login status
+    function checkLogin() {
+      const user = localStorage.getItem('manzilUser');
+      if (!user) {
+        window.location.href = 'login.html';
+        return;
+      }
+      const userData = JSON.parse(user);
+      document.getElementById('profileEmail').textContent = userData.email;
+      const userName = userData.fullname || userData.email.split('@')[0];
+      document.getElementById('profileName').textContent = userName;
+      const joinedDate = new Date(userData.signupTime || userData.loginTime);
+      document.getElementById('profileJoined').textContent = `Joined ${joinedDate.toLocaleDateString()}`;
+    }
+
+    function handleLogout() {
+      localStorage.removeItem('manzilUser');
+      window.location.href = 'login.html';
+    }
+
+    function editProfile() {
+      alert('Edit profile functionality coming soon!');
+    }
+
+    window.addEventListener('DOMContentLoaded', checkLogin);
+  </script>
+
+</body>
+</html>

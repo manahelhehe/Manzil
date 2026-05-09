@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Manzil — Sign Up</title>
+  <link rel="stylesheet" href="index.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    .signup-container {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, rgba(61,90,62,.05) 0%, rgba(155,123,90,.05) 100%);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+    }
+
+    .signup-card {
+      background: var(--white);
+      border: 1.5px solid var(--cream-dk);
+      border-radius: var(--r-lg);
+      box-shadow: 0 20px 60px rgba(0,0,0,.12);
+      padding: 3rem 2.5rem;
+      width: 100%;
+      max-width: 450px;
+      animation: slideUp .5s var(--ease) both;
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(40px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .signup-card h1 {
+      font-family: var(--serif);
+      font-size: 2.2rem;
+      font-weight: 400;
+      color: var(--ink);
+      margin-bottom: .3rem;
+      text-align: center;
+    }
+
+    .signup-card .subtitle {
+      text-align: center;
+      color: var(--ink-soft);
+      font-size: .9rem;
+      margin-bottom: 2rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: .8rem;
+      font-weight: 600;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--moss);
+      margin-bottom: .4rem;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: .85rem 1rem;
+      border: 1.5px solid var(--cream-dk);
+      border-radius: var(--r-md);
+      font-family: var(--sans);
+      font-size: .95rem;
+      color: var(--ink);
+      background: var(--cream);
+      transition: border-color .25s, box-shadow .25s;
+    }
+
+    .form-group input:focus {
+      outline: none;
+      border-color: var(--moss);
+      box-shadow: 0 0 0 3px rgba(61,90,62,.1);
+    }
+
+    .form-group input::placeholder {
+      color: var(--brown-lt);
+    }
+
+    .password-hint {
+      font-size: .75rem;
+      color: var(--ink-soft);
+      margin-top: .3rem;
+    }
+
+    .signup-btn {
+      width: 100%;
+      padding: .95rem;
+      background: var(--moss);
+      border: none;
+      color: var(--white);
+      border-radius: var(--r-md);
+      font-family: var(--sans);
+      font-size: .95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .25s, transform .15s;
+      margin-bottom: 1rem;
+    }
+
+    .signup-btn:hover {
+      background: var(--moss-lt);
+      transform: translateY(-2px);
+    }
+
+    .signup-btn:active {
+      transform: translateY(0);
+    }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin: 1.5rem 0;
+      color: var(--ink-soft);
+      font-size: .8rem;
+    }
+
+    .divider span {
+      flex: 1;
+      height: 1px;
+      background: var(--cream-dk);
+    }
+
+    .login-link {
+      text-align: center;
+      font-size: .9rem;
+      color: var(--ink-soft);
+    }
+
+    .login-link a {
+      color: var(--moss);
+      font-weight: 600;
+      transition: color .2s;
+    }
+
+    .login-link a:hover {
+      color: var(--moss-lt);
+    }
+
+    .error-msg {
+      display: none;
+      background: rgba(155,123,90,.1);
+      border: 1px solid var(--brown);
+      color: var(--ink);
+      padding: .8rem;
+      border-radius: var(--r-md);
+      font-size: .85rem;
+      margin-bottom: 1rem;
+      animation: slideUp .3s var(--ease) both;
+    }
+
+    .error-msg.show {
+      display: block;
+    }
+
+    .terms {
+      font-size: .75rem;
+      color: var(--ink-soft);
+      text-align: center;
+      margin-top: 1rem;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Grain texture overlay -->
+  <div class="grain"></div>
+
+  <!-- Signup Container -->
+  <div class="signup-container">
+    <div class="signup-card">
+      <h1>Join Manzil</h1>
+      <p class="subtitle">Create your account to explore amazing places</p>
+
+      <div class="error-msg" id="errorMsg"></div>
+
+      <form id="signupForm" onsubmit="handleSignup(event)">
+        <div class="form-group">
+          <label for="fullname">Full Name</label>
+          <input
+            type="text"
+            id="fullname"
+            name="fullname"
+            placeholder="Your full name"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            placeholder="your@email.com"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input
+            type="password"
+            id="password"
+            name="password"
+            placeholder="••••••••"
+            minlength="8"
+            required
+          />
+          <div class="password-hint">At least 8 characters</div>
+        </div>
+
+        <div class="form-group">
+          <label for="confirmPassword">Confirm Password</label>
+          <input
+            type="password"
+            id="confirmPassword"
+            name="confirmPassword"
+            placeholder="••••••••"
+            required
+          />
+        </div>
+
+        <button type="submit" class="signup-btn">Create Account</button>
+      </form>
+
+      <div class="terms">
+        By signing up, you agree to our Terms of Service and Privacy Policy
+      </div>
+
+      <div class="divider">
+        <span></span>
+        <span>OR</span>
+        <span></span>
+      </div>
+
+      <div class="login-link">
+        Already have an account? <a href="login.html">Log in</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function handleSignup(event) {
+      event.preventDefault();
+      const fullname = document.getElementById('fullname').value;
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+      const errorMsg = document.getElementById('errorMsg');
+
+      // Validation
+      if (!fullname || !email || !password || !confirmPassword) {
+        errorMsg.textContent = 'Please fill in all fields';
+        errorMsg.classList.add('show');
+        return;
+      }
+
+      if (password.length < 8) {
+        errorMsg.textContent = 'Password must be at least 8 characters';
+        errorMsg.classList.add('show');
+        return;
+      }
+
+      if (password !== confirmPassword) {
+        errorMsg.textContent = 'Passwords do not match';
+        errorMsg.classList.add('show');
+        return;
+      }
+
+      // Simulate signup (in real app, call API)
+      console.log('Signup with:', { fullname, email });
+
+      // Store user info in localStorage
+      localStorage.setItem('manzilUser', JSON.stringify({
+        fullname: fullname,
+        email: email,
+        loggedIn: true,
+        signupTime: new Date().toISOString()
+      }));
+
+      // Redirect to index.html
+      window.location.href = 'index.html';
+    }
+
+    // Check if already logged in
+    window.addEventListener('load', () => {
+      const user = localStorage.getItem('manzilUser');
+      if (user) {
+        window.location.href = 'index.html';
+      }
+    });
+  </script>
+
+</body>
+</html>
