@@ -6,6 +6,7 @@ import lombok.Data;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Pattern;
 import lombok.NoArgsConstructor;
+import java.time.LocalDate;
 
 @Inheritance(strategy = InheritanceType.JOINED)
 @Entity
@@ -30,6 +31,8 @@ public class ManzilUser {
     private String phoneNumber;
 
     private String profilePhoto;
+
+    private LocalDate dateJoined;
 
     private boolean activityStatus; // can either be online or offline
 

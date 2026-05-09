@@ -1,12 +1,14 @@
 package manzil.service;
 
 import manzil.exceptions.ResourceNotFoundException;
+import manzil.model.Admin;
 import manzil.model.ManzilUser;
 import manzil.model.RegisteredUser;
 import manzil.repository.ManzilUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -37,6 +39,19 @@ public class ManzilUserService {
     public ManzilUser fetchUserByEmail(String email) {
         return repo.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
+    }
+
+    public List<ManzilUser> fetchUsersByDateJoined(LocalDate dateJoined) {
+        return repo.findByDateJoined(dateJoined);
+    }
+
+    public List<Admin> fetchAllAdmins() {
+        return repo.findAllAdmins();
+    }
+
+    public Admin fetchAdminById(long userId) {
+        return repo.findAdminById(userId)
+                .orElseThrow(() -> new RuntimeException("Admin not found with id: " + userId));
     }
 
     public ManzilUser updateUser(long userId, ManzilUser updatedUser) {

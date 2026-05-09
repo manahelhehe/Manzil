@@ -13,12 +13,8 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true) // Important when using @Data with inheritance
 public class RegisteredUser extends ManzilUser
 {
-//    @ElementCollection
-//    @CollectionTable
-//    private List<String> preferences;
+//private List<String> preferences;
 
-    private LocalDate dateJoined;
-    
     @OneToMany(mappedBy = "recRegisteredUser", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Recommendation> recommendations;
 
@@ -28,6 +24,6 @@ public class RegisteredUser extends ManzilUser
     @PrePersist
     protected void prePersist()     // Protected ensures the JPA engine can access it
     {
-        dateJoined = LocalDate.now();
+        setDateJoined(LocalDate.now());
     }
 }
