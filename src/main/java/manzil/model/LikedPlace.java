@@ -20,5 +20,4 @@ public class LikedPlace
     @JoinColumn(name = "place_id", nullable = false)
     private Place place;
 
-
 }

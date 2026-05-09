@@ -2,6 +2,7 @@ package manzil.controller;
 
 import manzil.model.Admin;
 import manzil.model.ManzilUser;
+import manzil.model.RegisteredUser;
 import manzil.service.ManzilUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -60,13 +61,9 @@ public class ManzilUserController {
         return ResponseEntity.noContent().build();
     }
 
-    @PatchMapping("/{id}/online")
-    public ResponseEntity<ManzilUser> setOnline(@PathVariable long id) {
-        return ResponseEntity.ok(manzilUserService.setUserOnline(id));
-    }
+    @PostMapping("/register")
+    public RegisteredUser register(@RequestBody RegisteredUser u)
+    {
 
-    @PatchMapping("/{id}/offline")
-    public ResponseEntity<ManzilUser> setOffline(@PathVariable long id) {
-        return ResponseEntity.ok(manzilUserService.setUserOffline(id));
     }
 }

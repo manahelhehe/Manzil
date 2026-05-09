@@ -12,7 +12,8 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface ManzilUserRepository extends JpaRepository<ManzilUser, Long> {
+public interface ManzilUserRepository extends JpaRepository<ManzilUser, Long>
+{
     Optional<ManzilUser> findByEmail(String email);
     List<ManzilUser> findByDateJoined(LocalDate dateJoined);
 
