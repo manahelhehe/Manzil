@@ -15,16 +15,16 @@
 
   <!-- ── NAV ── -->
   <nav class="nav" id="nav">
-    <a href="index.html" class="nav-logo">M<span>anzil</span></a>
-    <div class="nav-links">
-      <a href="places.html">Explore</a>
-      <a href="places.html?open=true">Open Now</a>
-      <a href="places.html?nearby=true">Near Me</a>
-      <a href="places.html?vibes=true">Vibes</a>
+    <a href="/index.html" class="nav-logo">M<span>anzil</span></a>
+    <div class="nav-links" id="navLinks">
+      <a href="/index.html">Home</a>
+      <a href="/places.html">Explore</a>
+      <a href="/places.html?open=true">Open Now</a>
+      <a href="/places.html?nearby=true">Near Me</a>
     </div>
-    <div class="nav-right">
-      <button class="nav-btn-ghost">Log in</button>
-      <button class="nav-btn-solid">Join Free</button>
+    <div class="nav-right" id="navRight">
+      <button class="nav-btn-ghost" onclick="location.href='/login.html'">Log in</button>
+      <button class="nav-btn-solid" onclick="location.href='/signup.html'">Join Free</button>
     </div>
   </nav>
 
@@ -32,7 +32,7 @@
   <header class="hero">
     <div class="hero-label">
       <span class="label-line"></span>
-      <span>Premium Place Guide</span>
+      <span>Personalized Guide to Every Cafe, Dhabba or Museum</span>
       <span class="label-line"></span>
     </div>
 
@@ -42,7 +42,7 @@
       <span class="ht-bot">worth visiting</span>
     </h1>
 
-    <p class="hero-sub">Every city holds hidden gems. Manzil surfaces the ones worth your time — curated, rated, and always up to date.</p>
+    <p class="hero-sub">Can't find where to go? Manzil it — curated, rated, and always up to date.</p>
 
     <!-- Search -->
     <div class="search-wrap">
@@ -196,7 +196,42 @@
   </footer>
 
 <script>
+  // ── LOGIN STATE MANAGEMENT ──
+  function updateNavBar() {
+    const user = localStorage.getItem('manzilUser');
+    const navRight = document.getElementById('navRight');
+    const navLinks = document.getElementById('navLinks');
+
+    if (user) {
+      const userData = JSON.parse(user);
+      const userName = userData.fullname || userData.email.split('@')[0];
+      navLinks.innerHTML = `
+        <a href="/places.html">Explore</a>
+        <a href="/places.html?open=true">Open Now</a>
+        <a href="/places.html?nearby=true">Near Me</a>
+        <a href="/places.html?vibes=true">Vibes</a>
+      `;
+      navRight.innerHTML = `
+        <a href="/bookmarks.html" class="nav-links" style="color: var(--moss); font-weight: 500; display: flex; align-items: center; gap: 0.5rem;">
+          <i class="fas fa-bookmark"></i> Bookmarks
+        </a>
+        <a href="/profile.html" class="nav-links" style="color: var(--moss); font-weight: 500; display: flex; align-items: center; gap: 0.5rem;">
+          <i class="fas fa-user"></i> ${userName}
+        </a>
+        <button class="nav-btn-ghost" onclick="handleLogout()">Log out</button>
+      `;
+    }
+  }
+
+  function handleLogout() {
+    localStorage.removeItem('manzilUser');
+    window.location.href = 'index.html';
+  }
+
+  window.addEventListener('DOMContentLoaded', updateNavBar);
+
   const BASE = 'http://localhost:8080/api';
+
   const CAT_ICONS  = ['🏡','🏨','⛺','🏯','🌊','🌿','🍽️','🎭','🛍️','🏋️'];
   const VIBE_ICONS = ['✨','🔥','🌙','🌿','🎉','💎','🌊','🏔️'];
   const IMG = 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=700&q=80';
