@@ -1,5 +1,8 @@
 package manzil.controller;
 
+import jakarta.validation.Valid;
+import manzil.dto.UserRegistrationDTO;
+import manzil.dto.UserResponseDTO;
 import manzil.model.Admin;
 import manzil.model.ManzilUser;
 import manzil.model.RegisteredUser;
@@ -8,7 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -17,53 +22,66 @@ import java.util.List;
 public class ManzilUserController {
 
     @Autowired
-    private ManzilUserService manzilUserService;
+    private ManzilUserService service;
 
     @GetMapping
-    public ResponseEntity<List<ManzilUser>> getAllUsers() {
-        return ResponseEntity.ok(manzilUserService.fetchAllUsers());
+    public ResponseEntity<List<UserResponseDTO>> getAllUsers() {
+        return ResponseEntity.ok(service.fetchAllUsers());
     }
 
     @GetMapping("/joined/{date}")
     public ResponseEntity<List<ManzilUser>> getUsersByDateJoined(
             @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
-        return ResponseEntity.ok(manzilUserService.fetchUsersByDateJoined(date));
+        return ResponseEntity.ok(service.fetchUsersByDateJoined(date));
     }
 
     @GetMapping("/admins")
     public ResponseEntity<List<Admin>> getAllAdmins() {
-        return ResponseEntity.ok(manzilUserService.fetchAllAdmins());
+        return ResponseEntity.ok(service.fetchAllAdmins());
     }
 
     @GetMapping("/admins/{id}")
     public ResponseEntity<Admin> getAdminById(@PathVariable long id) {
-        return ResponseEntity.ok(manzilUserService.fetchAdminById(id));
+        return ResponseEntity.ok(service.fetchAdminById(id));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ManzilUser> getUserById(@PathVariable long id) {
-        return ResponseEntity.ok(manzilUserService.fetchUserById(id));
+        return ResponseEntity.ok(service.fetchUserById(id));
     }
 
     @GetMapping("/email/{email}")
     public ResponseEntity<ManzilUser> getUserByEmail(@PathVariable String email) {
-        return ResponseEntity.ok(manzilUserService.fetchUserByEmail(email));
+        return ResponseEntity.ok(service.fetchUserByEmail(email));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<ManzilUser> updateUser(@PathVariable long id, @RequestBody ManzilUser updatedUser) {
-        return ResponseEntity.ok(manzilUserService.updateUser(id, updatedUser));
+        return ResponseEntity.ok(service.updateUser(id, updatedUser));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable long id) {
-        manzilUserService.deleteUser(id);
+        service.deleteUser(id);
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/register")
-    public RegisteredUser register(@RequestBody RegisteredUser u)
+    public ResponseEntity<UserResponseDTO> register(@Valid @RequestBody UserRegistrationDTO dto)
     {
+        UserResponseDTO u = service.registerUser(dto);
 
+        URI path = ServletUriComponentsBuilder.
+                fromCurrentContextPath().
+                path("/api/users/{id}").
+                buildAndExpand(u.getUserId()).toUri();
+
+        return ResponseEntity.created(path).body(u);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<UserResponseDTO> login(@RequestParam String email, @RequestParam String password)
+    {
+        return ResponseEntity.ok(service.loginUser(email, password));
     }
 }

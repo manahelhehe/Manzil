@@ -1,10 +1,8 @@
 package manzil.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Size;
 import lombok.Data;
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.Pattern;
 import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 
@@ -22,7 +20,7 @@ public class ManzilUser {
     @Email
     @Column(unique = true, nullable = false)
     private String email;
-    private String phoneNumber;
+    private String phone;
     private String profilePhoto;
     private LocalDate dateJoined;
     private String password;

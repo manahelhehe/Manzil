@@ -1,5 +1,7 @@
 package manzil.service;
 
+import manzil.dto.UserRegistrationDTO;
+import manzil.dto.UserResponseDTO;
 import manzil.exceptions.InvalidCredentialsException;
 import manzil.exceptions.ResourceNotFoundException;
 import manzil.exceptions.UserAlreadyExistsException;
@@ -11,8 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 @Service
 public class ManzilUserService {
@@ -20,31 +22,64 @@ public class ManzilUserService {
     @Autowired
     private ManzilUserRepository repo;
 
-    public RegisteredUser registerUser(RegisteredUser u)
+    public UserResponseDTO registerUser(UserRegistrationDTO dto)
     {
-        if(repo.existsByEmail(u.getEmail()))
+        if(repo.existsByEmail(dto.getEmail()))
         {
             throw new UserAlreadyExistsException("Email is Already Registered!");
         }
-        return repo.save(u);
+        RegisteredUser user = new RegisteredUser();
+        user.setName(dto.getName());
+        user.setEmail(dto.getEmail());
+        user.setPassword(dto.getPassword());
+        user.setPhone(dto.getPhone());
+        user.setDateJoined(LocalDate.now()); // Ensure the member-since feature works!
+
+        RegisteredUser savedUser = repo.save(user);
+
+        return convertToResponse(savedUser);
     }
 
-    public ManzilUser loginUser(String email, String password)
+    public UserResponseDTO loginUser(String email, String password)
     {
         if(!repo.existsByEmail(email))
             throw new InvalidCredentialsException("Invalid Email!");
 
         ManzilUser u = fetchUserByEmail(email);
 
-        if(!u.getPassword().equals(password)))
+        if(!u.getPassword().equals(password))
             throw new InvalidCredentialsException("Invalid Password!");
 
-        return u;
+        return convertToResponse(u);
     }
 
+    public UserResponseDTO convertToResponse(ManzilUser user)
+    {
+        UserResponseDTO dto = new UserResponseDTO();
+        dto.setUserId(user.getUserId());
+        dto.setName(user.getName());
+        dto.setEmail(user.getEmail());
+        dto.setPhone(user.getPhone());
+        dto.setProfilePhoto(user.getProfilePhoto());
+        dto.setDateJoined(user.getDateJoined());
 
-    public List<ManzilUser> fetchAllUsers() {
-        return repo.findAll();
+        if(user instanceof Admin)
+            dto.setRole("ADMIN");
+        else
+            dto.setRole("USER");
+
+        return dto;
+    }
+
+    public List<UserResponseDTO> fetchAllUsers()
+    {
+        List<ManzilUser> users = repo.findAll();
+        List<UserResponseDTO> dtos = new ArrayList<>();
+        for(ManzilUser u: users)
+        {
+            dtos.add(convertToResponse(u));
+        }
+        return dtos;
     }
 
     public ManzilUser fetchUserById(long userId) {
@@ -84,7 +119,7 @@ public class ManzilUserService {
         ManzilUser existing = fetchUserById(userId);
         existing.setName(updatedUser.getName());
         existing.setEmail(updatedUser.getEmail());
-        existing.setPhoneNumber(updatedUser.getPhoneNumber());
+        existing.setPhone(updatedUser.getPhone());
         existing.setProfilePhoto(updatedUser.getProfilePhoto());
         return repo.save(existing);
     }
