@@ -246,6 +246,8 @@
 }
 /* ── FOOTER ───────────────────────────────────────────────────────────────── */
 .footer { background: var(--dark); color: var(--cream); padding: 5rem 6vw 2.5rem; }
+.footer-logo { font-size: 2rem; color: var(--cream); }
+.footer-logo span { color: var(--brown-lt); }
  
 .footer-inner {
   display: flex; gap: 6vw; flex-wrap: wrap;
