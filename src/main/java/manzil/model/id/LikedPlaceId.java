@@ -7,7 +7,7 @@ import java.io.Serializable;
 @Data
 public class LikedPlaceId implements Serializable
 {
-        private int user;
-        private int place;
+    private int user;
+    private int place;
 
 }

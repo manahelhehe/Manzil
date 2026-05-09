@@ -1,19 +1,12 @@
 package manzil.model;
 
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 
+import jakarta.persistence.*;
 import org.locationtech.jts.geom.Point;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -62,6 +55,9 @@ public class Place
     @ManyToOne
     @JoinColumn(name = "category_id")
     private Category category;
+
+    @OneToMany(mappedBy = "place", cascade = CascadeType.ALL)
+    private List<PlaceImage> images;
 
     public Place (PlaceCreateDTO dto)
     {

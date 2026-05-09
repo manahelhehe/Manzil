@@ -3,10 +3,12 @@ package manzil.model;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import lombok.NoArgsConstructor;
 import manzil.dto.ReviewCreateDTO;
 
 import java.time.LocalDate;
 
+@NoArgsConstructor
 @Entity
 @Data
 public class Review

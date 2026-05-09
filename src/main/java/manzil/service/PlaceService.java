@@ -5,6 +5,7 @@ import manzil.dto.PlaceCreateDTO;
 import manzil.exceptions.ResourceNotFoundException;
 import manzil.model.Category;
 import manzil.model.Place;
+import manzil.model.PlaceImage;
 import manzil.model.Vibe;
 import manzil.repository.CategoryRepository;
 import manzil.repository.PlaceRepository;
@@ -195,6 +196,24 @@ public class PlaceService
         }
 
         return repo.saveAll(places);
+    }
+
+    @Transactional
+    public void postImages(long placeId, List<String> urls)
+    {
+        Place p = fetchPlaceById(placeId);
+
+        int count = p.getImages().size();
+
+        for(String url: urls)
+        {
+            count++;
+            PlaceImage i = new PlaceImage(p, count, url);
+            // Because of CascadeType.ALL, saving the place will save the images
+            p.getImages().add(i);
+        }
+
+        repo.save(p);
     }
 
 }

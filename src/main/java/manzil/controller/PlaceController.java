@@ -1,13 +1,11 @@
 package manzil.controller;
 
-import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import manzil.dto.PlaceCreateDTO;
 import manzil.exceptions.ResourceNotFoundException;
 import manzil.model.Place;
 import manzil.service.PlaceService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -110,6 +108,13 @@ public class PlaceController
                 build().
                 toUri();
         return ResponseEntity.created(path).body(service.postPlaceList(places));
+    }
+
+    @PostMapping({"/{pId}/image")
+    public ResponseEntity<String> addImages(@PathVariable long pId, @RequestBody List<String> urls)
+    {
+        service.postImages(pId, urls);
+        return ResponseEntity.ok("Images Added Successfully!");
     }
 
 }
