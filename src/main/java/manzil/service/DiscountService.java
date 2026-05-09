@@ -7,9 +7,6 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 
 import manzil.model.DiscountOffer;
-import manzil.model.GroupDiscount;
-import manzil.model.TimeBasedDiscount;
-import manzil.model.UniversityDiscount;
 import manzil.repository.DiscountRepository;
 
 @Service
