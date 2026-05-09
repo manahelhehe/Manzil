@@ -12,7 +12,6 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/places")
@@ -74,16 +73,16 @@ public class PlaceController
     @PutMapping("/{id}")
     public ResponseEntity<Place> updatePlace(@PathVariable long id, @RequestBody Place updatedPlace) throws ResourceNotFoundException
     {
-        Optional<Place> place = service.updatePlace(id, updatedPlace);  // Exception is handled by Spring's Exception Handler
+        Place place = service.updatePlace(id, updatedPlace);  // Exception is handled by Spring's Exception Handler
 
-        return ResponseEntity.ok(place.get());
+        return ResponseEntity.ok(place);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deletePlace(@PathVariable long id) throws ResourceNotFoundException {
-        Optional<String> response = service.dropPlace(id);
+        String response = service.dropPlace(id);
 
-        return ResponseEntity.ok(response.get());
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping
@@ -110,7 +109,7 @@ public class PlaceController
         return ResponseEntity.created(path).body(service.postPlaceList(places));
     }
 
-    @PostMapping({"/{pId}/image")
+    @PostMapping("/{pId}/image")
     public ResponseEntity<String> addImages(@PathVariable long pId, @RequestBody List<String> urls)
     {
         service.postImages(pId, urls);

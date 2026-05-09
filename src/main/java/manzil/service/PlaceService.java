@@ -76,7 +76,7 @@ public class PlaceService
     }
 
     @Transactional  // Ensures a transactional process; either EVERYTHING executes or NOTHING does
-    public Optional<Place> updatePlace(long id, Place updatedPlace) throws ResourceNotFoundException
+    public Place updatePlace(long id, Place updatedPlace) throws ResourceNotFoundException
     {
         Place existingPlace = fetchPlaceById(id);
 
@@ -131,18 +131,15 @@ public class PlaceService
             existingPlace.setVibe(newVibes);    // The final list will be set as the vibes for the existing place
         }
 
-        return Optional.of(repo.save(existingPlace));
-        // Does two things:
-        // repo.save(existingPlace): saves the changes to existingPlace to our db and returns the newly saved Place
-        // Optional.of(): wraps the newly saved Place in an Optional to match the return type constraint
+        return repo.save(existingPlace);
     }
 
-    public Optional<String> dropPlace(long id) throws ResourceNotFoundException
+    public String dropPlace(long id) throws ResourceNotFoundException
     {
         Place p = fetchPlaceById(id);
 
         repo.delete(p);
-        return Optional.of("Place Deleted Successfully (ID: " + id + ")");
+        return ("Place Deleted Successfully (ID: " + id + ")");
     }
 
     @Transactional
