@@ -1,11 +1,14 @@
 package manzil.controller;
 
+import manzil.model.Admin;
 import manzil.model.ManzilUser;
 import manzil.service.ManzilUserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -18,6 +21,22 @@ public class ManzilUserController {
     @GetMapping
     public ResponseEntity<List<ManzilUser>> getAllUsers() {
         return ResponseEntity.ok(manzilUserService.fetchAllUsers());
+    }
+
+    @GetMapping("/joined/{date}")
+    public ResponseEntity<List<ManzilUser>> getUsersByDateJoined(
+            @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        return ResponseEntity.ok(manzilUserService.fetchUsersByDateJoined(date));
+    }
+
+    @GetMapping("/admins")
+    public ResponseEntity<List<Admin>> getAllAdmins() {
+        return ResponseEntity.ok(manzilUserService.fetchAllAdmins());
+    }
+
+    @GetMapping("/admins/{id}")
+    public ResponseEntity<Admin> getAdminById(@PathVariable long id) {
+        return ResponseEntity.ok(manzilUserService.fetchAdminById(id));
     }
 
     @GetMapping("/{id}")

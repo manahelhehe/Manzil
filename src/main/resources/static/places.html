@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Manzil — Explore Places</title>
+  <link rel="stylesheet" href="shared.css"/>
+  <link rel="stylesheet" href="places.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+</head>
+<body>
+
+  <div class="grain"></div>
+
+  <!-- NAV -->
+  <nav class="nav" id="nav">
+    <a href="index.html" class="nav-logo">M<span>anzil</span></a>
+    <div class="nav-links">
+      <a href="places.html" class="active">Explore</a>
+      <a href="places.html?open=true">Open Now</a>
+      <a href="places.html?nearby=true">Near Me</a>
+      <a href="places.html?vibes=true">Vibes</a>
+    </div>
+    <div class="nav-right">
+      <button class="nav-btn-ghost">Log in</button>
+      <button class="nav-btn-solid">Join Free</button>
+    </div>
+  </nav>
+
+  <div class="page-layout">
+
+    <!-- ── SIDEBAR FILTERS ── -->
+    <aside class="sidebar">
+      <div class="sidebar-inner">
+
+        <div class="filter-header">
+          <h2>Filters</h2>
+          <button class="clear-btn" id="clearAll">Clear all</button>
+        </div>
+
+        <!-- SEARCH -->
+        <div class="filter-group">
+          <label class="filter-label">Search</label>
+          <div class="filter-search">
+            <i class="fa fa-search"></i>
+            <input type="text" id="searchQ" placeholder="Place name..."/>
+          </div>
+        </div>
+
+        <!-- CITY -->
+        <div class="filter-group">
+          <label class="filter-label">City</label>
+          <div class="city-chips" id="cityChips">
+            <button class="city-chip active" data-city="">All Cities</button>
+            <button class="city-chip" data-city="Karachi">Karachi</button>
+            <button class="city-chip" data-city="Lahore">Lahore</button>
+            <button class="city-chip" data-city="Islamabad">Islamabad</button>
+            <button class="city-chip" data-city="Rawalpindi">Rawalpindi</button>
+            <button class="city-chip" data-city="Peshawar">Peshawar</button>
+          </div>
+        </div>
+
+        <!-- COST RANGE -->
+        <div class="filter-group">
+          <label class="filter-label">Cost Range</label>
+          <div class="range-display">
+            <span id="minCostLabel">PKR 0</span>
+            <span>—</span>
+            <span id="maxCostLabel">PKR 50,000</span>
+          </div>
+          <div class="dual-range">
+            <input type="range" id="minCost" min="0" max="50000" step="500" value="0" class="range-input range-min"/>
+            <input type="range" id="maxCost" min="0" max="50000" step="500" value="50000" class="range-input range-max"/>
+            <div class="range-track">
+              <div class="range-fill" id="rangeFill"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- VIBES -->
+        <div class="filter-group">
+          <label class="filter-label">Vibe</label>
+          <div class="tag-grid" id="vibeFilters">
+            <div class="tag-skel"></div><div class="tag-skel"></div>
+            <div class="tag-skel"></div><div class="tag-skel"></div>
+          </div>
+        </div>
+
+        <!-- CATEGORIES -->
+        <div class="filter-group">
+          <label class="filter-label">Category</label>
+          <div class="tag-grid" id="catFilters">
+            <!-- static cats + abandoned buildings -->
+            <button class="tag-btn" data-cat-id="1">🏡 Villas</button>
+            <button class="tag-btn" data-cat-id="2">🏨 Hotels</button>
+            <button class="tag-btn" data-cat-id="3">⛺ Camping</button>
+            <button class="tag-btn" data-cat-id="4">🏯 Heritage</button>
+            <button class="tag-btn" data-cat-id="5">🌊 Beachfront</button>
+            <button class="tag-btn" data-cat-id="6">🌿 Eco Stays</button>
+            <button class="tag-btn" data-cat-id="7">🍽️ Dining</button>
+            <button class="tag-btn" data-cat-id="8">🎭 Arts</button>
+            <button class="tag-btn" data-cat-id="9">🏚️ Abandoned</button>
+          </div>
+        </div>
+
+        <!-- OPEN NOW -->
+        <div class="filter-group">
+          <label class="filter-label">Availability</label>
+          <label class="toggle-label">
+            <input type="checkbox" id="openNowToggle"/>
+            <span class="toggle-track"><span class="toggle-thumb"></span></span>
+            <span>Open right now</span>
+          </label>
+        </div>
+
+        <button class="apply-btn" id="applyFilters">Apply Filters</button>
+      </div>
+    </aside>
+
+    <!-- ── RESULTS ── -->
+    <main class="results-area">
+      <div class="results-header">
+        <div>
+          <p class="results-eyebrow">Showing results</p>
+          <h1 class="results-title" id="resultsTitle">All Places</h1>
+        </div>
+        <div class="sort-wrap">
+          <label>Sort by</label>
+          <select id="sortSelect">
+            <option value="default">Default</option>
+            <option value="rating">Highest Rated</option>
+            <option value="cost-asc">Cost: Low to High</option>
+            <option value="cost-desc">Cost: High to Low</option>
+          </select>
+        </div>
+      </div>
+
+      <p class="results-count" id="resultsCount">Loading…</p>
+
+      <div class="places-grid" id="placesGrid">
+        <div class="skel skel-place"></div>
+        <div class="skel skel-place"></div>
+        <div class="skel skel-place"></div>
+        <div class="skel skel-place"></div>
+        <div class="skel skel-place"></div>
+        <div class="skel skel-place"></div>
+      </div>
+    </main>
+  </div>
+
+<script>
+  const BASE = 'http://localhost:8080/api';
+  const IMG  = 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=700&q=80';
+
+  let allPlaces = [];
+  let selectedCity    = '';
+  let selectedVibes   = new Set();
+  let selectedCats    = new Set();
+  let openNow         = false;
+
+  const cost = p => p.minCost && p.maxCost
+    ? `PKR ${p.minCost.toLocaleString()} – ${p.maxCost.toLocaleString()}`
+    : p.minCost ? `From PKR ${p.minCost.toLocaleString()}` : 'Price on request';
+
+  const stars = p => p.avgRating > 0
+    ? `<span class="p-badge">★ ${p.avgRating.toFixed(1)}</span>` : '';
+
+  const hours = p => p.openingTime && p.closingTime
+    ? `${p.openingTime.slice(0,5)} – ${p.closingTime.slice(0,5)}` : '';
+
+  // ── LOAD ALL PLACES ──
+  async function loadPlaces() {
+    try {
+      const url = new URLSearchParams(window.location.search);
+      let places;
+
+      if (url.get('vibe')) {
+        places = await fetch(`${BASE}/places/vibe?vibeID=${url.get('vibe')}`).then(r => r.json());
+      } else if (url.get('category')) {
+        places = await fetch(`${BASE}/places/category/${url.get('category')}`).then(r => r.json());
+      } else if (url.get('open')) {
+        // From "Open Now" nav link
+        places = await fetch(`${BASE}/places/open`).then(r => r.json());
+        document.getElementById('openNowToggle').checked = true;
+        document.getElementById('resultsTitle').textContent = 'Open Now';
+      } else if (url.get('nearby')) {
+        // From "Near Me" nav link — trigger location
+        places = await fetch(`${BASE}/places`).then(r => r.json());
+        requestNearby();
+      } else if (url.get('vibes')) {
+        // From "Vibes" nav link — show all, vibes filter active
+        places = await fetch(`${BASE}/places`).then(r => r.json());
+        document.getElementById('resultsTitle').textContent = 'Browse by Vibe';
+      } else {
+        places = await fetch(`${BASE}/places`).then(r => r.json());
+      }
+
+      allPlaces = places;
+      renderPlaces(allPlaces);
+      loadVibeFilters();
+    } catch {
+      document.getElementById('placesGrid').innerHTML = '<p class="err-msg">Could not load places. Is the backend running?</p>';
+      document.getElementById('resultsCount').textContent = '0 places';
+    }
+  }
+
+  // ── RENDER ──
+  function renderPlaces(places) {
+    const grid = document.getElementById('placesGrid');
+    document.getElementById('resultsCount').textContent = `${places.length} place${places.length !== 1 ? 's' : ''} found`;
+
+    if (!places.length) {
+      grid.innerHTML = '<p class="err-msg">No places match your filters.</p>';
+      return;
+    }
+
+    grid.innerHTML = places.map(p => `
+      <div class="place-card" onclick="location='/place.html?id=${p.placeId}'">
+        <div class="pc-img-wrap">
+          <img src="${IMG}" alt="${p.name}" loading="lazy"/>
+          ${p.avgRating > 0 ? `<span class="pc-rating">★ ${p.avgRating.toFixed(1)}</span>` : ''}
+          <button class="pc-bookmark" onclick="event.stopPropagation(); toggleBookmark(${p.placeId}, this)">
+            <i class="fa-regular fa-bookmark"></i>
+          </button>
+        </div>
+        <div class="pc-body">
+          <div class="pc-meta">
+            <span class="pc-city"><i class="fa fa-location-dot"></i> ${p.city}</span>
+            ${p.category ? `<span class="pc-cat">${p.category.name}</span>` : ''}
+          </div>
+          <h3 class="pc-name">${p.name}</h3>
+          <p class="pc-desc">${p.description ? p.description.slice(0, 80) + '…' : ''}</p>
+          <div class="pc-footer">
+            <span class="pc-cost">${cost(p)}</span>
+            ${p.openingTime ? `<span class="pc-hours">${hours(p)}</span>` : ''}
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // ── FILTERS ──
+  function applyFilters() {
+    const q      = document.getElementById('searchQ').value.trim().toLowerCase();
+    const minC   = parseInt(document.getElementById('minCost').value);
+    const maxC   = parseInt(document.getElementById('maxCost').value);
+    openNow      = document.getElementById('openNowToggle').checked;
+
+    let filtered = [...allPlaces];
+
+    if (q) filtered = filtered.filter(p => p.name.toLowerCase().includes(q) || p.city?.toLowerCase().includes(q));
+    if (selectedCity) filtered = filtered.filter(p => p.city === selectedCity);
+    if (selectedCats.size) filtered = filtered.filter(p => p.category && selectedCats.has(String(p.category.categoryId)));
+    if (selectedVibes.size) filtered = filtered.filter(p => p.vibe?.some(v => selectedVibes.has(String(v.vibeId))));
+    if (minC > 0) filtered = filtered.filter(p => !p.minCost || p.minCost >= minC);
+    if (maxC < 50000) filtered = filtered.filter(p => !p.maxCost || p.maxCost <= maxC);
+
+    if (openNow) {
+      const now = new Date();
+      const nowMins = now.getHours() * 60 + now.getMinutes();
+      filtered = filtered.filter(p => {
+        if (!p.openingTime || !p.closingTime) return false;
+        const [oh, om] = p.openingTime.split(':').map(Number);
+        const [ch, cm] = p.closingTime.split(':').map(Number);
+        return nowMins >= oh * 60 + om && nowMins <= ch * 60 + cm;
+      });
+    }
+
+    const sort = document.getElementById('sortSelect').value;
+    if (sort === 'rating') filtered.sort((a, b) => b.avgRating - a.avgRating);
+    if (sort === 'cost-asc') filtered.sort((a, b) => (a.minCost || 0) - (b.minCost || 0));
+    if (sort === 'cost-desc') filtered.sort((a, b) => (b.minCost || 0) - (a.minCost || 0));
+
+    const title = selectedCity || (q ? `"${q}"` : 'All Places');
+    document.getElementById('resultsTitle').textContent = title;
+    renderPlaces(filtered);
+  }
+
+  // ── VIBE FILTERS ──
+  async function loadVibeFilters() {
+    try {
+      const results = await Promise.all(
+        Array.from({length:8}, (_,i) =>
+          fetch(`${BASE}/places/vibe?vibeID=${i+1}`).then(r=>r.json()).catch(()=>[])
+        )
+      );
+      const vibes = results.map((p,i) => ({p, id: i+1})).filter(v => v.p.length);
+      const ICONS = ['✨','🔥','🌙','🌿','🎉','💎','🌊','🏔️'];
+      document.getElementById('vibeFilters').innerHTML = vibes.map(v => {
+        const name = v.p[0].vibe?.find(vi => vi.vibeId === v.id)?.name || `Vibe ${v.id}`;
+        return `<button class="tag-btn" data-vibe-id="${v.id}">${ICONS[v.id-1]||'✨'} ${name}</button>`;
+      }).join('');
+      // re-attach listeners
+      document.querySelectorAll('[data-vibe-id]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = btn.dataset.vibeId;
+          selectedVibes.has(id) ? selectedVibes.delete(id) : selectedVibes.add(id);
+          btn.classList.toggle('active');
+        });
+      });
+    } catch {}
+  }
+
+  // ── BOOKMARK ──
+  function toggleBookmark(placeId, btn) {
+    btn.innerHTML = '<i class="fa-solid fa-bookmark"></i>';
+    btn.style.color = 'var(--moss)';
+    // POST /bookmark — needs userId from session/localStorage once auth is implemented
+    console.log('Bookmark toggled for place', placeId);
+  }
+
+  // ── RANGE SLIDER ──
+  function updateRange() {
+    const min = parseInt(document.getElementById('minCost').value);
+    const max = parseInt(document.getElementById('maxCost').value);
+    if (min > max) return;
+    document.getElementById('minCostLabel').textContent = `PKR ${min.toLocaleString()}`;
+    document.getElementById('maxCostLabel').textContent = `PKR ${max.toLocaleString()}`;
+    const pct1 = (min / 50000) * 100;
+    const pct2 = (max / 50000) * 100;
+    document.getElementById('rangeFill').style.left  = pct1 + '%';
+    document.getElementById('rangeFill').style.width = (pct2 - pct1) + '%';
+  }
+
+  // ── CITY CHIPS ──
+  document.getElementById('cityChips').addEventListener('click', e => {
+    const btn = e.target.closest('.city-chip');
+    if (!btn) return;
+    document.querySelectorAll('.city-chip').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    selectedCity = btn.dataset.city;
+  });
+
+  // ── CATEGORY TAGS ──
+  document.querySelectorAll('[data-cat-id]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.catId;
+      selectedCats.has(id) ? selectedCats.delete(id) : selectedCats.add(id);
+      btn.classList.toggle('active');
+    });
+  });
+
+  document.getElementById('minCost').addEventListener('input', updateRange);
+  document.getElementById('maxCost').addEventListener('input', updateRange);
+  document.getElementById('applyFilters').addEventListener('click', applyFilters);
+  document.getElementById('sortSelect').addEventListener('change', applyFilters);
+  document.getElementById('searchQ').addEventListener('keydown', e => e.key === 'Enter' && applyFilters());
+  document.getElementById('clearAll').addEventListener('click', () => {
+    selectedCity = ''; selectedVibes.clear(); selectedCats.clear();
+    document.getElementById('searchQ').value = '';
+    document.getElementById('minCost').value = 0;
+    document.getElementById('maxCost').value = 50000;
+    document.getElementById('openNowToggle').checked = false;
+    document.querySelectorAll('.city-chip').forEach(b => b.classList.remove('active'));
+    document.querySelector('[data-city=""]').classList.add('active');
+    document.querySelectorAll('.tag-btn').forEach(b => b.classList.remove('active'));
+    updateRange();
+    renderPlaces(allPlaces);
+    document.getElementById('resultsTitle').textContent = 'All Places';
+  });
+
+  // ── NEARBY helper (from Near Me nav link) ──
+  function requestNearby() {
+    navigator.geolocation.getCurrentPosition(async pos => {
+      const {latitude:lat, longitude:lng} = pos.coords;
+      try {
+        const nearby = await fetch(`${BASE}/places/near?lat=${lat}&lng=${lng}&radius=5000`).then(r=>r.json());
+        allPlaces = nearby;
+        document.getElementById('resultsTitle').textContent = 'Near You';
+        renderPlaces(nearby);
+      } catch {}
+    }, () => {
+      document.getElementById('resultsTitle').textContent = 'Near You (location denied)';
+    });
+  }
+
+  window.addEventListener('scroll', () => {
+    document.getElementById('nav').classList.toggle('nav--scrolled', window.scrollY > 20);
+  });
+
+  updateRange();
+  loadPlaces();
+</script>
+</body>
+</html>
