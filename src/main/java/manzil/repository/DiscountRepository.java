@@ -6,15 +6,7 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import manzil.model.AvailableFor;
-import manzil.model.CardScheme;
-import manzil.model.CardType;
 import manzil.model.DiscountOffer;
-import manzil.model.GroupDiscount;
-import manzil.model.PaymentDiscount;
-import manzil.model.PaymentPartner;
-import manzil.model.TimeBasedDiscount;
-import manzil.model.UniversityDiscount;
 
 @Repository
 public interface DiscountRepository extends JpaRepository<DiscountOffer, Long> {

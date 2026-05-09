@@ -26,7 +26,7 @@ public class ManzilUserService {
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
     }
 
-    public RegisteredUser fetchRegisteredUserById(long userId) throws ResourceNotFoundException
+    public RegisteredUser fetchRegisteredUserById(long userId)
     {
         ManzilUser u = fetchUserById(userId);
 

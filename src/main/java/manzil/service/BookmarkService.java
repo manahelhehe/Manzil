@@ -7,20 +7,16 @@ import manzil.model.Place;
 import manzil.model.RegisteredUser;
 import manzil.repository.BookmarkRepository;
 import manzil.repository.ManzilUserRepository;
-import manzil.repository.PlaceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class BookmarkService
 {
     @Autowired
     private BookmarkRepository bRepo;
-    @Autowired
-    private PlaceRepository pRepo;
     @Autowired
     private ManzilUserRepository uRepo;
     @Autowired
