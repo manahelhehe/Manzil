@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact Us - Manzil</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Jost:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="shared.css">
+  <link rel="stylesheet" href="contact.css">
+</head>
+<body>
+  <div class="grain"></div>
+
+  <!-- ── NAV ── -->
+  <nav class="nav">
+    <a href="index.html" class="nav-logo">M<span>anzil</span></a>
+    <div id="navLinks">
+      <a href="places.html">Explore</a>
+      <a href="places.html?open=true">Open Now</a>
+      <a href="places.html?nearby=true">Near Me</a>
+      <a href="places.html?vibes=true">Vibes</a>
+    </div>
+    <div id="navRight">
+      <a href="login.html" class="btn btn--sm">Login</a>
+      <a href="signup.html" class="btn btn--sm btn--primary">Sign Up</a>
+    </div>
+  </nav>
+
+  <!-- ── MAIN ── -->
+  <main class="contact-container">
+    <div class="contact-hero">
+      <h1>Get in Touch</h1>
+      <p>We'd love to hear from you. Send us a message and we'll respond as soon as possible.</p>
+    </div>
+
+    <div class="contact-content">
+      <div class="contact-form">
+        <h2>Send us a message</h2>
+        <form id="contactForm">
+          <div class="form-group">
+            <label for="name">Name</label>
+            <input type="text" id="name" name="name" required>
+          </div>
+          <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" required>
+          </div>
+          <div class="form-group">
+            <label for="subject">Subject</label>
+            <input type="text" id="subject" name="subject" required>
+          </div>
+          <div class="form-group">
+            <label for="message">Message</label>
+            <textarea id="message" name="message" rows="6" required></textarea>
+          </div>
+          <button type="submit" class="btn btn--primary">Send Message</button>
+        </form>
+      </div>
+
+      <div class="contact-info">
+        <h2>Contact Information</h2>
+        <div class="info-item">
+          <i class="fas fa-envelope"></i>
+          <div>
+            <h3>Email</h3>
+            <a href="mailto:manzilit.pk@gmail.com">manzilit.pk@gmail.com</a>
+          </div>
+        </div>
+        <div class="info-item">
+          <i class="fab fa-instagram"></i>
+          <div>
+            <h3>Instagram</h3>
+            <a href="https://www.instagram.com/manzilit/" target="_blank">@manzilit</a>
+          </div>
+        </div>
+        <div class="info-item">
+          <i class="fas fa-map-marker-alt"></i>
+          <div>
+            <h3>Location</h3>
+            <p>NUST H12, Islamabad, Pakistan</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ── FOOTER ── -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <span class="nav-logo footer-logo">M<span>anzil</span></span>
+        <p>Curating the world's most memorable spaces, one city at a time.</p>
+      </div>
+      <div class="footer-cols">
+        <div>
+          <h5>Discover</h5>
+          <a href="places.html">All Places</a>
+          <a href="places.html?open=true">Open Now</a>
+          <a href="places.html?nearby=true">Near Me</a>
+          <a href="places.html">Top Rated</a>
+        </div>
+        <div>
+          <h5>Company</h5>
+          <a href="about.html">About</a>
+          <a href="contact.html">Contact</a>
+          <a href="#">For Businesses</a>
+          <a href="mailto:manzilit.pk@gmail.com"><i class="fa fa-envelope"></i> manzilit.pk@gmail.com</a>
+          <a href="https://www.instagram.com/manzilit/" target="_blank"><i class="fa-brands fa-instagram"></i> @manzilit</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2025 Manzil</span>
+      <span>All rights reserved</span>
+    </div>
+  </footer>
+
+  <script>
+    // ── LOGIN STATE MANAGEMENT ──
+    function updateNavBar() {
+      const user = localStorage.getItem('manzilUser');
+      const navRight = document.getElementById('navRight');
+      const navLinks = document.getElementById('navLinks');
+
+      if (user) {
+        const userData = JSON.parse(user);
+        const userName = userData.fullname || userData.email.split('@')[0];
+        navLinks.innerHTML = `
+          <a href="places.html">Explore</a>
+          <a href="places.html?open=true">Open Now</a>
+          <a href="places.html?nearby=true">Near Me</a>
+          <a href="places.html?vibes=true">Vibes</a>
+        `;
+        navRight.innerHTML = `
+          <a href="bookmarks.html" class="nav-links" style="color: var(--moss); font-weight: 500; display: flex; align-items: center; gap: 0.5rem;">
+            <i class="fas fa-bookmark"></i> Bookmarks
+          </a>
+          <a href="profile.html" class="btn btn--sm">Profile</a>
+        `;
+      }
+    }
+
+    // ── FORM HANDLING ──
+    document.getElementById('contactForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      alert('Thank you for your message! We\'ll get back to you soon.');
+      this.reset();
+    });
+
+    window.addEventListener('DOMContentLoaded', updateNavBar);
+  </script>
+</body>
+</html>

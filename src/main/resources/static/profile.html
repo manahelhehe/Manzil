@@ -105,6 +105,19 @@
           </div>
         </div>
       </section>
+
+      <section class="profile-card">
+        <h2 class="card-title">We'll miss you</h2>
+        <div class="details-card">
+          <div class="detail-row">
+            <div class="detail-key"><i class="fa fa-trash-alt"></i> Delete account</div>
+            <div class="detail-val">This is the end. Really wanna do this?</div>
+          </div>
+          <div class="detail-row">
+            <button class="danger-btn" onclick="deleteAccount()">Delete Account</button>
+          </div>
+        </div>
+      </section>
     </div>
   </main>
 
@@ -131,6 +144,14 @@
 
     function editProfile() {
       alert('Edit profile functionality coming soon!');
+    }
+
+    function deleteAccount() {
+      if (confirm('Are you sure you want to permanently delete your account?')) {
+        localStorage.removeItem('manzilUser');
+        alert('Your account has been deleted.');
+        window.location.href = 'signup.html';
+      }
     }
 
     window.addEventListener('DOMContentLoaded', checkLogin);
