@@ -13,10 +13,6 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true) // Important when using @Data with inheritance
 public class RegisteredUser extends ManzilUser
 {
-//private List<String> preferences;
-
-    @OneToMany(mappedBy = "recRegisteredUser", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Recommendation> recommendations;
 
     @OneToMany(mappedBy = "reviewUser", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Review> reviews;

@@ -39,8 +39,25 @@ public interface PlaceRepository extends JpaRepository<Place, Long>    /* Tells 
     // == PARAMETER 3: meterDistance ==
     // represents the radius in which places are to be selected
 
+
     List<Place> findPlaceByLocation(@Param("point") Point point, @Param("meterDistance") double meterDistance);
     List<Place> findPlaceByVibeVibeId(int vibeID);
     List<Place> findPlaceByCategoryCategoryId(int categoryID);
+
+    @Query(value = "SELECT * FROM place p " +
+            "WHERE p.category = (" +
+            "    SELECT p2.category FROM place p2 " +
+            "    JOIN liked_place lp ON p2.id = lp.place_id " +
+            "    WHERE lp.user_id = :userId " +
+            "    GROUP BY p2.category " +
+            "    ORDER BY COUNT(*) DESC " +
+            "    LIMIT 1" +
+            ") " +
+            "AND p.id NOT IN (SELECT lp2.place_id FROM liked_place lp2 WHERE lp2.user_id = :userId) " +
+            "ORDER BY p.rating DESC " +
+            "LIMIT 5", nativeQuery = true)
+    List<Place> getRecommendationsByVibe(@Param("userId") long userId);
+
+    List<Place> findTop5ByOrderByAvgRatingDesc();
 
 }

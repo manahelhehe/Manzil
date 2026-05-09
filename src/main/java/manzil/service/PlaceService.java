@@ -3,11 +3,9 @@ package manzil.service;
 import jakarta.transaction.Transactional;
 import manzil.dto.PlaceCreateDTO;
 import manzil.exceptions.ResourceNotFoundException;
-import manzil.model.Category;
-import manzil.model.Place;
-import manzil.model.PlaceImage;
-import manzil.model.Vibe;
+import manzil.model.*;
 import manzil.repository.CategoryRepository;
+import manzil.repository.ManzilUserRepository;
 import manzil.repository.PlaceRepository;
 import manzil.repository.VibeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +25,8 @@ public class PlaceService
     private CategoryRepository crepo;
     @Autowired
     private VibeRepository vrepo;
+    @Autowired
+    private ManzilUserService uService;
 
     public List<Place> fetchPlaces() {return repo.findAll();}
 
@@ -213,4 +213,14 @@ public class PlaceService
         repo.save(p);
     }
 
+    public List<Place> fetchPersonalizedRecommendations(long userId)
+    {
+        RegisteredUser u = uService.fetchRegisteredUserById(userId);
+        List<Place> rec = repo.getRecommendationsByVibe(userId);
+
+        if(rec.isEmpty())
+            rec = repo.findTop5ByOrderByAvgRatingDesc();
+
+        return rec;
+    }
 }

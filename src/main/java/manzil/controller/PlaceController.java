@@ -70,6 +70,12 @@ public class PlaceController
         return service.fetchNearPlaces(lat, lng, radius);
     }
 
+    @GetMapping("/recommendations/user/{id}")
+    public List<Place> getRecommendations(@PathVariable long id)
+    {
+        return service.fetchPersonalizedRecommendations(id);
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<Place> updatePlace(@PathVariable long id, @RequestBody Place updatedPlace) throws ResourceNotFoundException
     {

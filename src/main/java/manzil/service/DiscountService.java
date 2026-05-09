@@ -10,45 +10,30 @@ import manzil.model.DiscountOffer;
 import manzil.repository.DiscountRepository;
 
 @Service
-public class DiscountService
-{
+public class DiscountService {
     private final DiscountRepository repo;
 
     public DiscountService(DiscountRepository repo) {
-        this.repo = repo;}
+        this.repo = repo;
+    }
 
     public List<DiscountOffer> fetchAllDiscounts() {
-        return repo.findAll();}
-
+        return repo.findAll();
+    }
 
 
     public Optional<DiscountOffer> fetchDiscountById(long id) {
-        return repo.findById(id);}
-
-
+        return repo.findById(id);
+    }
 
 
     public DiscountOffer save(DiscountOffer discount) {
-        return repo.save(discount);}
-
+        return repo.save(discount);
+    }
 
 
     public void delete(long id) {
-        repo.deleteById(id);}
+        repo.deleteById(id);
+    }
 
-
-
-    public List<GroupDiscount> fetchGroupDiscounts(int size) {
-        return repo.findByMinGroupSizeLessThanEqual(size);}
-
-
-
-    public List<UniversityDiscount> fetchUniversity(String name) {
-        return repo.findByUniversityNameIgnoreCase(name);}
-
-
-
-    public List<TimeBasedDiscount> fetchActiveTimeDiscounts() {
-        return repo.findByStartTimeBeforeAndEndTimeAfter(
-                LocalDateTime.now(),
-                LocalDateTime.now());}} 
+}

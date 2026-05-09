@@ -20,30 +20,4 @@ public interface DiscountRepository extends JpaRepository<DiscountOffer, Long> {
 
     List<DiscountOffer> findByPlacesPlaceId(long placeId);
 
-    List<GroupDiscount> findByMinGroupSizeLessThanEqual(int groupSize);
-
-    List<UniversityDiscount> findByUniversityNameIgnoreCase(String universityName);
-
-    List<UniversityDiscount> findByAvailableFor(AvailableFor availableFor);
-
-    List<TimeBasedDiscount> findByStartTimeBeforeAndEndTimeAfter(
-            LocalDateTime start,
-            LocalDateTime end);
-
-
-    List<TimeBasedDiscount> findByStartTimeAfter(LocalDateTime startTime);
-
-
-    List<TimeBasedDiscount> findByEndTimeBefore(LocalDateTime endTime);
-
-
-    List<PaymentDiscount> findByPaymentPartner(PaymentPartner paymentPartner);
-
-
-    List<PaymentDiscount> findByCardScheme(CardScheme cardScheme);
-
-
-    List<PaymentDiscount> findByCardType(CardType cardType);
-
-
-    List<PaymentDiscount> findByCashbackAmountGreaterThanEqual(double amount);}
+}
