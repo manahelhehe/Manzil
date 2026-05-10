@@ -252,3 +252,36 @@ const UserService = {
     } catch {}
   }
 };
+const LikeService = {
+  // GET /api/liked/user/{id}
+  async getAll() {
+    const userId = AuthService.getUserId();
+    if (!userId) return [];
+    try {
+      const r = await fetch(`${BASE}/liked/user/${userId}`);
+      return r.ok ? r.json() : [];
+    } catch { return []; }
+  },
+
+  // POST /api/liked/toggle/user/{uId}/place/{pId}
+  async toggle(placeId) {
+    const userId = AuthService.getUserId();
+    if (!userId) return false;
+    try {
+      const r = await fetch(`${BASE}/liked/toggle/user/${userId}/place/${placeId}`, {
+        method: 'POST'
+      });
+      return r.ok ? r.text() : false; // returns "Liked" or "Unliked"
+    } catch { return false; }
+  },
+
+  // GET /api/liked/user/{uId}/place/{pId}
+  async isLiked(placeId) {
+    const userId = AuthService.getUserId();
+    if (!userId) return false;
+    try {
+      const r = await fetch(`${BASE}/liked/user/${userId}/place/${placeId}`);
+      return r.ok;
+    } catch { return false; }
+  }
+};

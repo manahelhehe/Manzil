@@ -91,16 +91,16 @@
           <label class="filter-label">Category</label>
           <div class="tag-grid" id="catFilters">
             <!-- static cats + abandoned buildings -->
-            <button class="tag-btn" data-cat-id="1"> Cafes</button>
-            <button class="tag-btn" data-cat-id="2"> Hotels</button>
-            <button class="tag-btn" data-cat-id="3"> Camping</button>
-            <button class="tag-btn" data-cat-id="4"> Historical</button>
-            <button class="tag-btn" data-cat-id="5"> Abandoned</button>
-            <button class="tag-btn" data-cat-id="7"> Restaurants</button>
-            <button class="tag-btn" data-cat-id="8"> Museums</button>
-            <button class="tag-btn" data-cat-id="9"> Androon Gems</button>
-            <button class="tag-btn" data-cat-id="10"> Beaches</button>
-            <button class="tag-btn" data-cat-id="10"> Chai Spots</button>
+            <button class="tag-btn" data-cat-name="Cafes"> Cafes</button>
+<button class="tag-btn" data-cat-name="Hotels"> Hotels</button>
+<button class="tag-btn" data-cat-name="Camping"> Camping</button>
+<button class="tag-btn" data-cat-name="Historical"> Historical</button>
+<button class="tag-btn" data-cat-name="Abandoned"> Abandoned</button>
+<button class="tag-btn" data-cat-name="Restaurants"> Restaurants</button>
+<button class="tag-btn" data-cat-name="Museums"> Museums</button>
+<button class="tag-btn" data-cat-name="Androon Gems"> Androon Gems</button>
+<button class="tag-btn" data-cat-name="Beaches"> Beaches</button>
+<button class="tag-btn" data-cat-name="Chai Spots"> Chai Spots</button>
 
 
           </div>
@@ -160,16 +160,10 @@
   let selectedVibes   = new Set();
   let selectedCats    = new Set();
   let openNow         = false;
-
-  const cost = p => p.minCost && p.maxCost
-    ? `PKR ${p.minCost.toLocaleString()} – ${p.maxCost.toLocaleString()}`
-    : p.minCost ? `From PKR ${p.minCost.toLocaleString()}` : 'Price on request';
-
-  const stars = p => p.avgRating > 0
-    ? `<span class="p-badge">★ ${p.avgRating.toFixed(1)}</span>` : '';
-
-  const hours = p => p.openingTime && p.closingTime
-    ? `${p.openingTime.slice(0,5)} – ${p.closingTime.slice(0,5)}` : '';
+const cost = p => p.minCost && p.minCost > 0 && p.maxCost && p.maxCost > 0
+  ? `PKR ${p.minCost.toLocaleString()} – ${p.maxCost.toLocaleString()}` : '';
+const stars = p => p.avgRating > 0
+  ? `<span class="p-badge">★ ${p.avgRating.toFixed(1)}</span>` : '';
 
   // ── LOAD ALL PLACES ──
   async function loadPlaces() {
@@ -207,102 +201,94 @@
     }
   }
 
-  // ── RENDER ──
-  function renderPlaces(places) {
-    const grid = document.getElementById('placesGrid');
-    document.getElementById('resultsCount').textContent = `${places.length} place${places.length !== 1 ? 's' : ''} found`;
+function renderPlaces(places) {
+  const grid = document.getElementById('placesGrid');
+  document.getElementById('resultsCount').textContent =
+    `${places.length} place${places.length !== 1 ? 's' : ''} found`;
 
-    if (!places.length) {
-      grid.innerHTML = '<p class="err-msg">No places match your filters.</p>';
-      return;
-    }
-
-    grid.innerHTML = places.map(p => `
-      <div class="place-card" onclick="location='/place.html?id=${p.placeId}'">
-        <div class="pc-img-wrap">
-          <img src="${IMG}" alt="${p.name}" loading="lazy"/>
-          ${p.avgRating > 0 ? `<span class="pc-rating">★ ${p.avgRating.toFixed(1)}</span>` : ''}
-          <button class="pc-bookmark" onclick="event.stopPropagation(); toggleBookmark(${p.placeId}, this)">
-            <i class="fa-regular fa-bookmark"></i>
-          </button>
-        </div>
-        <div class="pc-body">
-          <div class="pc-meta">
-            <span class="pc-city"><i class="fa fa-location-dot"></i> ${p.city}</span>
-            ${p.category ? `<span class="pc-cat">${p.category.name}</span>` : ''}
-          </div>
-          <h3 class="pc-name">${p.name}</h3>
-          <p class="pc-desc">${p.description ? p.description.slice(0, 80) + '…' : ''}</p>
-          <div class="pc-footer">
-            <span class="pc-cost">${cost(p)}</span>
-            ${p.openingTime ? `<span class="pc-hours">${hours(p)}</span>` : ''}
-          </div>
-        </div>
-      </div>
-    `).join('');
+  if (!places.length) {
+    grid.innerHTML = '<p class="err-msg">No places match your filters.</p>';
+    return;
   }
 
+  grid.innerHTML = places.map(p => `
+    <div class="place-card" onclick="location.href='place.html?id=${p.placeId}'">
+      <div class="pc-img-wrap">
+        <img src="${IMG}" alt="${p.name}" loading="lazy"/>
+        <button class="pc-bookmark" onclick="event.stopPropagation(); toggleBookmark(${p.placeId}, this)">
+          <i class="fa-regular fa-bookmark"></i>
+        </button>
+      </div>
+      <div class="pc-body">
+        <div class="pc-meta">
+          <span class="pc-city"><i class="fa fa-location-dot"></i> ${p.city || '—'}</span>
+          ${p.category ? `<span class="pc-cat">${p.category}</span>` : ''}
+        </div>
+        <h3 class="pc-name">${p.name}</h3>
+      </div>
+    </div>
+  `).join('');
+}
   // ── FILTERS ──
   function applyFilters() {
-    const q      = document.getElementById('searchQ').value.trim().toLowerCase();
-    const minC   = parseInt(document.getElementById('minCost').value);
-    const maxC   = parseInt(document.getElementById('maxCost').value);
-    openNow      = document.getElementById('openNowToggle').checked;
+  const q    = document.getElementById('searchQ').value.trim().toLowerCase();
+  openNow    = document.getElementById('openNowToggle').checked;
 
-    let filtered = [...allPlaces];
+  let filtered = [...allPlaces];
 
-    if (q) filtered = filtered.filter(p => p.name.toLowerCase().includes(q) || p.city?.toLowerCase().includes(q));
-    if (selectedCity) filtered = filtered.filter(p => p.city === selectedCity);
-    if (selectedCats.size) filtered = filtered.filter(p => p.category && selectedCats.has(String(p.category.categoryId)));
-    if (selectedVibes.size) filtered = filtered.filter(p => p.vibe?.some(v => selectedVibes.has(String(v.vibeId))));
-    if (minC > 0) filtered = filtered.filter(p => !p.minCost || p.minCost >= minC);
-    if (maxC < 50000) filtered = filtered.filter(p => !p.maxCost || p.maxCost <= maxC);
+  // only name and city exist on PlaceCardDTO
+  if (q) filtered = filtered.filter(p =>
+    p.name.toLowerCase().includes(q) || p.city?.toLowerCase().includes(q)
+  );
+  if (selectedCity) filtered = filtered.filter(p => p.city === selectedCity);
 
-    if (openNow) {
-      const now = new Date();
-      const nowMins = now.getHours() * 60 + now.getMinutes();
-      filtered = filtered.filter(p => {
-        if (!p.openingTime || !p.closingTime) return false;
-        const [oh, om] = p.openingTime.split(':').map(Number);
-        const [ch, cm] = p.closingTime.split(':').map(Number);
-        return nowMins >= oh * 60 + om && nowMins <= ch * 60 + cm;
+  // category is a String now, not an object
+  if (selectedCats.size) filtered = filtered.filter(p =>
+    p.category && selectedCats.has(p.category)
+  );
+
+  // vibes, cost, openNow don't exist on PlaceCardDTO — skip those filters
+  // they only work on PlaceDetailDTO (single place page)
+
+  const sort = document.getElementById('sortSelect').value;
+  // avgRating and minCost don't exist on PlaceCardDTO so sorting won't work
+  // remove those options or leave them as no-ops for now
+
+  const title = selectedCity || (q ? `"${q}"` : 'All Places');
+  document.getElementById('resultsTitle').textContent = title;
+  renderPlaces(filtered);
+}
+
+  
+
+ async function loadVibeFilters() {
+  try {
+    const results = await Promise.all(
+      Array.from({length:8}, (_,i) =>
+        fetch(`${BASE}/places/vibe?vibeID=${i+1}`).then(r=>r.json()).catch(()=>[])
+      )
+    );
+    const vibes = results.map((p,i) => ({places: p, id: i+1})).filter(v => v.places.length);
+    const ICONS = ['✨','🔥','🌙','🌿','🎉','💎','🌊','🏔️'];
+
+    document.getElementById('vibeFilters').innerHTML = vibes.map(v => {
+      // PlaceCardDTO has no vibe field — use vibe ID to re-fetch when selected
+      return `<button class="tag-btn" data-vibe-id="${v.id}">${ICONS[v.id-1]||'✨'} Vibe ${v.id}</button>`;
+    }).join('');
+
+    document.querySelectorAll('[data-vibe-id]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        document.querySelectorAll('[data-vibe-id]').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        // re-fetch places for this vibe
+        const places = await fetch(`${BASE}/places/vibe?vibeID=${btn.dataset.vibeId}`)
+          .then(r => r.json()).catch(() => []);
+        allPlaces = places;
+        renderPlaces(places);
       });
-    }
-
-    const sort = document.getElementById('sortSelect').value;
-    if (sort === 'rating') filtered.sort((a, b) => b.avgRating - a.avgRating);
-    if (sort === 'cost-asc') filtered.sort((a, b) => (a.minCost || 0) - (b.minCost || 0));
-    if (sort === 'cost-desc') filtered.sort((a, b) => (b.minCost || 0) - (a.minCost || 0));
-
-    const title = selectedCity || (q ? `"${q}"` : 'All Places');
-    document.getElementById('resultsTitle').textContent = title;
-    renderPlaces(filtered);
-  }
-
-  // ── VIBE FILTERS ──
-  async function loadVibeFilters() {
-    try {
-      const results = await Promise.all(
-        Array.from({length:8}, (_,i) =>
-          fetch(`${BASE}/places/vibe?vibeID=${i+1}`).then(r=>r.json()).catch(()=>[])
-        )
-      );
-      const vibes = results.map((p,i) => ({p, id: i+1})).filter(v => v.p.length);
-      const ICONS = ['✨','🔥','🌙','🌿','🎉','💎','🌊','🏔️'];
-      document.getElementById('vibeFilters').innerHTML = vibes.map(v => {
-        const name = v.p[0].vibe?.find(vi => vi.vibeId === v.id)?.name || `Vibe ${v.id}`;
-        return `<button class="tag-btn" data-vibe-id="${v.id}">${ICONS[v.id-1]||'✨'} ${name}</button>`;
-      }).join('');
-      // re-attach listeners
-      document.querySelectorAll('[data-vibe-id]').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const id = btn.dataset.vibeId;
-          selectedVibes.has(id) ? selectedVibes.delete(id) : selectedVibes.add(id);
-          btn.classList.toggle('active');
-        });
-      });
-    } catch {}
-  }
+    });
+  } catch {}
+}
 
   // ── BOOKMARK ──
   function toggleBookmark(placeId, btn) {
@@ -334,14 +320,17 @@
     selectedCity = btn.dataset.city;
   });
 
-  // ── CATEGORY TAGS ──
-  document.querySelectorAll('[data-cat-id]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const id = btn.dataset.catId;
-      selectedCats.has(id) ? selectedCats.delete(id) : selectedCats.add(id);
-      btn.classList.toggle('active');
-    });
+// Change tag buttons to use name instead of id
+// In HTML change to data-cat-name instead of data-cat-id:
+// <button class="tag-btn" data-cat-name="Cafes">Cafes</button>
+
+document.querySelectorAll('[data-cat-name]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const name = btn.dataset.catName;
+    selectedCats.has(name) ? selectedCats.delete(name) : selectedCats.add(name);
+    btn.classList.toggle('active');
   });
+});
 
   document.getElementById('minCost').addEventListener('input', updateRange);
   document.getElementById('maxCost').addEventListener('input', updateRange);
