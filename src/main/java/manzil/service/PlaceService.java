@@ -329,12 +329,11 @@ public class PlaceService
     public void postImages(long placeId, List<String> urls)
     {
         Place p = fetchPlaceById(placeId);
-        int count;
 
-        if(p.getImages() != null)
-            count = p.getImages().size();
-        else
-            count = 0;
+        if (p.getImages() == null)
+            p.setImages(new ArrayList<>());
+
+        int count = p.getImages().size();
 
         for(String url: urls)
         {
@@ -350,11 +349,8 @@ public class PlaceService
     public List<PlaceCardDTO> fetchPersonalizedRecommendations(long userId)
     {
         ManzilUser u = uService.fetchRegisteredUserById(userId);
-        List<Place> rec = repo.getRecommendationsByVibe(userId);
+        List<Place> rec = repo.findTop5ByOrderByAvgRatingDesc();
         List<PlaceCardDTO> recDtos = new ArrayList<>();
-
-        if(rec.isEmpty())
-            rec = repo.findTop5ByOrderByAvgRatingDesc();
 
         for(Place p: rec)
         {

@@ -2,6 +2,7 @@ package manzil.controller;
 
 import jakarta.validation.Valid;
 import manzil.dto.BookmarkCreateDTO;
+import manzil.dto.PlaceCardDTO;
 import manzil.exceptions.ResourceNotFoundException;
 import manzil.model.Bookmark;
 import manzil.service.BookmarkService;
@@ -22,7 +23,7 @@ public class BookmarkController
     private BookmarkService service;
 
     @GetMapping("/user/{id}")
-    public List<Bookmark> getUserBookmarks(@PathVariable long id) throws ResourceNotFoundException
+    public List<PlaceCardDTO> getUserBookmarks(@PathVariable long id) throws ResourceNotFoundException
     {
         return service.findUserBookmarks(id);
     }

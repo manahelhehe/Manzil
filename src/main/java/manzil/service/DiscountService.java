@@ -46,6 +46,7 @@ public class DiscountService
         }
 
         d.setPlaces(places);
+        d.setPercentage(dto.getPercentage());
 
         return dRepo.save(d);
     }

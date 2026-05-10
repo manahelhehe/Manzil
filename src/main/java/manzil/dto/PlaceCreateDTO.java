@@ -37,7 +37,7 @@ public class PlaceCreateDTO
     @Max(value = 180, message = "Longitude cannot be greater than 180!")
     private double longitude;
 
-    @NotBlank(message = "Category is mandatory!")
+    @Positive(message = "Category is mandatory!")
     private int categoryID;
 
     @NotEmpty(message = "Select at least one vibe!")
