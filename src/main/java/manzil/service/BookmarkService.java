@@ -1,6 +1,7 @@
 package manzil.service;
 
 import manzil.dto.BookmarkCreateDTO;
+import manzil.dto.BookmarkResponseDTO;
 import manzil.dto.PlaceCardDTO;
 import manzil.exceptions.ResourceNotFoundException;
 import manzil.model.Bookmark;
@@ -26,7 +27,22 @@ public class BookmarkService
     @Autowired
     private PlaceService pService;
 
+    public BookmarkResponseDTO mapDto(Bookmark b)
+    {
+        BookmarkResponseDTO dto = new BookmarkResponseDTO();
+        dto.setUserId(b.getUser().getUserId());
+        dto.setPlaceId(b.getPlace().getPlaceId());
+        dto.setPlaceName(b.getPlace().getName());
+        dto.setPlaceCity(b.getPlace().getCity());
+        dto.setCategory(b.getPlace().getCategory().getName());
+        dto.setSavedDate(b.getSavedDate());
+        
+        return dto;
+    }
     public List<PlaceCardDTO> findUserBookmarks(long userId) {
+        if(!uRepo.existsRegisteredUserById(userId))
+            throw new ResourceNotFoundException("User is Not Registered (ID: " + userId + ")");
+
         List<Bookmark> bookmarks = bRepo.findByUser_UserId(userId);
         List<PlaceCardDTO> dtos = new ArrayList<>();
 
@@ -37,15 +53,15 @@ public class BookmarkService
         return dtos;
     }
 
-    public Bookmark findBookmarkByUserAndPlace(long userId, long placeId) throws ResourceNotFoundException
+    public BookmarkResponseDTO findBookmarkByUserAndPlace(long userId, long placeId) throws ResourceNotFoundException
     {
-        return bRepo.findByUser_UserIdAndPlace_PlaceId(userId, placeId).orElseThrow(
+        return mapDto(bRepo.findByUser_UserIdAndPlace_PlaceId(userId, placeId).orElseThrow(
                 () -> new ResourceNotFoundException("Bookmark Not Found (Place ID: " + placeId +
-                        ", User ID: " + userId + ")"));
+                        ", User ID: " + userId + ")")));
 
     }
 
-    public Bookmark postBookmark(BookmarkCreateDTO dto) throws ResourceNotFoundException
+    public BookmarkResponseDTO postBookmark(BookmarkCreateDTO dto) throws ResourceNotFoundException
     {
         RegisteredUser u = uService.fetchRegisteredUserById(dto.getUserId());
         Place p = pService.fetchPlaceById(dto.getPlaceId());
@@ -54,13 +70,15 @@ public class BookmarkService
         b.setPlace(p);
         b.setUser(u);
 
-        return bRepo.save(b);
+        return mapDto(bRepo.save(b));
     }
 
     public String dropBookmark(long userId, long placeId) throws ResourceNotFoundException
     {
-        Bookmark b = findBookmarkByUserAndPlace(userId, placeId);
-
+        Bookmark b = bRepo.findByUser_UserIdAndPlace_PlaceId(userId, placeId).orElseThrow(
+                () -> new ResourceNotFoundException("Bookmark Not Found (Place ID: " + placeId +
+                        ", User ID: " + userId + ")"));
+        
         bRepo.delete(b);
         return ("Bookmark Deleted Successfully!");
     }

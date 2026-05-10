@@ -44,6 +44,16 @@ public class PlaceService
         return dto;
     }
 
+    public List<PlaceCardDTO> convertToCardList(List<Place> places)
+    {
+        List<PlaceCardDTO> dtos = new ArrayList<>();
+        for(Place p: places)
+        {
+            dtos.add(convertToCard(p));
+        }
+        return dtos;
+    }
+
     public PlaceDetailDTO convertToDetail(Place p)
     {
         PlaceDetailDTO dto = new PlaceDetailDTO();

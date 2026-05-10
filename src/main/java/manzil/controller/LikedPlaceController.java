@@ -2,6 +2,7 @@ package manzil.controller;
 
 import jakarta.validation.Valid;
 import manzil.dto.LikedPlaceDTO;
+import manzil.dto.PlaceCardDTO;
 import manzil.model.LikedPlace;
 import manzil.service.LikedPlaceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +21,7 @@ public class LikedPlaceController
     private LikedPlaceService service;
 
     @GetMapping("/user/{id}")
-    public List<LikedPlace> getUserLikedPlaces(@PathVariable long id)
+    public List<PlaceCardDTO> getUserLikedPlaces(@PathVariable long id)
     {
         return service.findUserLikedPlaces(id);
     }

@@ -1,5 +1,7 @@
 package manzil.service;
 
+import manzil.dto.LikedPlaceResponseDTO;
+import manzil.dto.PlaceCardDTO;
 import manzil.exceptions.ResourceNotFoundException;
 import manzil.model.LikedPlace;
 import manzil.model.Place;
@@ -10,6 +12,7 @@ import manzil.repository.PlaceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -26,12 +29,41 @@ public class LikedPlaceService
     @Autowired
     private PlaceService pService;
 
-    public List<LikedPlace> findUserLikedPlaces(long userId) throws ResourceNotFoundException
+    public LikedPlaceResponseDTO mapDto(LikedPlace p)
+    {
+        LikedPlaceResponseDTO dto = new LikedPlaceResponseDTO();
+        dto.setUserId(p.getUser().getUserId());
+        dto.setPlaceId(p.getPlace().getPlaceId());
+        dto.setPlaceName(p.getPlace().getName());
+        dto.setPlaceCity(p.getPlace().getCity());
+        dto.setCategory(p.getPlace().getCategory().getName());
+        dto.setLiked(true);
+        return dto;
+    }
+
+    public List<LikedPlaceResponseDTO> mapDtoList(List<LikedPlace> places)
+    {
+        List<LikedPlaceResponseDTO> dtos = new ArrayList<>();
+        for(LikedPlace p: places)
+        {
+            dtos.add(mapDto(p));
+        }
+
+        return dtos;
+    }
+
+    public List<PlaceCardDTO> findUserLikedPlaces(long userId)
     {
         if(!uRepo.existsRegisteredUserById(userId))
             throw new ResourceNotFoundException("User is Not Registered (ID: " + userId + ")");
 
-        return lRepo.findByUser_UserId(userId);
+        List<LikedPlace> places = lRepo.findByUser_UserId(userId);
+        List<PlaceCardDTO> dtos = new ArrayList<>();
+        for(LikedPlace p: places)
+        {
+            dtos.add(pService.convertToCard(pService.fetchPlaceById(p.getPlace().getPlaceId())));
+        }
+        return dtos;
     }
 
     public LikedPlace findLikedPlaceByUserAndPlace(long userId, long placeId) throws ResourceNotFoundException

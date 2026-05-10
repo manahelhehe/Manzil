@@ -2,6 +2,7 @@ package manzil.controller;
 
 import jakarta.validation.Valid;
 import manzil.dto.BookmarkCreateDTO;
+import manzil.dto.BookmarkResponseDTO;
 import manzil.dto.PlaceCardDTO;
 import manzil.exceptions.ResourceNotFoundException;
 import manzil.model.Bookmark;
@@ -29,15 +30,15 @@ public class BookmarkController
     }
 
     @GetMapping("/user/{uId}/place/{pId}")
-    public ResponseEntity<Bookmark> getBookmark(@PathVariable long uId, @PathVariable long pId) throws ResourceNotFoundException
+    public ResponseEntity<BookmarkResponseDTO> getBookmark(@PathVariable long uId, @PathVariable long pId) throws ResourceNotFoundException
     {
         return ResponseEntity.ok(service.findBookmarkByUserAndPlace(uId, pId));
     }
 
     @PostMapping
-    public ResponseEntity<Bookmark> addBookmark(@Valid @RequestBody BookmarkCreateDTO dto) throws ResourceNotFoundException
+    public ResponseEntity<BookmarkResponseDTO> addBookmark(@Valid @RequestBody BookmarkCreateDTO dto) throws ResourceNotFoundException
     {
-        Bookmark savedBookmark = service.postBookmark(dto);
+        BookmarkResponseDTO savedBookmark = service.postBookmark(dto);
 
         URI path = ServletUriComponentsBuilder.
                 fromCurrentRequest().
