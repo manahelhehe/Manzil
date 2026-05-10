@@ -1,8 +1,6 @@
 package manzil.dto;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.validation.constraints.*;
 import lombok.Data;
 
 import java.util.List;
@@ -22,4 +20,8 @@ public class DiscountRequestDTO
     private String validTo;
     @NotEmpty(message = "Add at least one applicable place!")
     private List<Long> placeIds;
+    @NotNull(message = "Percentage cannot be empty!")
+    @Min(value = 1, message = "Percentage must be at least 1!")
+    @Max(value = 100, message = "Percentage cannot be more than 100!")
+    private Integer percentage;
 }

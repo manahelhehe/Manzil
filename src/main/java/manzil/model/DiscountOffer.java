@@ -32,6 +32,8 @@ public class DiscountOffer {
     private LocalDateTime validTo;
     private LocalDateTime createdAt;
 
+    private int percentage;
+
     @ManyToMany
     private List<Place> places;
 

@@ -329,12 +329,11 @@ public class PlaceService
     public void postImages(long placeId, List<String> urls)
     {
         Place p = fetchPlaceById(placeId);
-        int count;
 
-        if(p.getImages() != null)
-            count = p.getImages().size();
-        else
-            count = 0;
+        if (p.getImages() == null)
+            p.setImages(new ArrayList<>());
+
+        int count = p.getImages().size();
 
         for(String url: urls)
         {
