@@ -349,11 +349,8 @@ public class PlaceService
     public List<PlaceCardDTO> fetchPersonalizedRecommendations(long userId)
     {
         ManzilUser u = uService.fetchRegisteredUserById(userId);
-        List<Place> rec = repo.getRecommendationsByVibe(userId);
+        List<Place> rec = repo.findTop5ByOrderByAvgRatingDesc();
         List<PlaceCardDTO> recDtos = new ArrayList<>();
-
-        if(rec.isEmpty())
-            rec = repo.findTop5ByOrderByAvgRatingDesc();
 
         for(Place p: rec)
         {

@@ -4,7 +4,6 @@ import jakarta.validation.Valid;
 import manzil.dto.ReviewCreateDTO;
 import manzil.dto.ReviewDTO;
 import manzil.exceptions.ResourceNotFoundException;
-import manzil.model.Review;
 import manzil.service.ReviewService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -84,7 +83,7 @@ public class ReviewController {
     // PUT like a review
     @PutMapping("/{id}/like")
     public ResponseEntity<ReviewDTO> likeReview(@PathVariable long id)  {
-        return ResponseEntity.ok(service.likeReview(id));
+        return ResponseEntity.ok(service.toggleLikeReview(id));
     }
 
     // DELETE a review

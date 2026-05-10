@@ -1,6 +1,7 @@
 package manzil.service;
 
 import manzil.dto.BookmarkCreateDTO;
+import manzil.dto.PlaceCardDTO;
 import manzil.exceptions.ResourceNotFoundException;
 import manzil.model.Bookmark;
 import manzil.model.Place;
@@ -10,6 +11,7 @@ import manzil.repository.ManzilUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -24,12 +26,15 @@ public class BookmarkService
     @Autowired
     private PlaceService pService;
 
-    public List<Bookmark> findUserBookmarks(long userId) throws ResourceNotFoundException
-    {
-        if(!uRepo.existsRegisteredUserById(userId))
-            throw new ResourceNotFoundException("User is Not Registered (ID: " + userId + ")");
+    public List<PlaceCardDTO> findUserBookmarks(long userId) {
+        List<Bookmark> bookmarks = bRepo.findByUser_UserId(userId);
+        List<PlaceCardDTO> dtos = new ArrayList<>();
 
-        return bRepo.findByUser_UserId(userId);
+        for (Bookmark b : bookmarks) {
+            // Reuse your existing PlaceService logic!
+            dtos.add(pService.convertToCard(b.getPlace()));
+        }
+        return dtos;
     }
 
     public Bookmark findBookmarkByUserAndPlace(long userId, long placeId) throws ResourceNotFoundException

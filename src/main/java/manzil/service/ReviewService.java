@@ -124,6 +124,7 @@ public class ReviewService {
         // New Average: Old Avg + (New Rating - Old Avg)/New Count
 
         p.setAvgRating(nAvg);
+        pRepo.save(p);
 
         return mapDto(review);
     }
@@ -143,10 +144,9 @@ public class ReviewService {
     }
 
     // Like a review (increment likes)
-    public ReviewDTO likeReview(long reviewId)
+    public ReviewDTO toggleLikeReview(long reviewId)
     {
         Review review = fetchReviewById(reviewId);
-
         review.setLikesCount(review.getLikesCount() + 1);
         return mapDto(rRepo.save(review));
     }
