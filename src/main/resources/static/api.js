@@ -1,67 +1,62 @@
-/**
- * Manzil API Service Layer
- * Handles all communication with the backend
- */
-
 const API_BASE = 'http://localhost:8080/api';
 
-// ── AUTH ──────────────────────────────────────────────────────
 const AuthService = {
-  async login(email, password) {
-    try {
-      const response = await fetch(`${API_BASE}/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
-      });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Login failed');
-      }
-      
-      const data = await response.json();
-      // Store user info and token
-      localStorage.setItem('manzilUser', JSON.stringify({
-        userId: data.userId,
-        email: data.email,
-        fullname: data.fullname,
-        token: data.token,
-        loggedIn: true
-      }));
-      
-      return data;
-    } catch (error) {
-      console.error('Login error:', error);
-      throw error;
-    }
-  },
 
-  async signup(email, password, fullname) {
+  async signup(name, email, phone, password, favouriteCategories = []) {
     try {
-      const response = await fetch(`${API_BASE}/auth/register`, {
+      const response = await fetch(`${API_BASE}/users/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, fullname })
+        body: JSON.stringify({ name, email, phone, password, favouriteCategories })
       });
-      
+
       if (!response.ok) {
         const error = await response.json();
         throw new Error(error.message || 'Signup failed');
       }
-      
-      const data = await response.json();
+
+      const data = await response.json(); // returns UserResponseDTO
       localStorage.setItem('manzilUser', JSON.stringify({
-        userId: data.userId,
-        email: data.email,
-        fullname: data.fullname,
-        token: data.token,
-        loggedIn: true
+        userId:    data.userId,
+        name:      data.name,
+        email:     data.email,
+        phone:     data.phone,
+        role:      data.role,
+        loggedIn:  true
       }));
-      
+
       return data;
     } catch (error) {
       console.error('Signup error:', error);
+      throw error;
+    }
+  },
+
+  async login(email, password) {
+    try {
+      const response = await fetch(
+        `${API_BASE}/users/login?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`,
+        { method: 'POST' }
+      );
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Login failed');
+      }
+
+      const data = await response.json(); // returns UserResponseDTO
+      localStorage.setItem('manzilUser', JSON.stringify({
+        userId:   data.userId,
+        name:     data.name,
+        email:    data.email,
+        phone:    data.phone,
+        role:     data.role,
+        loggedIn: true
+      }));
+
+      return data;
+    } catch (error) {
+      console.error('Login error:', error);
       throw error;
     }
   },
@@ -72,402 +67,188 @@ const AuthService = {
   },
 
   getCurrentUser() {
-    const userStr = localStorage.getItem('manzilUser');
-    return userStr ? JSON.parse(userStr) : null;
-  },
-
-  getToken() {
-    const user = this.getCurrentUser();
-    return user?.token || null;
+    const u = localStorage.getItem('manzilUser');
+    return u ? JSON.parse(u) : null;
   },
 
   isLoggedIn() {
-    return !!this.getCurrentUser()?.token;
+    return !!this.getCurrentUser()?.loggedIn;
+  },
+
+  getUserId() {
+    return this.getCurrentUser()?.userId || null;
   }
 };
 
-// ── PLACES ────────────────────────────────────────────────────
 const PlaceService = {
-  getHeaders() {
-    const token = AuthService.getToken();
-    return {
-      'Content-Type': 'application/json',
-      ...(token && { 'Authorization': `Bearer ${token}` })
-    };
-  },
 
   async getAll() {
     try {
-      const response = await fetch(`${API_BASE}/places`, {
-        headers: this.getHeaders()
-      });
-      return response.ok ? response.json() : [];
-    } catch (error) {
-      console.error('Error fetching places:', error);
-      return [];
-    }
+      const r = await fetch(`${API_BASE}/places`);
+      return r.ok ? r.json() : [];
+    } catch { return []; }
   },
 
+  // GET /api/places/{id}
   async getById(placeId) {
     try {
-      const response = await fetch(`${API_BASE}/places/${placeId}`, {
-        headers: this.getHeaders()
-      });
-      return response.ok ? response.json() : null;
-    } catch (error) {
-      console.error('Error fetching place:', error);
-      return null;
-    }
+      const r = await fetch(`${API_BASE}/places/${placeId}`);
+      return r.ok ? r.json() : null;
+    } catch { return null; }
   },
 
+  // GET /api/places/category/{id}
   async getByCategory(categoryId) {
     try {
-      const response = await fetch(`${API_BASE}/places/category/${categoryId}`, {
-        headers: this.getHeaders()
-      });
-      return response.ok ? response.json() : [];
-    } catch (error) {
-      console.error('Error fetching places by category:', error);
-      return [];
-    }
+      const r = await fetch(`${API_BASE}/places/category/${categoryId}`);
+      return r.ok ? r.json() : [];
+    } catch { return []; }
   },
 
+  // GET /api/places/vibe?vibeID={id}
   async getByVibe(vibeId) {
     try {
-      const response = await fetch(`${API_BASE}/places/vibe?vibeID=${vibeId}`, {
-        headers: this.getHeaders()
-      });
-      return response.ok ? response.json() : [];
-    } catch (error) {
-      console.error('Error fetching places by vibe:', error);
-      return [];
-    }
+      const r = await fetch(`${API_BASE}/places/vibe?vibeID=${vibeId}`);
+      return r.ok ? r.json() : [];
+    } catch { return []; }
   },
 
+  // GET /api/places/near?lat=&lng=&radius=
   async getNearby(lat, lng, radius = 5000) {
     try {
-      const response = await fetch(
-        `${API_BASE}/places/near?lat=${lat}&lng=${lng}&radius=${radius}`,
-        { headers: this.getHeaders() }
-      );
-      return response.ok ? response.json() : [];
-    } catch (error) {
-      console.error('Error fetching nearby places:', error);
-      return [];
-    }
+      const r = await fetch(`${API_BASE}/places/near?lat=${lat}&lng=${lng}&radius=${radius}`);
+      return r.ok ? r.json() : [];
+    } catch { return []; }
   },
 
+  // GET /api/places/open
   async getOpen() {
     try {
-      const response = await fetch(`${API_BASE}/places/open`, {
-        headers: this.getHeaders()
-      });
-      return response.ok ? response.json() : [];
-    } catch (error) {
-      console.error('Error fetching open places:', error);
-      return [];
-    }
+      const r = await fetch(`${API_BASE}/places/open`);
+      return r.ok ? r.json() : [];
+    } catch { return []; }
   },
 
+  // GET /api/places/search?query=
   async search(query) {
     try {
-      const response = await fetch(
-        `${API_BASE}/places/search?query=${encodeURIComponent(query)}`,
-        { headers: this.getHeaders() }
-      );
-      return response.ok ? response.json() : [];
-    } catch (error) {
-      console.error('Error searching places:', error);
-      return [];
-    }
+      const r = await fetch(`${API_BASE}/places/search?query=${encodeURIComponent(query)}`);
+      return r.ok ? r.json() : [];
+    } catch { return []; }
   },
 
+  // GET /api/places/city?city=
   async searchByCity(city) {
     try {
-      const response = await fetch(
-        `${API_BASE}/places/city?city=${encodeURIComponent(city)}`,
-        { headers: this.getHeaders() }
-      );
-      return response.ok ? response.json() : [];
-    } catch (error) {
-      console.error('Error searching by city:', error);
-      return [];
-    }
+      const r = await fetch(`${API_BASE}/places/city?city=${encodeURIComponent(city)}`);
+      return r.ok ? r.json() : [];
+    } catch { return []; }
   }
 };
 
 // ── BOOKMARKS ─────────────────────────────────────────────────
 const BookmarkService = {
-  getHeaders() {
-    const token = AuthService.getToken();
-    return {
-      'Content-Type': 'application/json',
-      ...(token && { 'Authorization': `Bearer ${token}` })
-    };
-  },
 
+  // GET /bookmark/user/{userId}
   async getAll() {
-    if (!AuthService.isLoggedIn()) {
-      console.warn('Not logged in - cannot fetch bookmarks');
-      return [];
-    }
+    const userId = AuthService.getUserId();
+    if (!userId) return [];
     try {
-      const response = await fetch(`${API_BASE}/bookmarks`, {
-        headers: this.getHeaders()
-      });
-      return response.ok ? response.json() : [];
-    } catch (error) {
-      console.error('Error fetching bookmarks:', error);
-      return [];
-    }
+      const r = await fetch(`http://localhost:8080/bookmark/user/${userId}`);
+      return r.ok ? r.json() : [];
+    } catch { return []; }
   },
 
+  // POST /bookmark — body: { userId, placeId }
   async add(placeId) {
-    if (!AuthService.isLoggedIn()) {
-      console.warn('Not logged in - cannot add bookmark');
-      return false;
-    }
+    const userId = AuthService.getUserId();
+    if (!userId) return false;
     try {
-      const response = await fetch(`${API_BASE}/bookmarks`, {
+      const r = await fetch(`http://localhost:8080/bookmark`, {
         method: 'POST',
-        headers: this.getHeaders(),
-        body: JSON.stringify({ placeId })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, placeId })
       });
-      return response.ok;
-    } catch (error) {
-      console.error('Error adding bookmark:', error);
-      return false;
-    }
+      return r.ok;
+    } catch { return false; }
   },
 
+  // DELETE /bookmark/user/{userId}/place/{placeId}
   async remove(placeId) {
-    if (!AuthService.isLoggedIn()) {
-      console.warn('Not logged in - cannot remove bookmark');
-      return false;
-    }
+    const userId = AuthService.getUserId();
+    if (!userId) return false;
     try {
-      const response = await fetch(`${API_BASE}/bookmarks/${placeId}`, {
-        method: 'DELETE',
-        headers: this.getHeaders()
+      const r = await fetch(`http://localhost:8080/bookmark/user/${userId}/place/${placeId}`, {
+        method: 'DELETE'
       });
-      return response.ok;
-    } catch (error) {
-      console.error('Error removing bookmark:', error);
-      return false;
-    }
+      return r.ok;
+    } catch { return false; }
   },
 
+  // GET /bookmark/user/{userId}/place/{placeId}
   async isBookmarked(placeId) {
-    if (!AuthService.isLoggedIn()) return false;
+    const userId = AuthService.getUserId();
+    if (!userId) return false;
     try {
-      const bookmarks = await this.getAll();
-      return bookmarks.some(b => b.placeId === placeId);
-    } catch {
-      return false;
-    }
-  }
-};
-
-// ── LIKED PLACES ──────────────────────────────────────────────
-const LikeService = {
-  getHeaders() {
-    const token = AuthService.getToken();
-    return {
-      'Content-Type': 'application/json',
-      ...(token && { 'Authorization': `Bearer ${token}` })
-    };
-  },
-
-  async getAll() {
-    if (!AuthService.isLoggedIn()) {
-      console.warn('Not logged in - cannot fetch liked places');
-      return [];
-    }
-    try {
-      const response = await fetch(`${API_BASE}/likedplaces`, {
-        headers: this.getHeaders()
-      });
-      return response.ok ? response.json() : [];
-    } catch (error) {
-      console.error('Error fetching liked places:', error);
-      return [];
-    }
-  },
-
-  async add(placeId) {
-    if (!AuthService.isLoggedIn()) {
-      console.warn('Not logged in - cannot like place');
-      return false;
-    }
-    try {
-      const response = await fetch(`${API_BASE}/likedplaces`, {
-        method: 'POST',
-        headers: this.getHeaders(),
-        body: JSON.stringify({ placeId })
-      });
-      return response.ok;
-    } catch (error) {
-      console.error('Error liking place:', error);
-      return false;
-    }
-  },
-
-  async remove(placeId) {
-    if (!AuthService.isLoggedIn()) {
-      console.warn('Not logged in - cannot unlike place');
-      return false;
-    }
-    try {
-      const response = await fetch(`${API_BASE}/likedplaces/${placeId}`, {
-        method: 'DELETE',
-        headers: this.getHeaders()
-      });
-      return response.ok;
-    } catch (error) {
-      console.error('Error unliking place:', error);
-      return false;
-    }
-  },
-
-  async isLiked(placeId) {
-    if (!AuthService.isLoggedIn()) return false;
-    try {
-      const likedPlaces = await this.getAll();
-      return likedPlaces.some(l => l.placeId === placeId);
-    } catch {
-      return false;
-    }
-  }
-};
-
-// ── REVIEWS ───────────────────────────────────────────────────
-const ReviewService = {
-  getHeaders() {
-    const token = AuthService.getToken();
-    return {
-      'Content-Type': 'application/json',
-      ...(token && { 'Authorization': `Bearer ${token}` })
-    };
-  },
-
-  async getByPlace(placeId) {
-    try {
-      const response = await fetch(`${API_BASE}/reviews?placeId=${placeId}`, {
-        headers: this.getHeaders()
-      });
-      return response.ok ? response.json() : [];
-    } catch (error) {
-      console.error('Error fetching reviews:', error);
-      return [];
-    }
-  },
-
-  async create(placeId, rating, comment) {
-    if (!AuthService.isLoggedIn()) {
-      console.warn('Not logged in - cannot create review');
-      return null;
-    }
-    try {
-      const response = await fetch(`${API_BASE}/reviews`, {
-        method: 'POST',
-        headers: this.getHeaders(),
-        body: JSON.stringify({ placeId, rating, comment })
-      });
-      return response.ok ? response.json() : null;
-    } catch (error) {
-      console.error('Error creating review:', error);
-      return null;
-    }
+      const r = await fetch(`http://localhost:8080/bookmark/user/${userId}/place/${placeId}`);
+      return r.ok;
+    } catch { return false; }
   }
 };
 
 // ── USER ──────────────────────────────────────────────────────
 const UserService = {
-  getHeaders() {
-    const token = AuthService.getToken();
-    return {
-      'Content-Type': 'application/json',
-      ...(token && { 'Authorization': `Bearer ${token}` })
-    };
-  },
 
+  // GET /api/users/{id}
   async getProfile() {
-    if (!AuthService.isLoggedIn()) {
-      console.warn('Not logged in');
-      return null;
-    }
+    const userId = AuthService.getUserId();
+    if (!userId) return null;
     try {
-      const response = await fetch(`${API_BASE}/users/profile`, {
-        headers: this.getHeaders()
-      });
-      return response.ok ? response.json() : null;
-    } catch (error) {
-      console.error('Error fetching profile:', error);
-      return null;
-    }
+      const r = await fetch(`${API_BASE}/users/${userId}`);
+      return r.ok ? r.json() : null;
+    } catch { return null; }
   },
 
-  async updateProfile(fullname, phone) {
-    if (!AuthService.isLoggedIn()) {
-      console.warn('Not logged in');
-      return false;
-    }
+  // PUT /api/users/{id} — body matches UserUpdateDTO
+  async updateProfile(name, email, phone, profilePhoto, favouriteCategories) {
+    const userId = AuthService.getUserId();
+    if (!userId) return false;
     try {
-      const response = await fetch(`${API_BASE}/users/profile`, {
+      const r = await fetch(`${API_BASE}/users/${userId}`, {
         method: 'PUT',
-        headers: this.getHeaders(),
-        body: JSON.stringify({ fullname, phone })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, phone, profilePhoto, favouriteCategories })
       });
-      return response.ok;
-    } catch (error) {
-      console.error('Error updating profile:', error);
-      return false;
-    }
+      return r.ok;
+    } catch { return false; }
   },
 
+  // DELETE /api/users/{id}
   async deleteAccount() {
-    if (!AuthService.isLoggedIn()) {
-      console.warn('Not logged in');
-      return false;
-    }
+    const userId = AuthService.getUserId();
+    if (!userId) return false;
     try {
-      const response = await fetch(`${API_BASE}/users/profile`, {
-        method: 'DELETE',
-        headers: this.getHeaders()
-      });
-      if (response.ok) {
-        AuthService.logout();
-      }
-      return response.ok;
-    } catch (error) {
-      console.error('Error deleting account:', error);
-      return false;
-    }
-  }
-};
+      const r = await fetch(`${API_BASE}/users/${userId}`, { method: 'DELETE' });
+      if (r.ok) AuthService.logout();
+      return r.ok;
+    } catch { return false; }
+  },
 
-// ── CATEGORIES ────────────────────────────────────────────────
-const CategoryService = {
-  async getAll() {
+  // PATCH /api/users/{id}/online
+  async setOnline() {
+    const userId = AuthService.getUserId();
+    if (!userId) return;
     try {
-      const response = await fetch(`${API_BASE}/categories`);
-      return response.ok ? response.json() : [];
-    } catch (error) {
-      console.error('Error fetching categories:', error);
-      return [];
-    }
-  }
-};
+      await fetch(`${API_BASE}/users/${userId}/online`, { method: 'PATCH' });
+    } catch {}
+  },
 
-// ── VIBES ─────────────────────────────────────────────────────
-const VibeService = {
-  async getAll() {
+  // PATCH /api/users/{id}/offline
+  async setOffline() {
+    const userId = AuthService.getUserId();
+    if (!userId) return;
     try {
-      const response = await fetch(`${API_BASE}/vibes`);
-      return response.ok ? response.json() : [];
-    } catch (error) {
-      console.error('Error fetching vibes:', error);
-      return [];
-    }
+      await fetch(`${API_BASE}/users/${userId}/offline`, { method: 'PATCH' });
+    } catch {}
   }
 };
