@@ -143,6 +143,23 @@ body { min-height: 100vh; display: flex; flex-direction: column; }
 }
 .apply-btn:hover { background: var(--moss-lt); }
 
+/* ── EXPLORE SUBSECTIONS ────────────────────────────────────── */
+.explore-subsections { margin-bottom: 3rem; }
+.subsection { margin-bottom: 2.5rem; }
+.subsection h2 {
+  font-family: var(--serif); font-size: 1.5rem; font-weight: 600;
+  color: var(--ink); margin-bottom: 1rem;
+}
+
+.near-me-prompt {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  height: 200px; background: var(--cream); border: 1px solid var(--cream-dk);
+  border-radius: var(--r-lg); text-align: center;
+}
+.near-me-prompt p {
+  font-size: 1.1rem; color: var(--ink-soft); margin-bottom: 1rem;
+}
+
 /* ── RESULTS AREA ───────────────────────────────────────────── */
 .results-area { padding: 2.5rem 3vw; }
 
