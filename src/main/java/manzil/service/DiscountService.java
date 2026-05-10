@@ -1,5 +1,6 @@
 package manzil.service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,8 +34,8 @@ public class DiscountService
         d.setTitle(dto.getTitle());
         d.setDescription(dto.getDescription());
         d.setMinSpend(dto.getMinSpend());
-        d.setValidFrom(LocalDateTime.parse(dto.getValidFrom()));
-        d.setValidTo(LocalDateTime.parse(dto.getValidTo()));
+        d.setValidFrom(LocalDate.parse(dto.getValidFrom()));
+        d.setValidTo(LocalDate.parse(dto.getValidTo()));
         // Setting the creation time
         d.setCreatedAt(LocalDateTime.now());
 

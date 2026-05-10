@@ -1,4 +1,4 @@
-const API_BASE = 'http://localhost:8080/api';
+const API_BASE = 'https://manzil-production-73bf.up.railway.app/api';
 
 const AuthService = {
 
@@ -154,7 +154,7 @@ const BookmarkService = {
     const userId = AuthService.getUserId();
     if (!userId) return [];
     try {
-      const r = await fetch(`http://localhost:8080/bookmark/user/${userId}`);
+      const r = await fetch(`https://manzil-production-73bf.up.railway.app/bookmark/user/${userId}`);
       return r.ok ? r.json() : [];
     } catch { return []; }
   },
@@ -164,7 +164,7 @@ const BookmarkService = {
     const userId = AuthService.getUserId();
     if (!userId) return false;
     try {
-      const r = await fetch(`http://localhost:8080/bookmark`, {
+      const r = await fetch(`https://manzil-production-73bf.up.railway.app/bookmark`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId, placeId })
@@ -178,7 +178,7 @@ const BookmarkService = {
     const userId = AuthService.getUserId();
     if (!userId) return false;
     try {
-      const r = await fetch(`http://localhost:8080/bookmark/user/${userId}/place/${placeId}`, {
+      const r = await fetch(`https://manzil-production-73bf.up.railway.app/bookmark/user/${userId}/place/${placeId}`, {
         method: 'DELETE'
       });
       return r.ok;
@@ -190,7 +190,7 @@ const BookmarkService = {
     const userId = AuthService.getUserId();
     if (!userId) return false;
     try {
-      const r = await fetch(`http://localhost:8080/bookmark/user/${userId}/place/${placeId}`);
+      const r = await fetch(`https://manzil-production-73bf.up.railway.app/bookmark/user/${userId}/place/${placeId}`);
       return r.ok;
     } catch { return false; }
   }
