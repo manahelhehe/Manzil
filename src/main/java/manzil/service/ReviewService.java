@@ -2,6 +2,7 @@ package manzil.service;
 
 import jakarta.transaction.Transactional;
 import manzil.dto.ReviewCreateDTO;
+import manzil.dto.ReviewDTO;
 import manzil.exceptions.ResourceNotFoundException;
 import manzil.model.ManzilUser;
 import manzil.model.RegisteredUser;
@@ -14,8 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class ReviewService {
@@ -29,35 +30,72 @@ public class ReviewService {
     @Autowired 
     private ManzilUserRepository uRepo;
 
+    public ReviewDTO mapDto(Review r)
+    {
+        ReviewDTO dto = new ReviewDTO();
+        dto.setReviewId(r.getReviewId());
+        dto.setComments(r.getComments());
+        dto.setReviewDate(r.getReviewDate().toString());
+        dto.setLikesCount(r.getLikesCount());
+        dto.setRatingScore(r.getRatingScore());
+        dto.setPlaceId(r.getReviewPlace().getPlaceId());
+        dto.setUserId(r.getReviewUser().getUserId());
+        dto.setUserName(r.getReviewUser().getName());
+
+        return dto;
+    }
+
+    public List<ReviewDTO> mapDtoList(List<Review> reviews)
+    {
+        List<ReviewDTO> dtos = new ArrayList<>();
+        for(Review r: reviews)
+        {
+            dtos.add(mapDto(r));
+        }
+        return dtos;
+    }
+
     // Get all reviews
-    public List<Review> fetchReviews() {
-        return rRepo.findAll();
+    public List<ReviewDTO> fetchReviews()
+    {
+        return mapDtoList(rRepo.findAll());
     }
 
     // Get review by ID
-    public Review fetchReviewById(long reviewId) throws ResourceNotFoundException
+    public Review fetchReviewById(long reviewId)
     {
         return rRepo.findById(reviewId).orElseThrow(() ->
                 new ResourceNotFoundException("Review Not Found (ID: " + reviewId + ")") );
 
     }
 
+    public ReviewDTO fetchReviewDtoById(long reviewId)
+    {
+        return mapDto(fetchReviewById(reviewId));
+
+    }
+
     // Get all reviews for a specific place
+    public List<ReviewDTO> fetchReviewDtosByPlace(long placeId)
+    {
+        return mapDtoList(rRepo.findByReviewPlace_PlaceId(placeId));
+    }
+
     public List<Review> fetchReviewsByPlace(long placeId)
     {
         return rRepo.findByReviewPlace_PlaceId(placeId);
     }
 
     // Get all reviews by a specific user
-    public List<Review> getReviewsByUser(long userId)
+    public List<ReviewDTO> getReviewsByUser(long userId)
     {
-        return rRepo.findByReviewUser_UserId(userId);
+        return mapDtoList(rRepo.findByReviewUser_UserId(userId));
     }
 
 
     // Add a new review
     @Transactional
-    public Review addReview(ReviewCreateDTO dto) throws ResourceNotFoundException
+    public ReviewDTO addReview(ReviewCreateDTO dto)
     {
         Review review = new Review(dto);
 
@@ -87,12 +125,12 @@ public class ReviewService {
 
         p.setAvgRating(nAvg);
 
-        return review;
+        return mapDto(review);
     }
 
     // Update an existing review
     @Transactional
-    public Review updateReview(long reviewId, Review updatedReview) throws ResourceNotFoundException
+    public ReviewDTO updateReview(long reviewId, ReviewDTO updatedReview)
     {
         Review existing = fetchReviewById(reviewId);
 
@@ -101,21 +139,21 @@ public class ReviewService {
 
         existing.setReviewDate(LocalDate.now());
 
-        return rRepo.save(existing);
+        return mapDto(rRepo.save(existing));
     }
 
     // Like a review (increment likes)
-    public Review likeReview(long reviewId) throws ResourceNotFoundException
+    public ReviewDTO likeReview(long reviewId)
     {
         Review review = fetchReviewById(reviewId);
 
         review.setLikesCount(review.getLikesCount() + 1);
-        return rRepo.save(review);
+        return mapDto(rRepo.save(review));
     }
 
     // Delete a review
     @Transactional
-    public String deleteReview(long reviewId) throws ResourceNotFoundException
+    public String deleteReview(long reviewId)
     {
         Review review = fetchReviewById(reviewId);
 

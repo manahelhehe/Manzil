@@ -17,6 +17,8 @@
     <div class="nav-links" id="navLinks">
       <a href="index.html">Home</a>
       <a href="places.html">Explore</a>
+      <a href="places.html?open=true">Open Now</a>
+      <a href="places.html?nearby=true">Near Me</a>
     </div>
     <div class="nav-right" id="navRight">
       <button class="nav-btn-ghost" onclick="location.href='login.html'">Log in</button>
@@ -131,7 +133,9 @@
       <div class="footer-cols">
         <div>
           <h5>Discover</h5>
-          <a href="places.html">Explore</a>
+          <a href="places.html">All Places</a>
+          <a href="places.html?open=true">Open Now</a>
+          <a href="places.html?nearby=true">Near Me</a>
           <a href="places.html">Top Rated</a>
         </div>
         <div>
@@ -146,7 +150,7 @@
       </div>
     </div>
     <div class="footer-bottom">
-      <span>© 2026 Manzil</span>
+      <span>© 2025 Manzil</span>
       <span>All rights reserved</span>
     </div>
   </footer>
@@ -162,6 +166,8 @@
       const userName = userData.fullname || userData.email.split('@')[0];
       navLinks.innerHTML = `
         <a href="places.html">Explore</a>
+        <a href="places.html?open=true">Open Now</a>
+        <a href="places.html?nearby=true">Near Me</a>
         <a href="places.html?vibes=true">Vibes</a>
       `;
       navRight.innerHTML = `
@@ -199,16 +205,6 @@
 
   const hours = p => p.openingTime && p.closingTime
     ? `${p.openingTime.slice(0,5)} – ${p.closingTime.slice(0,5)}` : '';
-
-  const getPlaceImage = p => {
-    if (p.address && p.address.length > 0 && p.placeorder !== undefined) {
-      const idx = p.placeorder;
-      if (idx >= 0 && idx < p.address.length && p.address[idx].image) {
-        return p.address[idx].image;
-      }
-    }
-    return IMG;
-  };
 
   async function handleSearch() {
     const q    = document.getElementById('searchInput').value.trim();
@@ -313,19 +309,11 @@
 
         document.getElementById('nearbyGrid').innerHTML = places.slice(0,6).map(p => `
           <div class="nearby-card" onclick="location='place.html?id=${p.placeId}'">
-            <div class="nc-img" style="background-image:url('${getPlaceImage(p)}')"></div>
+            <div class="nc-img" style="background-image:url('${IMG}')"></div>
             <div class="nc-body">
               <h4>${p.name}</h4>
               <span><i class="fa fa-location-dot"></i> ${p.city}</span>
               <div class="nc-meta">${stars(p)}<span>${cost(p)}</span></div>
-              <div class="nc-actions">
-                <button class="nc-heart" onclick="event.stopPropagation(); toggleLike(${p.placeId}, this)" title="Add to liked places">
-                  <i class="fa-regular fa-heart"></i>
-                </button>
-                <button class="nc-bookmark" onclick="event.stopPropagation(); toggleBookmark(${p.placeId}, this)" title="Add to bookmarks">
-                  <i class="fa-regular fa-bookmark"></i>
-                </button>
-              </div>
             </div>
           </div>`).join('');
       } catch {
@@ -344,7 +332,7 @@
 
       document.getElementById('openList').innerHTML = places.slice(0,5).map(p => `
         <div class="open-card" onclick="location='place.html?id=${p.placeId}'">
-          <div class="oc-img" style="background-image:url('${getPlaceImage(p)}')"></div>
+          <div class="oc-img" style="background-image:url('${IMG}')"></div>
           <div class="oc-body">
             <div class="oc-top">
               <h4>${p.name}</h4>
@@ -355,14 +343,6 @@
               ${stars(p)}
               <span>${cost(p)}</span>
               <span class="oc-hrs">Until ${p.closingTime?.slice(0,5)}</span>
-            </div>
-            <div class="oc-actions">
-              <button class="oc-heart" onclick="event.stopPropagation(); toggleLike(${p.placeId}, this)" title="Add to liked places">
-                <i class="fa-regular fa-heart"></i>
-              </button>
-              <button class="oc-bookmark" onclick="event.stopPropagation(); toggleBookmark(${p.placeId}, this)" title="Add to bookmarks">
-                <i class="fa-regular fa-bookmark"></i>
-              </button>
             </div>
           </div>
           <i class="fa fa-chevron-right oc-arrow"></i>
@@ -375,24 +355,6 @@
   window.addEventListener('scroll', () => {
     document.getElementById('nav').classList.toggle('nav--scrolled', window.scrollY > 40);
   });
-
-  function toggleLike(placeId, btn) {
-    const isLiked = btn.querySelector('i').classList.contains('fa-solid');
-    if (isLiked) {
-      btn.innerHTML = '<i class="fa-regular fa-heart"></i>';
-      btn.style.color = 'var(--ink-soft)';
-    } else {
-      btn.innerHTML = '<i class="fa-solid fa-heart"></i>';
-      btn.style.color = 'var(--moss)';
-    }
-    console.log('Like toggled for place', placeId);
-  }
-
-  function toggleBookmark(placeId, btn) {
-    btn.innerHTML = '<i class="fa-solid fa-bookmark"></i>';
-    btn.style.color = 'var(--moss)';
-    console.log('Bookmark toggled for place', placeId);
-  }
 
   loadCategories();
   loadVibes();

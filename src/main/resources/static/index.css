@@ -490,15 +490,6 @@ a { text-decoration: none; }
 .nc-body h4 { font-family: var(--serif); font-size: 1.05rem; font-weight: 600; margin-bottom: .3rem; }
 .nc-body span { font-size: .78rem; color: var(--ink-soft); }
 .nc-meta { display: flex; gap: .8rem; margin-top: .5rem; font-size: .78rem; font-weight: 500; }
-.nc-actions { display: flex; gap: .4rem; margin-top: .6rem; }
-.nc-heart, .nc-bookmark {
-  background: var(--cream); border: 1.5px solid var(--cream-dk);
-  border-radius: 50%; width: 28px; height: 28px;
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer; color: var(--ink-soft); font-size: .7rem;
-  transition: color .2s, border-color .2s, background .2s;
-}
-.nc-heart:hover, .nc-bookmark:hover { border-color: var(--moss); color: var(--moss); background: var(--white); }
  
 .loc-denied {
   display: flex; flex-direction: column; align-items: center;
@@ -528,15 +519,6 @@ a { text-decoration: none; }
 .oc-city i { margin-right: .3rem; }
 .oc-meta { display: flex; gap: .8rem; font-size: .78rem; font-weight: 500; align-items: center; }
 .oc-hrs  { color: var(--brown); }
-.oc-actions { display: flex; gap: .4rem; margin-left: .6rem; }
-.oc-heart, .oc-bookmark {
-  background: var(--cream); border: 1.5px solid var(--cream-dk);
-  border-radius: 50%; width: 28px; height: 28px;
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer; color: var(--ink-soft); font-size: .7rem;
-  transition: color .2s, border-color .2s, background .2s;
-}
-.oc-heart:hover, .oc-bookmark:hover { border-color: var(--moss); color: var(--moss); background: var(--white); }
 .oc-arrow { color: var(--cream-dk); font-size: .85rem; flex-shrink: 0; }
 .open-card:hover .oc-arrow { color: var(--moss); }
  

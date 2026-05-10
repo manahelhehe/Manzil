@@ -18,6 +18,8 @@
     <div class="nav-links" id="navLinks">
       <a href="index.html">Home</a>
       <a href="places.html" class="active">Explore</a>
+      <a href="places.html?open=true">Open Now</a>
+      <a href="places.html?nearby=true">Near Me</a>
     </div>
     <div class="nav-right" id="navRight">
       <button class="nav-btn-ghost" onclick="location.href='login.html'">Log in</button>
@@ -120,21 +122,6 @@
 
     <!-- ── RESULTS ── -->
     <main class="results-area">
-      <div class="explore-subsections">
-        <section class="subsection">
-          <h2>Open Now</h2>
-          <div class="places-grid" id="openNowGrid">
-            <!-- Open now places will be loaded here -->
-          </div>
-        </section>
-        <section class="subsection">
-          <h2>Near Me</h2>
-          <div class="places-grid" id="nearMeGrid">
-            <!-- Near me places will be loaded here -->
-          </div>
-        </section>
-      </div>
-
       <div class="results-header">
         <div>
           <p class="results-eyebrow">Showing results</p>
@@ -184,17 +171,6 @@
   const hours = p => p.openingTime && p.closingTime
     ? `${p.openingTime.slice(0,5)} – ${p.closingTime.slice(0,5)}` : '';
 
-  // ── HELPER: GET PLACE IMAGE ──
-  function getPlaceImage(place) {
-    if (place.address && place.address.length > 0 && place.placeorder !== undefined) {
-      const idx = place.placeorder;
-      if (idx >= 0 && idx < place.address.length && place.address[idx].image) {
-        return place.address[idx].image;
-      }
-    }
-    return IMG; // Fallback to default image
-  }
-
   // ── LOAD ALL PLACES ──
   async function loadPlaces() {
     try {
@@ -224,8 +200,6 @@
 
       allPlaces = places;
       renderPlaces(allPlaces);
-      renderOpenNow();
-      renderNearMe();
       loadVibeFilters();
     } catch {
       document.getElementById('placesGrid').innerHTML = '<p class="err-msg">Could not load places. Bilals busy eating Haleem?</p>';
@@ -246,16 +220,11 @@
     grid.innerHTML = places.map(p => `
       <div class="place-card" onclick="location='/place.html?id=${p.placeId}'">
         <div class="pc-img-wrap">
-          <img src="${getPlaceImage(p)}" alt="${p.name}" loading="lazy"/>
+          <img src="${IMG}" alt="${p.name}" loading="lazy"/>
           ${p.avgRating > 0 ? `<span class="pc-rating">★ ${p.avgRating.toFixed(1)}</span>` : ''}
-          <div class="pc-buttons">
-            <button class="pc-heart" onclick="event.stopPropagation(); toggleLike(${p.placeId}, this)" title="Add to liked places">
-              <i class="fa-regular fa-heart"></i>
-            </button>
-            <button class="pc-bookmark" onclick="event.stopPropagation(); toggleBookmark(${p.placeId}, this)" title="Add to bookmarks">
-              <i class="fa-regular fa-bookmark"></i>
-            </button>
-          </div>
+          <button class="pc-bookmark" onclick="event.stopPropagation(); toggleBookmark(${p.placeId}, this)">
+            <i class="fa-regular fa-bookmark"></i>
+          </button>
         </div>
         <div class="pc-body">
           <div class="pc-meta">
@@ -271,63 +240,6 @@
         </div>
       </div>
     `).join('');
-  }
-
-  // ── RENDER OPEN NOW ──
-  function renderOpenNow() {
-    const now = new Date();
-    const nowMins = now.getHours() * 60 + now.getMinutes();
-    const openPlaces = allPlaces.filter(p => {
-      if (!p.openingTime || !p.closingTime) return false;
-      const [oh, om] = p.openingTime.split(':').map(Number);
-      const [ch, cm] = p.closingTime.split(':').map(Number);
-      return nowMins >= oh * 60 + om && nowMins <= ch * 60 + cm;
-    }).slice(0, 4); // Show first 4
-
-    const grid = document.getElementById('openNowGrid');
-    if (openPlaces.length === 0) {
-      grid.innerHTML = '<p>No places open right now.</p>';
-      return;
-    }
-    grid.innerHTML = openPlaces.map(p => `
-      <div class="place-card" onclick="location='/place.html?id=${p.placeId}'">
-        <div class="pc-img-wrap">
-          <img src="${getPlaceImage(p)}" alt="${p.name}" loading="lazy"/>
-          ${p.avgRating > 0 ? `<span class="pc-rating">★ ${p.avgRating.toFixed(1)}</span>` : ''}
-          <div class="pc-buttons">
-            <button class="pc-heart" onclick="event.stopPropagation(); toggleLike(${p.placeId}, this)" title="Add to liked places">
-              <i class="fa-regular fa-heart"></i>
-            </button>
-            <button class="pc-bookmark" onclick="event.stopPropagation(); toggleBookmark(${p.placeId}, this)" title="Add to bookmarks">
-              <i class="fa-regular fa-bookmark"></i>
-            </button>
-          </div>
-        </div>
-        <div class="pc-body">
-          <div class="pc-meta">
-            <span class="pc-city"><i class="fa fa-location-dot"></i> ${p.city}</span>
-            ${p.category ? `<span class="pc-cat">${p.category.name}</span>` : ''}
-          </div>
-          <h3 class="pc-name">${p.name}</h3>
-          <p class="pc-desc">${p.description ? p.description.slice(0, 80) + '…' : ''}</p>
-          <div class="pc-footer">
-            <span class="pc-cost">${cost(p)}</span>
-            ${p.openingTime ? `<span class="pc-hours">${hours(p)}</span>` : ''}
-          </div>
-        </div>
-      </div>
-    `).join('');
-  }
-
-  // ── RENDER NEAR ME ──
-  function renderNearMe() {
-    const grid = document.getElementById('nearMeGrid');
-    grid.innerHTML = `
-      <div class="near-me-prompt">
-        <p>Find places near you</p>
-        <button class="btn btn--sm" onclick="requestNearby()">Allow Location</button>
-      </div>
-    `;
   }
 
   // ── FILTERS ──
@@ -400,20 +312,6 @@
     console.log('Bookmark toggled for place', placeId);
   }
 
-  // ── LIKED PLACES ──
-  function toggleLike(placeId, btn) {
-    const isLiked = btn.querySelector('i').classList.contains('fa-solid');
-    if (isLiked) {
-      btn.innerHTML = '<i class="fa-regular fa-heart"></i>';
-      btn.style.color = 'var(--ink-soft)';
-    } else {
-      btn.innerHTML = '<i class="fa-solid fa-heart"></i>';
-      btn.style.color = 'var(--moss)';
-    }
-    // POST /like or DELETE /like — needs userId from session/localStorage once auth is implemented
-    console.log('Like toggled for place', placeId);
-  }
-
   // ── RANGE SLIDER ──
   function updateRange() {
     const min = parseInt(document.getElementById('minCost').value);
@@ -470,47 +368,13 @@
       const {latitude:lat, longitude:lng} = pos.coords;
       try {
         const nearby = await fetch(`${BASE}/places/near?lat=${lat}&lng=${lng}&radius=5000`).then(r=>r.json());
-        renderNearMePlaces(nearby);
+        allPlaces = nearby;
+        document.getElementById('resultsTitle').textContent = 'Near You';
+        renderPlaces(nearby);
       } catch {}
     }, () => {
-      document.getElementById('nearMeGrid').innerHTML = '<p>Location access denied. Please enable location to find places near you.</p>';
+      document.getElementById('resultsTitle').textContent = 'Near You (location denied)';
     });
-  }
-
-  function renderNearMePlaces(places) {
-    const grid = document.getElementById('nearMeGrid');
-    if (places.length === 0) {
-      grid.innerHTML = '<p>No places found near you.</p>';
-      return;
-    }
-    grid.innerHTML = places.slice(0, 4).map(p => `
-      <div class="place-card" onclick="location='/place.html?id=${p.placeId}'">
-        <div class="pc-img-wrap">
-          <img src="${getPlaceImage(p)}" alt="${p.name}" loading="lazy"/>
-          ${p.avgRating > 0 ? `<span class="pc-rating">★ ${p.avgRating.toFixed(1)}</span>` : ''}
-          <div class="pc-buttons">
-            <button class="pc-heart" onclick="event.stopPropagation(); toggleLike(${p.placeId}, this)" title="Add to liked places">
-              <i class="fa-regular fa-heart"></i>
-            </button>
-            <button class="pc-bookmark" onclick="event.stopPropagation(); toggleBookmark(${p.placeId}, this)" title="Add to bookmarks">
-              <i class="fa-regular fa-bookmark"></i>
-            </button>
-          </div>
-        </div>
-        <div class="pc-body">
-          <div class="pc-meta">
-            <span class="pc-city"><i class="fa fa-location-dot"></i> ${p.city}</span>
-            ${p.category ? `<span class="pc-cat">${p.category.name}</span>` : ''}
-          </div>
-          <h3 class="pc-name">${p.name}</h3>
-          <p class="pc-desc">${p.description ? p.description.slice(0, 80) + '…' : ''}</p>
-          <div class="pc-footer">
-            <span class="pc-cost">${cost(p)}</span>
-            ${p.openingTime ? `<span class="pc-hours">${hours(p)}</span>` : ''}
-          </div>
-        </div>
-      </div>
-    `).join('');
   }
 
   function updateNavBar() {
@@ -524,6 +388,8 @@
       navLinks.innerHTML = `
         <a href="index.html">Home</a>
         <a href="places.html" class="active">Explore</a>
+        <a href="places.html?open=true">Open Now</a>
+        <a href="places.html?nearby=true">Near Me</a>
         <a href="places.html?vibes=true">Vibes</a>
       `;
       navRight.innerHTML = `
@@ -569,7 +435,9 @@
       <div class="footer-cols">
         <div>
           <h5>Discover</h5>
-          <a href="places.html">Explore</a>
+          <a href="places.html">All Places</a>
+          <a href="places.html?open=true">Open Now</a>
+          <a href="places.html?nearby=true">Near Me</a>
           <a href="places.html">Top Rated</a>
         </div>
 

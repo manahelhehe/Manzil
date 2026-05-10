@@ -2,6 +2,7 @@ package manzil.controller;
 
 import jakarta.validation.Valid;
 import manzil.dto.ReviewCreateDTO;
+import manzil.dto.ReviewDTO;
 import manzil.exceptions.ResourceNotFoundException;
 import manzil.model.Review;
 import manzil.service.ReviewService;
@@ -23,29 +24,29 @@ public class ReviewController {
 
     // GET all reviews
     @GetMapping
-    public List<Review> getAllReviews() {
+    public List<ReviewDTO> getAllReviews() {
         return service.fetchReviews();
     }
 
     // GET review by ID
     @GetMapping("/{id}")
-    public ResponseEntity<Review> getReviewById(@PathVariable long id) throws ResourceNotFoundException
+    public ResponseEntity<ReviewDTO> getReviewById(@PathVariable long id) throws ResourceNotFoundException
     {
-        Review review = service.fetchReviewById(id);
+        ReviewDTO review = service.fetchReviewDtoById(id);
 
         return ResponseEntity.ok(review);
     }
 
     // GET all reviews for a place
     @GetMapping("/place/{placeId}")
-    public List<Review> getReviewsByPlace(@PathVariable long placeId)
+    public List<ReviewDTO> getReviewsByPlace(@PathVariable long placeId)
     {
-        return service.fetchReviewsByPlace(placeId);
+        return service.fetchReviewDtosByPlace(placeId);
     }
 
     // GET all reviews by a user
     @GetMapping("/user/{userId}")
-    public List<Review> getReviewsByUser(@PathVariable long userId)
+    public List<ReviewDTO> getReviewsByUser(@PathVariable long userId)
     {
         return service.getReviewsByUser(userId);
     }
@@ -59,9 +60,9 @@ public class ReviewController {
 
     // POST add a new review
     @PostMapping
-    public ResponseEntity<Review> addReview(@Valid @RequestBody ReviewCreateDTO dto) throws ResourceNotFoundException
+    public ResponseEntity<ReviewDTO> addReview(@Valid @RequestBody ReviewCreateDTO dto) throws ResourceNotFoundException
     {
-        Review savedReview = service.addReview(dto);
+        ReviewDTO savedReview = service.addReview(dto);
 
         URI path = ServletUriComponentsBuilder
                 .fromCurrentRequest() // Starts with /api/places
@@ -74,17 +75,16 @@ public class ReviewController {
 
     // PUT update a review
     @PutMapping("/{id}")
-    public ResponseEntity<Review> updateReview(@PathVariable long id, @RequestBody Review updatedReview) throws ResourceNotFoundException {
+    public ResponseEntity<ReviewDTO> updateReview(@PathVariable long id, @RequestBody ReviewDTO updatedReview)  {
 
-        Review updated = service.updateReview(id, updatedReview);
+        ReviewDTO updated = service.updateReview(id, updatedReview);
         return ResponseEntity.ok(updated);
     }
 
     // PUT like a review
     @PutMapping("/{id}/like")
-    public ResponseEntity<Review> likeReview(@PathVariable long id) throws ResourceNotFoundException {
-        Review liked = service.likeReview(id);
-        return ResponseEntity.ok(liked);
+    public ResponseEntity<ReviewDTO> likeReview(@PathVariable long id)  {
+        return ResponseEntity.ok(service.likeReview(id));
     }
 
     // DELETE a review

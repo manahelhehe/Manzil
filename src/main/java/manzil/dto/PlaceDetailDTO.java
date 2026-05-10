@@ -26,4 +26,6 @@ public class PlaceDetailDTO
     // -- Flattened Vibe List --
     private List<String> vibes;
 
+    private List<String> imgUrls;
+
 }
