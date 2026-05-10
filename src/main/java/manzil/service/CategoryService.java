@@ -1,7 +1,9 @@
 package manzil.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import manzil.exceptions.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -35,6 +37,20 @@ public class CategoryService {
         existing.setName(updatedCategory.getName());
         existing.setDescription(updatedCategory.getDescription());
         return repo.save(existing);
+    }
+
+    public List<Category> mapCategories(List<String> names)
+    {
+        List<Category> categories = new ArrayList<>();
+
+        for(String s: names)
+        {
+            Category c = repo.findByName(s).orElseThrow(() ->
+                            new ResourceNotFoundException("Category Not Found! (Name: " + s + ")" ));
+            categories.add(c);
+        }
+
+        return categories;
     }
 
 

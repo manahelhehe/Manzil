@@ -89,9 +89,8 @@ public class ReviewController {
 
     // DELETE a review
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteReview(@PathVariable long id) throws ResourceNotFoundException
+    public ResponseEntity<String> deleteReview(@PathVariable long id) throws ResourceNotFoundException
     {
-        service.deleteReview(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(service.deleteReview(id));
     }
 }

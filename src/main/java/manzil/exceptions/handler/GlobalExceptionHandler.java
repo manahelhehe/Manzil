@@ -25,7 +25,7 @@ public class GlobalExceptionHandler
     }
 
     @ExceptionHandler(InvalidCredentialsException.class)
-    public ResponseEntity<String> handleInvalidCredentials(UserAlreadyExistsException e)
+    public ResponseEntity<String> handleInvalidCredentials(InvalidCredentialsException e)
     {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
     }

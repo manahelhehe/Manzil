@@ -14,13 +14,13 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true) // Important when using @Data with inheritance
 public class RegisteredUser extends ManzilUser
 {
-    @ElementCollection
-    @CollectionTable(
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
             name = "user_favourite_categories",
-            joinColumns = @JoinColumn(name = "user_id")
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "category_id")
     )
-    @Column(name = "favourite_category")
-    private List<String> favouriteCategories = new ArrayList<>();
+    private List<Category> favouriteCategories = new ArrayList<>();
 
     @OneToMany(mappedBy = "reviewUser", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Review> reviews;

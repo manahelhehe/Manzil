@@ -3,6 +3,7 @@ package manzil.controller;
 import jakarta.validation.Valid;
 import manzil.dto.UserRegistrationDTO;
 import manzil.dto.UserResponseDTO;
+import manzil.dto.UserUpdateDTO;
 import manzil.model.Admin;
 import manzil.model.ManzilUser;
 import manzil.model.RegisteredUser;
@@ -58,7 +59,7 @@ public class ManzilUserController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ManzilUser> updateUser(@PathVariable long id, @RequestBody ManzilUser updatedUser) {
+    public ResponseEntity<UserResponseDTO> updateUser(@PathVariable long id, @RequestBody UserUpdateDTO updatedUser) {
         return ResponseEntity.ok(service.updateUser(id, updatedUser));
     }
 

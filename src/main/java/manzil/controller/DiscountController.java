@@ -3,6 +3,7 @@ package manzil.controller;
 import java.net.URI;
 import java.util.List;
 
+import jakarta.validation.Valid;
 import manzil.dto.DiscountRequestDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +22,7 @@ public class DiscountController {
     private DiscountService service;
 
     @PostMapping
-    public ResponseEntity<DiscountOffer> addDiscount(@RequestBody DiscountRequestDTO dto)
+    public ResponseEntity<DiscountOffer> addDiscount(@Valid @RequestBody DiscountRequestDTO dto)
     {
         DiscountOffer createdDiscount = service.createOffer(dto);
 

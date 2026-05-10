@@ -7,6 +7,6 @@ import java.io.Serializable;
 @Data
 public class BookmarkId implements Serializable
 {
-    private int user;
-    private int place;
+    private long user;
+    private long place;
 }

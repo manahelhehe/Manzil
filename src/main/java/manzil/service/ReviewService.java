@@ -115,7 +115,7 @@ public class ReviewService {
 
     // Delete a review
     @Transactional
-    public Optional<String> deleteReview(long reviewId) throws ResourceNotFoundException
+    public String deleteReview(long reviewId) throws ResourceNotFoundException
     {
         Review review = fetchReviewById(reviewId);
 
@@ -131,7 +131,7 @@ public class ReviewService {
             p.setAvgRating(getAverageRatingForPlace(p.getPlaceId()));
 
         pRepo.save(p);
-        return Optional.of("Review Deleted Successfully (ID: " + reviewId + ")");
+        return ("Review Deleted Successfully (ID: " + reviewId + ")");
     }
 
     // Get average rating for a place

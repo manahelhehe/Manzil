@@ -199,8 +199,12 @@ public class PlaceService
     public void postImages(long placeId, List<String> urls)
     {
         Place p = fetchPlaceById(placeId);
+        int count;
 
-        int count = p.getImages().size();
+        if(p.getImages() != null)
+            count = p.getImages().size();
+        else
+            count = 0;
 
         for(String url: urls)
         {

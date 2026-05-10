@@ -3,6 +3,7 @@ package manzil.dto;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Data
 public class UserResponseDTO
@@ -13,6 +14,8 @@ public class UserResponseDTO
     private String phone;
     private String profilePhoto;
     private LocalDate dateJoined;
+    private List<String> favouriteCategories;
     private String role;
+
 }
 

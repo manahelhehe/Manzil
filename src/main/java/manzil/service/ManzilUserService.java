@@ -3,13 +3,15 @@ package manzil.service;
 import jakarta.transaction.Transactional;
 import manzil.dto.UserRegistrationDTO;
 import manzil.dto.UserResponseDTO;
+import manzil.dto.UserUpdateDTO;
 import manzil.exceptions.InvalidCredentialsException;
 import manzil.exceptions.ResourceNotFoundException;
 import manzil.exceptions.UserAlreadyExistsException;
 import manzil.model.Admin;
+import manzil.model.Category;
 import manzil.model.ManzilUser;
 import manzil.model.RegisteredUser;
-import manzil.repository.AdminRespository;
+import manzil.repository.AdminRepository;
 import manzil.repository.ManzilUserRepository;
 import manzil.repository.RegisteredUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +29,9 @@ public class ManzilUserService {
     @Autowired
     private RegisteredUserRepository uRepo;
     @Autowired
-    private AdminRespository aRepo;
+    private AdminRepository aRepo;
+    @Autowired
+    private CategoryService cService;
 
     public UserResponseDTO registerUser(UserRegistrationDTO dto)
     {
@@ -39,7 +43,7 @@ public class ManzilUserService {
         user.setEmail(dto.getEmail());
         user.setPassword(dto.getPassword());
         user.setPhone(dto.getPhone());
-        user.setFavouriteCategories(dto.getFavouriteCategories());
+        user.setFavouriteCategories(cService.mapCategories(dto.getFavouriteCategories()));
         user.setDateJoined(LocalDate.now()); // Ensure the member-since feature works!
 
         RegisteredUser savedUser = uRepo.save(user);
@@ -91,7 +95,21 @@ public class ManzilUserService {
         if(user instanceof Admin)
             dto.setRole("ADMIN");
         else
+        {
             dto.setRole("USER");
+            RegisteredUser regUser = (RegisteredUser) user;
+            List<Category> categories = regUser.getFavouriteCategories();
+
+            if(categories != null)
+            {
+                List<String> names = new ArrayList<>();
+                for(Category c: categories)
+                {
+                    names.add(c.getName());
+                }
+                dto.setFavouriteCategories(names);
+            }
+        }
 
         return dto;
     }
@@ -142,7 +160,7 @@ public class ManzilUserService {
     }
 
     @Transactional
-    public ManzilUser updateUser(long userId, ManzilUser updatedUser)
+    public UserResponseDTO updateUser(long userId, UserUpdateDTO updatedUser)
     {
         ManzilUser existing = fetchUserById(userId);
 
@@ -161,21 +179,18 @@ public class ManzilUserService {
         if(existing instanceof RegisteredUser)
         {
             RegisteredUser regExisting = (RegisteredUser) existing;
-            if(updatedUser instanceof RegisteredUser)
-            {
-                RegisteredUser user = (RegisteredUser) updatedUser;
 
-                if(user.getFavouriteCategories() != null)
-                    regExisting.setFavouriteCategories(user.getFavouriteCategories());
-            }
+            if(updatedUser.getFavouriteCategories() != null)
+                regExisting.setFavouriteCategories(cService.mapCategories(updatedUser.getFavouriteCategories()));
 
-            return uRepo.save(regExisting);
+            return convertToResponse(uRepo.save(regExisting));
         }
 
         else
-            return aRepo.save((Admin) existing);
+            return convertToResponse(aRepo.save((Admin) existing));
     }
 
+    @Transactional
     public void deleteUser(long userId) {
         repo.delete(fetchUserById(userId));
     }
