@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class LikedPlaceService 
+public class LikedPlaceService
 {
     @Autowired
     private LikedPlaceRepository lRepo;
@@ -58,12 +58,10 @@ public class LikedPlaceService
             throw new ResourceNotFoundException("User is Not Registered (ID: " + userId + ")");
 
         List<LikedPlace> places = lRepo.findByUser_UserId(userId);
-        List<PlaceCardDTO> dtos = new ArrayList<>();
-        for(LikedPlace p: places)
-        {
-            dtos.add(pService.convertToCard(pService.fetchPlaceById(p.getPlace().getPlaceId())));
-        }
-        return dtos;
+
+        return places.stream()
+                .map(lp -> pService.convertToCard(lp.getPlace()))
+                .toList();
     }
 
     public LikedPlace findLikedPlaceByUserAndPlace(long userId, long placeId) throws ResourceNotFoundException
@@ -74,24 +72,25 @@ public class LikedPlaceService
 
     }
 
-    public String toggleLike(long uId, long pId) throws ResourceNotFoundException {
+    public LikedPlaceResponseDTO toggleLike(long uId, long pId) {
+        return lRepo.findByUser_UserIdAndPlace_PlaceId(uId, pId)
+                .map(like -> {
+                    LikedPlaceResponseDTO dto = new LikedPlaceResponseDTO();
+                    dto.setLiked(false);
+                    dto.setPlaceId(pId);
+                    dto.setUserId(uId);
 
-        return lRepo.findByUser_UserIdAndPlace_PlaceId(uId, pId).map(like ->
-        {
-            lRepo.delete(like);
-            return "Place Unliked Successfully!";
-        })
-        .orElseGet(() ->
-        {
-            LikedPlace lp = new LikedPlace();
-
-            RegisteredUser u = uService.fetchRegisteredUserById(uId);
-            Place p = pService.fetchPlaceById(pId);
-            lp.setPlace(p);
-            lp.setUser(u);
-            lRepo.save(lp);
-            return "Place Liked Successfully";
-        }
-        );
+                    lRepo.delete(like);
+                    return dto;
+                })
+                .orElseGet(() -> {
+                    LikedPlace lp = new LikedPlace();
+                    lp.setPlace(pService.fetchPlaceById(pId));
+                    lp.setUser(uService.fetchRegisteredUserById(uId));
+                    lRepo.save(lp);
+                    return mapDto(lp);
+                });
     }
+
 }
+

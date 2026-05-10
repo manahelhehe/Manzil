@@ -1,5 +1,6 @@
 package manzil.model;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -28,8 +29,8 @@ public class DiscountOffer {
 
     private double minSpend;
 
-    private LocalDateTime validFrom;
-    private LocalDateTime validTo;
+    private LocalDate validFrom;
+    private LocalDate validTo;
     private LocalDateTime createdAt;
 
     private int percentage;
