@@ -64,6 +64,33 @@
   text-decoration: underline;
 }
 
+.btn {
+  display: inline-block;
+  padding: 0.75rem 2rem;
+  background: var(--moss);
+  color: var(--white);
+  border: none;
+  border-radius: var(--r-sm);
+  font-family: var(--sans);
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.btn:hover {
+  background: var(--moss-lt);
+}
+
+.btn--primary {
+  background: var(--moss);
+}
+
+.btn--sm {
+  padding: 0.5rem 1.5rem;
+  font-size: 0.9rem;
+}
+
 /* ── FOOTER ───────────────────────────────────────────────────────────────── */
 .footer { background: var(--dark); color: var(--cream); padding: 5rem 6vw 2.5rem; }
 .footer-logo { font-size: 2rem; color: var(--cream); }
