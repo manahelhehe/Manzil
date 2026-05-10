@@ -13,6 +13,6 @@ public class SpatialUtil
 
     public static Point mapLocation(double lat, double lng)
     {
-        return geoFactory.createPoint(new Coordinate(lat, lng));
+        return geoFactory.createPoint(new Coordinate(lng, lat));
     }
 }
