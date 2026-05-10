@@ -1,10 +1,9 @@
 package manzil.dto;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.Data;
+
+import java.util.List;
 
 @Data
 public class UserRegistrationDTO
@@ -27,4 +26,7 @@ public class UserRegistrationDTO
     @Size(max = 18, message = "Password cannot be greater than 18 characters!")
     @NotBlank(message = "Password cannot be empty!")
     private String password;
-}
+
+    @NotEmpty(message = "Please select at least 1 category!")
+    private List<String> favouriteCategories;
+ }

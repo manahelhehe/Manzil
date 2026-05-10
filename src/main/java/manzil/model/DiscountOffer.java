@@ -11,8 +11,10 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
 import jakarta.persistence.ManyToMany;
+import lombok.Data;
 
 @Entity
+@Data
 @Inheritance(strategy = InheritanceType.JOINED)
 public class DiscountOffer {
     @Id
@@ -25,7 +27,6 @@ public class DiscountOffer {
     private String description;
 
     private double minSpend;
-    private boolean active;
 
     private LocalDateTime validFrom;
     private LocalDateTime validTo;

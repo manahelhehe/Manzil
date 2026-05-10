@@ -6,6 +6,7 @@ import lombok.EqualsAndHashCode;
 
 import java.time.LocalDate;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -13,6 +14,13 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true) // Important when using @Data with inheritance
 public class RegisteredUser extends ManzilUser
 {
+    @ElementCollection
+    @CollectionTable(
+            name = "user_favourite_categories",
+            joinColumns = @JoinColumn(name = "user_id")
+    )
+    @Column(name = "favourite_category")
+    private List<String> favouriteCategories = new ArrayList<>();
 
     @OneToMany(mappedBy = "reviewUser", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Review> reviews;

@@ -19,6 +19,8 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/users")
+@CrossOrigin(origins = "*")
+
 public class ManzilUserController {
 
     @Autowired
@@ -66,14 +68,28 @@ public class ManzilUserController {
         return ResponseEntity.noContent().build();
     }
 
+    @PostMapping("/admin-creation")
+    public ResponseEntity<UserResponseDTO> createAdmin(@Valid @RequestBody UserRegistrationDTO dto)
+    {
+        UserResponseDTO admin = service.registerAdmin(dto);
+
+        URI path = ServletUriComponentsBuilder.
+                fromCurrentRequest().
+                path("/admin/{id}").
+                buildAndExpand(admin.getUserId()).
+                toUri();
+
+        return ResponseEntity.created(path).body(admin);
+    }
+
     @PostMapping("/register")
     public ResponseEntity<UserResponseDTO> register(@Valid @RequestBody UserRegistrationDTO dto)
     {
         UserResponseDTO u = service.registerUser(dto);
 
         URI path = ServletUriComponentsBuilder.
-                fromCurrentContextPath().
-                path("/api/users/{id}").
+                fromCurrentRequest().
+                path("/{id}").
                 buildAndExpand(u.getUserId()).toUri();
 
         return ResponseEntity.created(path).body(u);
