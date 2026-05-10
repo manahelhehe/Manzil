@@ -13,13 +13,13 @@ public class PlaceDetailDTO
     private String city;
     private String openingTime;
     private String closingTime;
-    private int minCost = -1;
-    private int maxCost = -1;
-    private double latitude;
-    private double longitude;
+    private Integer minCost = -1;
+    private Integer maxCost = -1;
+    private Double latitude;
+    private Double longitude;
 
     // -- Flattened Category Data --
-    private int categoryId;
+    private Integer categoryId;
     private String cName;
     private String cDescription;
 

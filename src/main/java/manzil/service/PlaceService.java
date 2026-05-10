@@ -1,7 +1,9 @@
 package manzil.service;
 
 import jakarta.transaction.Transactional;
+import manzil.dto.PlaceCardDTO;
 import manzil.dto.PlaceCreateDTO;
+import manzil.dto.PlaceDetailDTO;
 import manzil.exceptions.ResourceNotFoundException;
 import manzil.model.*;
 import manzil.repository.CategoryRepository;
@@ -26,8 +28,69 @@ public class PlaceService
     private VibeRepository vrepo;
     @Autowired
     private ManzilUserService uService;
+    @Autowired
+    private CategoryService cService;
+    @Autowired
+    private VibeService vService;
 
-    public List<Place> fetchPlaces() {return repo.findAll();}
+    public PlaceCardDTO convertToCard(Place p)
+    {
+        PlaceCardDTO dto = new PlaceCardDTO();
+        dto.setName(p.getName());
+        dto.setPlaceId(p.getPlaceId());
+        dto.setCity(p.getCity());
+        dto.setCategory(p.getCategory().getName());
+
+        return dto;
+    }
+
+    public PlaceDetailDTO convertToDetail(Place p)
+    {
+        PlaceDetailDTO dto = new PlaceDetailDTO();
+        dto.setPlaceId(p.getPlaceId());
+        dto.setName(p.getName());
+        dto.setDescription(p.getDescription());
+        dto.setCity(p.getCity());
+        dto.setOpeningTime(p.getOpeningTime().toString());
+        dto.setClosingTime(p.getClosingTime().toString());
+        dto.setMinCost(p.getMinCost());
+        dto.setMaxCost(p.getMaxCost());
+
+        if (p.getLocation() != null)
+        {
+            dto.setLongitude(p.getLocation().getX());
+            dto.setLatitude(p.getLocation().getY());
+        }
+
+        dto.setCategoryId(p.getCategory().getCategoryId());
+        dto.setCName(p.getCategory().getName());
+        dto.setCDescription(p.getCategory().getDescription());
+
+        if(p.getVibe()!=null)
+        {
+            List<String> vibes = new ArrayList<>();
+            for(Vibe v: p.getVibe())
+            {
+                vibes.add(v.getName());
+            }
+            dto.setVibes(vibes);
+        }
+
+        return dto;
+    }
+
+    public List<PlaceCardDTO> fetchPlaces()
+    {
+        List<Place> places = repo.findAll();
+        List<PlaceCardDTO> dtos = new ArrayList<>();
+
+        for(Place p: places)
+        {
+            dtos.add(convertToCard(p));
+        }
+
+        return dtos;
+    }
 
     public Place fetchPlaceById(long id) throws ResourceNotFoundException
     {
@@ -35,32 +98,80 @@ public class PlaceService
                 new ResourceNotFoundException("Place Not Found (ID: " + id + ")"));
     }
 
-    public List<Place> fetchOpenPlaces()
+    public PlaceDetailDTO fetchPlaceDTOById(long id)
     {
-        return repo.findByOpeningTimeBeforeAndClosingTimeAfter(LocalTime.now(), LocalTime.now());
+        Place p = repo.findById(id).orElseThrow(() ->
+                new ResourceNotFoundException("Place Not Found (ID: " + id + ")"));
+
+        return convertToDetail(p);
     }
 
-    public List<Place> fetchNearPlaces(double lat, double lng, double radius)
+    public List<PlaceCardDTO> fetchOpenPlaces()
     {
-        return repo.findPlaceByLocation(mapLocation(lat, lng), radius);
+        List<Place> places = repo.findByOpeningTimeBeforeAndClosingTimeAfter(LocalTime.now(), LocalTime.now());
+        List<PlaceCardDTO> dtos = new ArrayList<>();
+
+        for(Place p: places)
+        {
+            dtos.add(convertToCard(p));
+        }
+
+        return dtos;
     }
 
-    public List<Place> fetchPlacesByVibe(int vibeID)
+    public List<PlaceCardDTO> fetchNearPlaces(double lat, double lng, double radius)
     {
-        return repo.findPlaceByVibeVibeId(vibeID);
+        List<Place> places = repo.findPlaceByLocation(mapLocation(lat, lng), radius);
+        List<PlaceCardDTO> dtos = new ArrayList<>();
+
+        for(Place p: places)
+        {
+            dtos.add(convertToCard(p));
+        }
+
+        return dtos;
     }
 
-    public List<Place> fetchPlacesByCategory(int categoryID)
+    public List<PlaceCardDTO> fetchPlacesByVibe(int vibeID)
     {
-        return repo.findPlaceByCategoryCategoryId(categoryID);
+        List<Place> places = repo.findPlaceByVibeVibeId(vibeID);
+        List<PlaceCardDTO> dtos = new ArrayList<>();
+
+        for(Place p: places)
+        {
+            dtos.add(convertToCard(p));
+        }
+
+        return dtos;
     }
 
-    public List<Place> fetchPlacesByCity(String city)
+    public List<PlaceCardDTO> fetchPlacesByCategory(int categoryID)
     {
-        return repo.findPlaceByCity(city);
+        List<Place> places = repo.findPlaceByCategoryCategoryId(categoryID);
+        List<PlaceCardDTO> dtos = new ArrayList<>();
+
+        for(Place p: places)
+        {
+            dtos.add(convertToCard(p));
+        }
+
+        return dtos;
     }
 
-    public List<Place> findPlace(String query)
+    public List<PlaceCardDTO> fetchPlacesByCity(String city)
+    {
+        List<Place> places = repo.findPlaceByCity(city);
+        List<PlaceCardDTO> dtos = new ArrayList<>();
+
+        for(Place p: places)
+        {
+            dtos.add(convertToCard(p));
+        }
+
+        return dtos;
+    }
+
+    public List<PlaceCardDTO> findPlace(String query)
     {
         List<Place> placesByName = repo.findByNameContainingIgnoreCase(query);
         List<Place> placesByDescription = repo.findByDescriptionContainingIgnoreCase(query);
@@ -71,11 +182,19 @@ public class PlaceService
         results.addAll(placesByDescription);
         results.addAll(placesByCity);
 
-        return new ArrayList<>(results);
+        List<Place> places = new ArrayList<>(results);
+        List<PlaceCardDTO> dtos = new ArrayList<>();
+
+        for(Place p: places)
+        {
+            dtos.add(convertToCard(p));
+        }
+
+        return dtos;
     }
 
     @Transactional  // Ensures a transactional process; either EVERYTHING executes or NOTHING does
-    public Place updatePlace(long id, Place updatedPlace) throws ResourceNotFoundException
+    public PlaceDetailDTO updatePlace(long id, PlaceDetailDTO updatedPlace)
     {
         Place existingPlace = fetchPlaceById(id);
 
@@ -89,10 +208,10 @@ public class PlaceService
             existingPlace.setCity(updatedPlace.getCity());
 
         if(updatedPlace.getOpeningTime() != null)
-            existingPlace.setOpeningTime(updatedPlace.getOpeningTime());
+            existingPlace.setOpeningTime(LocalTime.parse(updatedPlace.getOpeningTime()));
 
         if(updatedPlace.getClosingTime() != null)
-            existingPlace.setClosingTime(updatedPlace.getClosingTime());
+            existingPlace.setClosingTime(LocalTime.parse(updatedPlace.getClosingTime()));
 
         if(updatedPlace.getMinCost() != null)
             existingPlace.setMinCost(updatedPlace.getMinCost());
@@ -100,40 +219,35 @@ public class PlaceService
         if(updatedPlace.getMaxCost() != null)
             existingPlace.setMaxCost(updatedPlace.getMaxCost());
 
-        if(updatedPlace.getLocation() != null)
-            existingPlace.setLocation(updatedPlace.getLocation());
+        if(updatedPlace.getLatitude() != null && updatedPlace.getLongitude() != null)
+            existingPlace.setLocation(mapLocation(updatedPlace.getLatitude(), updatedPlace.getLongitude()));
 
-        if(updatedPlace.getCategory() != null)
+        if(updatedPlace.getCategoryId() != null)
         {
-            int cId = updatedPlace.getCategory().getCategoryId();  // Gets the ID of the new category
-            Category category = crepo.findById(cId).orElseThrow(() ->
-                    new ResourceNotFoundException("Category Not Found! (ID: " + cId + ")"));
+            int cId = updatedPlace.getCategoryId();  // Gets the ID of the new category
+            Category category = cService.getCategoryById(cId);
 
-            existingPlace.setCategory(category);  /* If found, the category will be extracted from the optional
-                                                         and set as the category for the existing Place */
-        }
+            existingPlace.setCategory(category);   // If found, the category will be extracted from the optional
+                                                  //     and set as the category for the existing Place
+    }
+        if(updatedPlace.getVibes() != null)
+    {
+        List<Vibe> newVibes = new ArrayList<>();
 
-        if(updatedPlace.getVibe() != null)
+        for(String v: updatedPlace.getVibes()) // Checks for all vibes within the Vibe List of the updatedPlace
         {
-            List<Vibe> newVibes = new ArrayList<>();
+            if(!vrepo.existsByName(v))
+                throw new ResourceNotFoundException("Vibe Not Found! (Name: " + v + ")");
 
-            for(Vibe v: updatedPlace.getVibe()) // Checks for all vibes within the Vibe List of the updatedPlace
-            {
-                int vId = v.getVibeId();
-
-                if(!vrepo.existsById(vId))
-                    throw new ResourceNotFoundException("Vibe Not Found! (ID: " + vId + ")");
-
-                newVibes.add(v);    // If found, the vibe will be added to the newVibes List
-            }
-
-            existingPlace.setVibe(newVibes);    // The final list will be set as the vibes for the existing place
+            newVibes.add(vrepo.findByName(v));    // If found, the vibe will be added to the newVibes List
         }
-
-        return repo.save(existingPlace);
+        existingPlace.setVibe(newVibes);    // The final list will be set as the vibes for the existing place
+    }
+        Place savedPlace = repo.save(existingPlace);
+        return convertToDetail(savedPlace);
     }
 
-    public String dropPlace(long id) throws ResourceNotFoundException
+    public String dropPlace(long id)
     {
         Place p = fetchPlaceById(id);
 
@@ -142,47 +256,45 @@ public class PlaceService
     }
 
     @Transactional
-    public Place postPlace(PlaceCreateDTO dto) throws ResourceNotFoundException
+    public PlaceDetailDTO postPlace(PlaceCreateDTO dto) throws ResourceNotFoundException
     {
         Place place = new Place(dto);
 
-        Category c = crepo.findById(dto.getCategoryID()).orElseThrow(
-                () -> new ResourceNotFoundException("Category Not Found (ID: " + dto.getCategoryID() + ")") );
+        Category c = cService.getCategoryById(dto.getCategoryID());
 
         if(dto.getVibeIDs() != null && !dto.getVibeIDs().isEmpty())
         {
             List<Vibe> vibes = new ArrayList<>();
-            for (int id : dto.getVibeIDs()) {
-                Vibe v = vrepo.findById(id).orElseThrow(() ->
-                        new ResourceNotFoundException("Vibe Not Found (ID: " + id + ")"));
-
+            for (int id : dto.getVibeIDs())
+            {
+                Vibe v = vService.fetchVibeById(id);
                 vibes.add(v);
             }
             place.setVibe(vibes);
         }
         place.setCategory(c);
 
-        return repo.save(place);
+        return convertToDetail(repo.save(place));
     }
 
     @Transactional
-    public List<Place> postPlaceList(List<PlaceCreateDTO> dtos) throws ResourceNotFoundException {
+    public List<PlaceDetailDTO> postPlaceList(List<PlaceCreateDTO> dtos) throws ResourceNotFoundException {
         List<Place> places = new ArrayList<>();
 
         for (PlaceCreateDTO dto : dtos) {
             Place place = new Place(dto);
 
             // Fetch Category
-            Category c = crepo.findById(dto.getCategoryID())
-                    .orElseThrow(() -> new ResourceNotFoundException("Category Not Found: ID = " + dto.getCategoryID()));
+            Category c = cService.getCategoryById(dto.getCategoryID());
             place.setCategory(c);
 
             // Fetch Vibes
             if (dto.getVibeIDs() != null && !dto.getVibeIDs().isEmpty()) {
                 List<Vibe> vibes = new ArrayList<>();
-                for (int id : dto.getVibeIDs()) {
-                    Vibe v = vrepo.findById(id)
-                            .orElseThrow(() -> new ResourceNotFoundException("Vibe Not Found (ID: " + id + ")"));
+
+                for (int id : dto.getVibeIDs())
+                {
+                    Vibe v = vService.fetchVibeById(id);
                     vibes.add(v);
                 }
                 place.setVibe(vibes);
@@ -191,7 +303,15 @@ public class PlaceService
             places.add(place);
         }
 
-        return repo.saveAll(places);
+        List<Place> savedPlaces = repo.saveAll(places);
+        List<PlaceDetailDTO> savedDtos = new ArrayList<>();
+
+        for(Place p: savedPlaces)
+        {
+            savedDtos.add(convertToDetail(p));
+        }
+
+        return savedDtos;
     }
 
     @Transactional
@@ -216,14 +336,20 @@ public class PlaceService
         repo.save(p);
     }
 
-    public List<Place> fetchPersonalizedRecommendations(long userId)
+    public List<PlaceCardDTO> fetchPersonalizedRecommendations(long userId)
     {
-        RegisteredUser u = uService.fetchRegisteredUserById(userId);
+        ManzilUser u = uService.fetchRegisteredUserById(userId);
         List<Place> rec = repo.getRecommendationsByVibe(userId);
+        List<PlaceCardDTO> recDtos = new ArrayList<>();
 
         if(rec.isEmpty())
             rec = repo.findTop5ByOrderByAvgRatingDesc();
 
-        return rec;
+        for(Place p: rec)
+        {
+            recDtos.add(convertToCard(p));
+        }
+
+        return recDtos;
     }
 }

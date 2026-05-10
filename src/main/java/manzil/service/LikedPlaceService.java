@@ -1,9 +1,6 @@
 package manzil.service;
 
-import manzil.dto.BookmarkCreateDTO;
-import manzil.dto.LikedPlaceDTO;
 import manzil.exceptions.ResourceNotFoundException;
-import manzil.model.Bookmark;
 import manzil.model.LikedPlace;
 import manzil.model.Place;
 import manzil.model.RegisteredUser;
