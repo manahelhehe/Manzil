@@ -5,7 +5,6 @@ import manzil.dto.PlaceCreateDTO;
 import manzil.exceptions.ResourceNotFoundException;
 import manzil.model.*;
 import manzil.repository.CategoryRepository;
-import manzil.repository.ManzilUserRepository;
 import manzil.repository.PlaceRepository;
 import manzil.repository.VibeRepository;
 import org.springframework.beans.factory.annotation.Autowired;

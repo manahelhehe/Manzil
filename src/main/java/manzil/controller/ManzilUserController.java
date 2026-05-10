@@ -6,7 +6,6 @@ import manzil.dto.UserResponseDTO;
 import manzil.dto.UserUpdateDTO;
 import manzil.model.Admin;
 import manzil.model.ManzilUser;
-import manzil.model.RegisteredUser;
 import manzil.service.ManzilUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
