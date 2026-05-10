@@ -216,12 +216,17 @@
     </div>
   </div>
 
+  <script src="api.js"></script>
   <script>
-    function handleLogin(event) {
+    async function handleLogin(event) {
       event.preventDefault();
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
       const errorMsg = document.getElementById('errorMsg');
+      const loginBtn = document.querySelector('.login-btn');
+
+      // Clear error
+      errorMsg.classList.remove('show');
 
       // Basic validation
       if (!email || !password) {
@@ -230,24 +235,25 @@
         return;
       }
 
-      // Simulate login (in real app, call API)
-      console.log('Attempting login with:', email);
+      // Show loading state
+      loginBtn.disabled = true;
+      loginBtn.textContent = 'Logging in...';
 
-      // Store session info in localStorage
-      localStorage.setItem('manzilUser', JSON.stringify({
-        email: email,
-        loggedIn: true,
-        loginTime: new Date().toISOString()
-      }));
-
-      // Redirect to index.html
-      window.location.href = 'index.html';
+      try {
+        await AuthService.login(email, password);
+        // Login successful - redirect
+        window.location.href = 'index.html';
+      } catch (error) {
+        errorMsg.textContent = error.message || 'Login failed. Please try again.';
+        errorMsg.classList.add('show');
+        loginBtn.disabled = false;
+        loginBtn.textContent = 'Log In';
+      }
     }
 
     // Check if already logged in
     window.addEventListener('load', () => {
-      const user = localStorage.getItem('manzilUser');
-      if (user) {
+      if (AuthService.isLoggedIn()) {
         window.location.href = 'index.html';
       }
     });

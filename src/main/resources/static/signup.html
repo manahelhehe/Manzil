@@ -258,14 +258,16 @@
     </div>
   </div>
 
+  <script src="api.js"></script>
   <script>
-    function handleSignup(event) {
+    async function handleSignup(event) {
       event.preventDefault();
       const fullname = document.getElementById('fullname').value;
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
       const confirmPassword = document.getElementById('confirmPassword').value;
       const errorMsg = document.getElementById('errorMsg');
+      const signupBtn = document.querySelector('.signup-btn');
 
       // Validation
       if (!fullname || !email || !password || !confirmPassword) {
@@ -286,28 +288,30 @@
         return;
       }
 
-      // Simulate signup (in real app, call API)
-      console.log('Signup with:', { fullname, email });
+      // Show loading state
+      signupBtn.disabled = true;
+      signupBtn.textContent = 'Creating account...';
+      errorMsg.classList.remove('show');
 
-      // Store user info in localStorage
-      localStorage.setItem('manzilUser', JSON.stringify({
-        fullname: fullname,
-        email: email,
-        loggedIn: true,
-        signupTime: new Date().toISOString()
-      }));
-
-      // Redirect to index.html
-      window.location.href = 'index.html';
+      try {
+        await AuthService.signup(email, password, fullname);
+        // Signup successful - redirect
+        window.location.href = 'index.html';
+      } catch (error) {
+        errorMsg.textContent = error.message || 'Signup failed. Please try again.';
+        errorMsg.classList.add('show');
+        signupBtn.disabled = false;
+        signupBtn.textContent = 'Sign Up';
+      }
     }
 
     // Check if already logged in
     window.addEventListener('load', () => {
-      const user = localStorage.getItem('manzilUser');
-      if (user) {
+      if (AuthService.isLoggedIn()) {
         window.location.href = 'index.html';
       }
     });
+  </script>
   </script>
 
 </body>
