@@ -8,5 +8,5 @@ public class PlaceCardDTO
     private long placeId;
     private String name;
     private String city;
-    private int categoryId;
+    private String category;
 }
