@@ -27,6 +27,5 @@ public class UserRegistrationDTO
     @NotBlank(message = "Password cannot be empty!")
     private String password;
 
-    @NotEmpty(message = "Please select at least 1 category!")
     private List<String> favouriteCategories;
  }

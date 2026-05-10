@@ -15,6 +15,7 @@ import manzil.repository.AdminRepository;
 import manzil.repository.ManzilUserRepository;
 import manzil.repository.RegisteredUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -32,6 +33,8 @@ public class ManzilUserService {
     private AdminRepository aRepo;
     @Autowired
     private CategoryService cService;
+    @Autowired
+    private BCryptPasswordEncoder encoder;
 
     public UserResponseDTO registerUser(UserRegistrationDTO dto)
     {
@@ -41,10 +44,14 @@ public class ManzilUserService {
         RegisteredUser user = new RegisteredUser();
         user.setName(dto.getName());
         user.setEmail(dto.getEmail());
-        user.setPassword(dto.getPassword());
         user.setPhone(dto.getPhone());
         user.setFavouriteCategories(cService.mapCategories(dto.getFavouriteCategories()));
         user.setDateJoined(LocalDate.now()); // Ensure the member-since feature works!
+
+        // Encrypting the password as hash for security
+        String rawPassword = dto.getPassword();
+        String encryptedPassword = encoder.encode(rawPassword);
+        user.setPassword(encryptedPassword);
 
         RegisteredUser savedUser = uRepo.save(user);
 
@@ -60,9 +67,13 @@ public class ManzilUserService {
 
         admin.setName(dto.getName());
         admin.setEmail(dto.getEmail());
-        admin.setPassword(dto.getPassword());
         admin.setPhone(dto.getPhone());
         admin.setDateJoined(LocalDate.now());
+
+        // Encrypting the password as hash for security
+        String rawPassword = dto.getPassword();
+        String encryptedPassword = encoder.encode(rawPassword);
+        admin.setPassword(encryptedPassword);
 
         Admin savedAdmin = aRepo.save(admin);
 
@@ -76,7 +87,7 @@ public class ManzilUserService {
 
         ManzilUser u = fetchUserByEmail(email);
 
-        if(!u.getPassword().equals(password))
+        if(!encoder.matches(password, u.getPassword()))
             throw new InvalidCredentialsException("Invalid Password!");
 
         return convertToResponse(u);
