@@ -214,7 +214,17 @@
             required
           />
         </div>
-
+        <div class="form-group">
+  <label for="phone">Phone Number</label>
+  <input
+    type="tel"
+    id="phone"
+    name="phone"
+    placeholder="03XXXXXXXXX"
+    required
+  />
+  <div class="password-hint">Format: 03XXXXXXXXX</div>
+</div>
         <div class="form-group">
           <label for="password">Password</label>
           <input
@@ -261,49 +271,56 @@
   <script src="api.js"></script>
   <script>
     async function handleSignup(event) {
-      event.preventDefault();
-      const fullname = document.getElementById('fullname').value;
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
-      const confirmPassword = document.getElementById('confirmPassword').value;
-      const errorMsg = document.getElementById('errorMsg');
-      const signupBtn = document.querySelector('.signup-btn');
+  event.preventDefault();
 
-      // Validation
-      if (!fullname || !email || !password || !confirmPassword) {
-        errorMsg.textContent = 'Please fill in all fields';
-        errorMsg.classList.add('show');
-        return;
-      }
+  const name     = document.getElementById('fullname').value.trim();
+  const email    = document.getElementById('email').value.trim();
+  const phone    = document.getElementById('phone').value.trim();
+  const password = document.getElementById('password').value;
+  const confirmPassword = document.getElementById('confirmPassword').value;
+  const errorMsg  = document.getElementById('errorMsg');
+  const signupBtn = document.querySelector('.signup-btn');
 
-      if (password.length < 8) {
-        errorMsg.textContent = 'Password must be at least 8 characters';
-        errorMsg.classList.add('show');
-        return;
-      }
+  // Validation
+  if (!name || !email || !phone || !password || !confirmPassword) {
+    errorMsg.textContent = 'Please fill in all fields';
+    errorMsg.classList.add('show');
+    return;
+  }
 
-      if (password !== confirmPassword) {
-        errorMsg.textContent = 'Passwords do not match';
-        errorMsg.classList.add('show');
-        return;
-      }
+  if (!/^03[0-9]{9}$/.test(phone)) {
+    errorMsg.textContent = 'Phone must be in format 03XXXXXXXXX';
+    errorMsg.classList.add('show');
+    return;
+  }
 
-      // Show loading state
-      signupBtn.disabled = true;
-      signupBtn.textContent = 'Creating account...';
-      errorMsg.classList.remove('show');
+  if (password.length < 8 || password.length > 18) {
+    errorMsg.textContent = 'Password must be between 8 and 18 characters';
+    errorMsg.classList.add('show');
+    return;
+  }
 
-      try {
-        await AuthService.signup(email, password, fullname);
-        // Signup successful - redirect
-        window.location.href = 'index.html';
-      } catch (error) {
-        errorMsg.textContent = error.message || 'Signup failed. Please try again.';
-        errorMsg.classList.add('show');
-        signupBtn.disabled = false;
-        signupBtn.textContent = 'Sign Up';
-      }
-    }
+  if (password !== confirmPassword) {
+    errorMsg.textContent = 'Passwords do not match';
+    errorMsg.classList.add('show');
+    return;
+  }
+
+  signupBtn.disabled = true;
+  signupBtn.textContent = 'Creating account...';
+  errorMsg.classList.remove('show');
+
+  try {
+    // correct order: name, email, phone, password
+    await AuthService.signup(name, email, phone, password);
+    window.location.href = 'index.html';
+  } catch (error) {
+    errorMsg.textContent = error.message || 'Signup failed. Please try again.';
+    errorMsg.classList.add('show');
+    signupBtn.disabled = false;
+    signupBtn.textContent = 'Create Account';
+  }
+}
 
     // Check if already logged in
     window.addEventListener('load', () => {
@@ -311,7 +328,6 @@
         window.location.href = 'index.html';
       }
     });
-  </script>
   </script>
 
 </body>
