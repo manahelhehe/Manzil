@@ -184,6 +184,17 @@
   const hours = p => p.openingTime && p.closingTime
     ? `${p.openingTime.slice(0,5)} – ${p.closingTime.slice(0,5)}` : '';
 
+  // ── HELPER: GET PLACE IMAGE ──
+  function getPlaceImage(place) {
+    if (place.address && place.address.length > 0 && place.placeorder !== undefined) {
+      const idx = place.placeorder;
+      if (idx >= 0 && idx < place.address.length && place.address[idx].image) {
+        return place.address[idx].image;
+      }
+    }
+    return IMG; // Fallback to default image
+  }
+
   // ── LOAD ALL PLACES ──
   async function loadPlaces() {
     try {
@@ -235,11 +246,16 @@
     grid.innerHTML = places.map(p => `
       <div class="place-card" onclick="location='/place.html?id=${p.placeId}'">
         <div class="pc-img-wrap">
-          <img src="${IMG}" alt="${p.name}" loading="lazy"/>
+          <img src="${getPlaceImage(p)}" alt="${p.name}" loading="lazy"/>
           ${p.avgRating > 0 ? `<span class="pc-rating">★ ${p.avgRating.toFixed(1)}</span>` : ''}
-          <button class="pc-bookmark" onclick="event.stopPropagation(); toggleBookmark(${p.placeId}, this)">
-            <i class="fa-regular fa-bookmark"></i>
-          </button>
+          <div class="pc-buttons">
+            <button class="pc-heart" onclick="event.stopPropagation(); toggleLike(${p.placeId}, this)" title="Add to liked places">
+              <i class="fa-regular fa-heart"></i>
+            </button>
+            <button class="pc-bookmark" onclick="event.stopPropagation(); toggleBookmark(${p.placeId}, this)" title="Add to bookmarks">
+              <i class="fa-regular fa-bookmark"></i>
+            </button>
+          </div>
         </div>
         <div class="pc-body">
           <div class="pc-meta">
@@ -276,11 +292,16 @@
     grid.innerHTML = openPlaces.map(p => `
       <div class="place-card" onclick="location='/place.html?id=${p.placeId}'">
         <div class="pc-img-wrap">
-          <img src="${IMG}" alt="${p.name}" loading="lazy"/>
+          <img src="${getPlaceImage(p)}" alt="${p.name}" loading="lazy"/>
           ${p.avgRating > 0 ? `<span class="pc-rating">★ ${p.avgRating.toFixed(1)}</span>` : ''}
-          <button class="pc-bookmark" onclick="event.stopPropagation(); toggleBookmark(${p.placeId}, this)">
-            <i class="fa-regular fa-bookmark"></i>
-          </button>
+          <div class="pc-buttons">
+            <button class="pc-heart" onclick="event.stopPropagation(); toggleLike(${p.placeId}, this)" title="Add to liked places">
+              <i class="fa-regular fa-heart"></i>
+            </button>
+            <button class="pc-bookmark" onclick="event.stopPropagation(); toggleBookmark(${p.placeId}, this)" title="Add to bookmarks">
+              <i class="fa-regular fa-bookmark"></i>
+            </button>
+          </div>
         </div>
         <div class="pc-body">
           <div class="pc-meta">
@@ -379,6 +400,20 @@
     console.log('Bookmark toggled for place', placeId);
   }
 
+  // ── LIKED PLACES ──
+  function toggleLike(placeId, btn) {
+    const isLiked = btn.querySelector('i').classList.contains('fa-solid');
+    if (isLiked) {
+      btn.innerHTML = '<i class="fa-regular fa-heart"></i>';
+      btn.style.color = 'var(--ink-soft)';
+    } else {
+      btn.innerHTML = '<i class="fa-solid fa-heart"></i>';
+      btn.style.color = 'var(--moss)';
+    }
+    // POST /like or DELETE /like — needs userId from session/localStorage once auth is implemented
+    console.log('Like toggled for place', placeId);
+  }
+
   // ── RANGE SLIDER ──
   function updateRange() {
     const min = parseInt(document.getElementById('minCost').value);
@@ -451,11 +486,16 @@
     grid.innerHTML = places.slice(0, 4).map(p => `
       <div class="place-card" onclick="location='/place.html?id=${p.placeId}'">
         <div class="pc-img-wrap">
-          <img src="${IMG}" alt="${p.name}" loading="lazy"/>
+          <img src="${getPlaceImage(p)}" alt="${p.name}" loading="lazy"/>
           ${p.avgRating > 0 ? `<span class="pc-rating">★ ${p.avgRating.toFixed(1)}</span>` : ''}
-          <button class="pc-bookmark" onclick="event.stopPropagation(); toggleBookmark(${p.placeId}, this)">
-            <i class="fa-regular fa-bookmark"></i>
-          </button>
+          <div class="pc-buttons">
+            <button class="pc-heart" onclick="event.stopPropagation(); toggleLike(${p.placeId}, this)" title="Add to liked places">
+              <i class="fa-regular fa-heart"></i>
+            </button>
+            <button class="pc-bookmark" onclick="event.stopPropagation(); toggleBookmark(${p.placeId}, this)" title="Add to bookmarks">
+              <i class="fa-regular fa-bookmark"></i>
+            </button>
+          </div>
         </div>
         <div class="pc-body">
           <div class="pc-meta">

@@ -19,9 +19,6 @@
     <a href="index.html" class="nav-logo">M<span>anzil</span></a>
     <div class="nav-links" id="navLinks">
       <a href="places.html">Explore</a>
-      <a href="places.html?open=true">Open Now</a>
-      <a href="places.html?nearby=true">Near Me</a>
-      <a href="places.html?vibes=true">Vibes</a>
     </div>
     <div class="nav-right" id="navRight">
       <a href="login.html" class="btn btn--sm">Login</a>
@@ -85,9 +82,7 @@
       <div class="footer-cols">
         <div>
           <h5>Discover</h5>
-          <a href="places.html">All Places</a>
-          <a href="places.html?open=true">Open Now</a>
-          <a href="places.html?nearby=true">Near Me</a>
+          <a href="places.html">Explore</a>
           <a href="places.html">Top Rated</a>
         </div>
         <div>
@@ -118,9 +113,6 @@
         const userName = userData.fullname || userData.email.split('@')[0];
         navLinks.innerHTML = `
           <a href="places.html">Explore</a>
-          <a href="places.html?open=true">Open Now</a>
-          <a href="places.html?nearby=true">Near Me</a>
-          <a href="places.html?vibes=true">Vibes</a>
         `;
         navRight.innerHTML = `
           <a href="bookmarks.html" class="nav-links" style="color: var(--moss); font-weight: 500; display: flex; align-items: center; gap: 0.5rem;">
