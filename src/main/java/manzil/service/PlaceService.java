@@ -47,6 +47,7 @@ public class PlaceService
     public PlaceDetailDTO convertToDetail(Place p)
     {
         PlaceDetailDTO dto = new PlaceDetailDTO();
+
         dto.setPlaceId(p.getPlaceId());
         dto.setName(p.getName());
         dto.setDescription(p.getDescription());
@@ -74,6 +75,16 @@ public class PlaceService
                 vibes.add(v.getName());
             }
             dto.setVibes(vibes);
+        }
+
+        if(p.getImages() != null)
+        {
+            List<String> urls = new ArrayList<>();
+            for(PlaceImage img: p.getImages())
+            {
+                urls.add(img.getUrl());
+            }
+            dto.setImgUrls(urls);
         }
 
         return dto;
