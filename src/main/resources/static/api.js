@@ -149,22 +149,22 @@ const PlaceService = {
 // ── BOOKMARKS ─────────────────────────────────────────────────
 const BookmarkService = {
 
-  // GET /bookmark/user/{userId}
+  // GET /api/bookmark/user/{userId}
   async getAll() {
     const userId = AuthService.getUserId();
     if (!userId) return [];
     try {
-      const r = await fetch(`https://manzil-production-73bf.up.railway.app/bookmark/user/${userId}`);
+      const r = await fetch(`${API_BASE}/bookmark/user/${userId}`);
       return r.ok ? r.json() : [];
     } catch { return []; }
   },
 
-  // POST /bookmark — body: { userId, placeId }
+  // POST /api/bookmark - body: { userId, placeId }
   async add(placeId) {
     const userId = AuthService.getUserId();
     if (!userId) return false;
     try {
-      const r = await fetch(`https://manzil-production-73bf.up.railway.app/bookmark`, {
+      const r = await fetch(`${API_BASE}/bookmark`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId, placeId })
@@ -173,24 +173,24 @@ const BookmarkService = {
     } catch { return false; }
   },
 
-  // DELETE /bookmark/user/{userId}/place/{placeId}
+  // DELETE /api/bookmark/user/{userId}/place/{placeId}
   async remove(placeId) {
     const userId = AuthService.getUserId();
     if (!userId) return false;
     try {
-      const r = await fetch(`https://manzil-production-73bf.up.railway.app/bookmark/user/${userId}/place/${placeId}`, {
+      const r = await fetch(`${API_BASE}/bookmark/user/${userId}/place/${placeId}`, {
         method: 'DELETE'
       });
       return r.ok;
     } catch { return false; }
   },
 
-  // GET /bookmark/user/{userId}/place/{placeId}
+  // GET /api/bookmark/user/{userId}/place/{placeId}
   async isBookmarked(placeId) {
     const userId = AuthService.getUserId();
     if (!userId) return false;
     try {
-      const r = await fetch(`https://manzil-production-73bf.up.railway.app/bookmark/user/${userId}/place/${placeId}`);
+      const r = await fetch(`${API_BASE}/bookmark/user/${userId}/place/${placeId}`);
       return r.ok;
     } catch { return false; }
   }
@@ -258,7 +258,7 @@ const LikeService = {
     const userId = AuthService.getUserId();
     if (!userId) return [];
     try {
-      const r = await fetch(`${BASE}/liked/user/${userId}`);
+      const r = await fetch(`${API_BASE}/liked/user/${userId}`);
       return r.ok ? r.json() : [];
     } catch { return []; }
   },
@@ -268,10 +268,10 @@ const LikeService = {
     const userId = AuthService.getUserId();
     if (!userId) return false;
     try {
-      const r = await fetch(`${BASE}/liked/toggle/user/${userId}/place/${placeId}`, {
+      const r = await fetch(`${API_BASE}/liked/toggle/user/${userId}/place/${placeId}`, {
         method: 'POST'
       });
-      return r.ok ? r.text() : false; // returns "Liked" or "Unliked"
+      return r.ok ? r.json() : false;
     } catch { return false; }
   },
 
@@ -280,7 +280,7 @@ const LikeService = {
     const userId = AuthService.getUserId();
     if (!userId) return false;
     try {
-      const r = await fetch(`${BASE}/liked/user/${userId}/place/${placeId}`);
+      const r = await fetch(`${API_BASE}/liked/user/${userId}/place/${placeId}`);
       return r.ok;
     } catch { return false; }
   }

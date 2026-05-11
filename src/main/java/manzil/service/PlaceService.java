@@ -43,6 +43,13 @@ public class PlaceService
             dto.setCategory(p.getCategory().getName());
         if (p.getImages() != null && !p.getImages().isEmpty())
             dto.setImageUrl(p.getImages().get(0).getUrl());
+        dto.setMinCost(p.getMinCost());
+        dto.setMaxCost(p.getMaxCost());
+        dto.setAvgRating(p.getAvgRating());
+        if (p.getOpeningTime() != null)
+            dto.setOpeningTime(p.getOpeningTime().toString());
+        if (p.getClosingTime() != null)
+            dto.setClosingTime(p.getClosingTime().toString());
 
         return dto;
     }
@@ -65,10 +72,13 @@ public class PlaceService
         dto.setName(p.getName());
         dto.setDescription(p.getDescription());
         dto.setCity(p.getCity());
-        dto.setOpeningTime(p.getOpeningTime().toString());
-        dto.setClosingTime(p.getClosingTime().toString());
+        if (p.getOpeningTime() != null)
+            dto.setOpeningTime(p.getOpeningTime().toString());
+        if (p.getClosingTime() != null)
+            dto.setClosingTime(p.getClosingTime().toString());
         dto.setMinCost(p.getMinCost());
         dto.setMaxCost(p.getMaxCost());
+        dto.setAvgRating(p.getAvgRating());
 
         if (p.getLocation() != null)
         {

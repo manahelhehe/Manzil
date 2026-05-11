@@ -3,18 +3,15 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Manzil — My Bookmarks</title>
+  <title>Manzil - My Bookmarks</title>
   <link rel="stylesheet" href="shared.css"/>
   <link rel="stylesheet" href="bookmarks.css"/>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 </head>
 <body>
-
-  <!-- Grain texture overlay -->
   <div class="grain"></div>
 
-  <!-- ── NAV ── -->
   <nav class="nav" id="nav">
     <a href="index.html" class="nav-logo">M<span>anzil</span></a>
     <div class="nav-links" id="navLinks">
@@ -28,7 +25,6 @@
     </div>
   </nav>
 
-  <!-- Bookmarks Section -->
   <main class="bookmarks-container">
     <header class="bookmarks-header">
       <h1>My Bookmarks</h1>
@@ -36,68 +32,34 @@
     </header>
 
     <div class="bookmarks-controls">
-      <input
-        type="text"
-        class="bookmarks-search"
-        id="bookmarksSearch"
-        placeholder="Search your bookmarks..."
-        onkeyup="filterBookmarks()"
-      />
-      <select class="bookmarks-filter" id="vibeFilter" onchange="filterBookmarks()">
-        <option value="">All Vibes</option>
-        <option value="cozy">Cozy</option>
-        <option value="trendy">Aesthetic</option>
-        <option value="casual">Casual</option>
-        <option value="romantic">Picturesque</option>
+      <input type="text" class="bookmarks-search" id="bookmarksSearch" placeholder="Search your bookmarks..."/>
+      <select class="bookmarks-filter" id="categoryFilter">
+        <option value="">All Categories</option>
       </select>
     </div>
 
     <div class="bookmarks-grid" id="bookmarksGrid">
-      <!-- Bookmarks will be dynamically loaded here -->
       <div class="empty-state">
         <i class="fas fa-bookmark"></i>
-        <h3>No bookmarks yet</h3>
-        <p>Start exploring and bookmark your favorite places!</p>
-        <a href="index.html" class="btn-explore">Explore Places</a>
+        <h3>Loading bookmarks</h3>
+        <p>Please wait...</p>
       </div>
     </div>
   </main>
 
   <script>
-    // Sample bookmarks data
-    const sampleBookmarks = [
-      {
-        id: 1,
-        name: 'Chai Theory',
-        city: 'Islamabad',
-        vibe: 'Casual',
-        rating: 5,
-        image: 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22200%22%3E%3Crect fill=%225a7a5b%22 width=%22300%22 height=%22200%22/%3E%3C/svg%3E'
-      },
-      {
-        id: 2,
-        name: 'Modern Bistro',
-        city: 'Karachi',
-        vibe: 'trendy',
-        rating: 4.2,
-        image: 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22200%22%3E%3Crect fill=%229b7b5a%22 width=%22300%22 height=%22200%22/%3E%3C/svg%3E'
-      },
-      {
-        id: 3,
-        name: 'Street Eats Hub',
-        city: 'Islamabad',
-        vibe: 'casual',
-        rating: 4.8,
-        image: 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22200%22%3E%3Crect fill=%223d5a3e%22 width=%22300%22 height=%22200%22/%3E%3C/svg%3E'
-      }
-    ];
+    const BASE = 'https://manzil-production-73bf.up.railway.app/api';
+    const FALLBACK_IMG = 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=700&q=80';
+    let bookmarks = [];
+
+    const placeImage = p => p.imageUrl || p.imgUrl || p.imgUrls?.[0] || FALLBACK_IMG;
+    const getCurrentUserId = () => {
+      const user = localStorage.getItem('manzilUser');
+      return user ? JSON.parse(user).userId : null;
+    };
 
     function checkLogin() {
-      const user = localStorage.getItem('manzilUser');
-      if (!user) {
-        window.location.href = 'login.html';
-        return;
-      }
+      if (!getCurrentUserId()) window.location.href = 'login.html';
     }
 
     function handleLogout() {
@@ -105,43 +67,59 @@
       window.location.href = 'login.html';
     }
 
-    function renderBookmarks(bookmarks) {
+    async function hydratePlaces(places) {
+      return Promise.all(places.map(async p => {
+        if (p.imageUrl || p.imgUrl || p.imgUrls?.[0]) return p;
+        try {
+          const detail = await fetch(`${BASE}/places/${p.placeId}`).then(r => r.ok ? r.json() : null);
+          return {
+            ...p,
+            imageUrl: detail?.imgUrls?.[0],
+            category: p.category || detail?.cName,
+            vibes: detail?.vibes || []
+          };
+        } catch {
+          return p;
+        }
+      }));
+    }
+
+    function populateCategoryFilter() {
+      const select = document.getElementById('categoryFilter');
+      const categories = [...new Set(bookmarks.map(b => b.category).filter(Boolean))].sort();
+      select.innerHTML = '<option value="">All Categories</option>' +
+        categories.map(category => `<option value="${category}">${category}</option>`).join('');
+    }
+
+    function renderBookmarks(items) {
       const grid = document.getElementById('bookmarksGrid');
-      
-      if (bookmarks.length === 0) {
+      if (!items.length) {
         grid.innerHTML = `
           <div class="empty-state">
             <i class="fas fa-bookmark"></i>
             <h3>No bookmarks found</h3>
-            <p>Try adjusting your filters</p>
+            <p>Start exploring and bookmark your favorite places.</p>
+            <a href="places.html" class="btn-explore">Explore Places</a>
           </div>
         `;
         return;
       }
 
-      grid.innerHTML = bookmarks.map(bookmark => `
-        <div class="bookmark-card">
+      grid.innerHTML = items.map(bookmark => `
+        <div class="bookmark-card" onclick="location.href='place.html?id=${bookmark.placeId}'">
           <div class="bookmark-image">
-            <img src="${bookmark.image}" alt="${bookmark.name}"/>
-            <button class="bookmark-remove" onclick="removeBookmark(${bookmark.id})">
+            <img src="${placeImage(bookmark)}" alt="${bookmark.name}"/>
+            <button class="bookmark-remove" onclick="event.stopPropagation(); removeBookmark(${bookmark.placeId})">
               <i class="fas fa-trash"></i>
             </button>
           </div>
           <div class="bookmark-content">
             <h3 class="bookmark-name">${bookmark.name}</h3>
             <div class="bookmark-meta">
-              <span class="bookmark-city"><i class="fas fa-map-marker-alt"></i> ${bookmark.city}</span>
-              <span class="bookmark-vibe"><i class="fas fa-sparkles"></i> ${bookmark.vibe}</span>
+              <span class="bookmark-city"><i class="fas fa-map-marker-alt"></i> ${bookmark.city || '-'}</span>
+              ${bookmark.category ? `<span class="bookmark-vibe"><i class="fas fa-tag"></i> ${bookmark.category}</span>` : ''}
             </div>
-            <div class="bookmark-rating">
-              <div class="stars">
-                ${[...Array(5)].map((_, i) => `
-                  <i class="fa${i < Math.floor(bookmark.rating) ? 's' : 'r'} fa-star"></i>
-                `).join('')}
-              </div>
-              <span>${bookmark.rating}</span>
-            </div>
-            <a href="#" class="bookmark-visit">Visit Place</a>
+            <a href="place.html?id=${bookmark.placeId}" class="bookmark-visit">Visit Place</a>
           </div>
         </div>
       `).join('');
@@ -149,51 +127,69 @@
 
     function filterBookmarks() {
       const searchTerm = document.getElementById('bookmarksSearch').value.toLowerCase();
-      const vibeFilter = document.getElementById('vibeFilter').value.toLowerCase();
-
-      const filtered = sampleBookmarks.filter(bookmark => {
-        const matchesSearch = bookmark.name.toLowerCase().includes(searchTerm) ||
-                             bookmark.city.toLowerCase().includes(searchTerm);
-        const matchesVibe = !vibeFilter || bookmark.vibe === vibeFilter;
-        return matchesSearch && matchesVibe;
+      const category = document.getElementById('categoryFilter').value;
+      const filtered = bookmarks.filter(bookmark => {
+        const matchesSearch =
+          bookmark.name?.toLowerCase().includes(searchTerm) ||
+          bookmark.city?.toLowerCase().includes(searchTerm) ||
+          bookmark.category?.toLowerCase().includes(searchTerm);
+        const matchesCategory = !category || bookmark.category === category;
+        return matchesSearch && matchesCategory;
       });
-
       renderBookmarks(filtered);
     }
 
-    function removeBookmark(id) {
-      if (confirm('Remove this bookmark?')) {
-        sampleBookmarks.splice(sampleBookmarks.findIndex(b => b.id === id), 1);
+    async function loadBookmarks() {
+      const userId = getCurrentUserId();
+      try {
+        const data = await fetch(`${BASE}/bookmark/user/${userId}`).then(r => r.ok ? r.json() : []);
+        bookmarks = await hydratePlaces(data);
+        populateCategoryFilter();
+        filterBookmarks();
+      } catch {
+        document.getElementById('bookmarksGrid').innerHTML = `
+          <div class="empty-state">
+            <i class="fas fa-bookmark"></i>
+            <h3>Could not load bookmarks</h3>
+            <p>Please try again later.</p>
+          </div>
+        `;
+      }
+    }
+
+    async function removeBookmark(placeId) {
+      const userId = getCurrentUserId();
+      const previous = [...bookmarks];
+      bookmarks = bookmarks.filter(bookmark => bookmark.placeId !== placeId);
+      populateCategoryFilter();
+      filterBookmarks();
+
+      try {
+        const response = await fetch(`${BASE}/bookmark/user/${userId}/place/${placeId}`, { method: 'DELETE' });
+        if (!response.ok) throw new Error('Remove failed');
+      } catch {
+        bookmarks = previous;
+        populateCategoryFilter();
         filterBookmarks();
       }
     }
 
+    document.getElementById('bookmarksSearch').addEventListener('input', filterBookmarks);
+    document.getElementById('categoryFilter').addEventListener('change', filterBookmarks);
+
     window.addEventListener('DOMContentLoaded', () => {
       checkLogin();
-      setTimeout(() => {
-        renderBookmarks(sampleBookmarks);
-      }, 100);
+      loadBookmarks();
     });
   </script>
-    </script>
 
-  <!-- ── FOOTER ── -->
   <footer class="footer">
     <div class="footer-inner">
-
       <div class="footer-brand">
-        <span class="nav-logo footer-logo">
-          M<span>anzil</span>
-        </span>
-
-        <p>
-          Curating the world's most memorable spaces,
-          one city at a time.
-        </p>
+        <span class="nav-logo footer-logo">M<span>anzil</span></span>
+        <p>Curating the world's most memorable spaces, one city at a time.</p>
       </div>
-
       <div class="footer-cols">
-
         <div>
           <h5>Discover</h5>
           <a href="places.html">All Places</a>
@@ -201,35 +197,21 @@
           <a href="places.html?nearby=true">Near Me</a>
           <a href="places.html">Top Rated</a>
         </div>
-
         <div>
           <h5>Company</h5>
           <a href="about.html">About</a>
           <a href="contact.html">Contact</a>
           <a href="privacy.html">Privacy</a>
           <a href="#">For Businesses</a>
-
-          <a href="mailto:manzilit.pk@gmail.com">
-            <i class="fa fa-envelope"></i>
-            manzilit.pk@gmail.com
-          </a>
-
-          <a href="https://www.instagram.com/manzilit/" target="_blank">
-            <i class="fa-brands fa-instagram"></i>
-            @manzilit
-          </a>
+          <a href="mailto:manzilit.pk@gmail.com"><i class="fa fa-envelope"></i> manzilit.pk@gmail.com</a>
+          <a href="https://www.instagram.com/manzilit/" target="_blank"><i class="fa-brands fa-instagram"></i> @manzilit</a>
         </div>
-
       </div>
     </div>
-
     <div class="footer-bottom">
-      <span>© 2025 Manzil</span>
+      <span>© 2026 Manzil</span>
       <span>All rights reserved</span>
     </div>
   </footer>
-
-</body>
-</html>
 </body>
 </html>

@@ -15,6 +15,7 @@ public class PlaceDetailDTO
     private String closingTime;
     private Integer minCost = -1;
     private Integer maxCost = -1;
+    private Double avgRating;
     private Double latitude;
     private Double longitude;
 

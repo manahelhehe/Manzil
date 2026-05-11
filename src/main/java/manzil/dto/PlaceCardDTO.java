@@ -10,4 +10,9 @@ public class PlaceCardDTO
     private String city;
     private String category;
     private String imageUrl;
+    private Integer minCost;
+    private Integer maxCost;
+    private Double avgRating;
+    private String openingTime;
+    private String closingTime;
 }
