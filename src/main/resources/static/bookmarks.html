@@ -170,11 +170,32 @@
       try {
         const response = await fetch(`${BASE}/bookmark/user/${userId}/place/${placeId}`, { method: 'DELETE' });
         if (!response.ok) throw new Error('Remove failed');
+        showToast('Bookmark removed');
       } catch {
         bookmarks = previous;
         populateCategoryFilter();
         filterBookmarks();
+        showToast('Could not remove bookmark', 'error');
       }
+    }
+
+    function showToast(message, kind = 'success') {
+      let host = document.getElementById('toastHost');
+      if (!host) {
+        host = document.createElement('div');
+        host.id = 'toastHost';
+        host.className = 'toast-host';
+        document.body.appendChild(host);
+      }
+      const toast = document.createElement('div');
+      toast.className = `toast toast--${kind}`;
+      toast.innerHTML = `<i class="fas fa-${kind === 'error' ? 'circle-exclamation' : 'check'}"></i><span>${message}</span>`;
+      host.appendChild(toast);
+      requestAnimationFrame(() => toast.classList.add('toast--show'));
+      setTimeout(() => {
+        toast.classList.remove('toast--show');
+        setTimeout(() => toast.remove(), 280);
+      }, 2200);
     }
 
     document.getElementById('bookmarksSearch').addEventListener('input', filterBookmarks);

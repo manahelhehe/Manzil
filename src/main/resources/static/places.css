@@ -345,6 +345,10 @@ body { min-height: 100vh; display: flex; flex-direction: column; }
   align-items: center;
   gap: .45rem;
 }
+.action-btn {
+  transition: transform .15s var(--ease), background .2s, color .2s, border-color .2s;
+}
+.action-btn:hover { transform: translateY(-1px); }
 .action-btn.active.bookmark {
   color: var(--moss);
   border-color: var(--moss);
@@ -354,6 +358,11 @@ body { min-height: 100vh; display: flex; flex-direction: column; }
   color: #b94a48;
   border-color: #d9aaa8;
   background: #fff1f0;
+}
+.action-btn.share { color: var(--brown); }
+.action-btn.share:hover {
+  color: var(--moss);
+  border-color: var(--moss);
 }
 .detail-meta {
   display: grid;

@@ -122,6 +122,40 @@ a { text-decoration: none; color: inherit; }
   from { opacity: 0; transform: translateY(20px); }
   to   { opacity: 1; transform: translateY(0); }
 }
+
+/* ── TOAST ─────────────────────────────────────────────────────── */
+.toast-host {
+  position: fixed; bottom: 1.5rem; left: 50%;
+  transform: translateX(-50%);
+  display: flex; flex-direction: column; gap: .5rem;
+  z-index: 10000; pointer-events: none;
+}
+.toast {
+  display: flex; align-items: center; gap: .65rem;
+  background: var(--ink);
+  color: var(--white);
+  border-radius: 100px;
+  padding: .7rem 1.2rem;
+  font-size: .86rem; font-weight: 500;
+  box-shadow: 0 8px 28px rgba(0,0,0,.18);
+  opacity: 0; transform: translateY(10px);
+  transition: opacity .22s var(--ease), transform .22s var(--ease);
+  pointer-events: auto;
+  max-width: 92vw;
+}
+.toast--show { opacity: 1; transform: translateY(0); }
+.toast--success { background: var(--moss); }
+.toast--error { background: #b94a48; }
+.toast i { font-size: .82rem; }
+
+/* ── BUTTON PULSE ──────────────────────────────────────────────── */
+@keyframes btnPulse {
+  0%   { transform: scale(1); }
+  35%  { transform: scale(1.18); }
+  60%  { transform: scale(.94); }
+  100% { transform: scale(1); }
+}
+.pulse { animation: btnPulse .42s var(--ease); }
 /* about.css */
 
 .about-hero {

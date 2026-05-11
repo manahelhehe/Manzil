@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls /c/Users/manah/.claude/projects/ 2>/dev/null)"
+    ]
+  }
+}

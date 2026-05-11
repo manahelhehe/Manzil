@@ -174,11 +174,32 @@
       try {
         const response = await fetch(`${BASE}/liked/toggle/user/${userId}/place/${placeId}`, { method: 'POST' });
         if (!response.ok) throw new Error('Remove failed');
+        showToast('Removed from liked places');
       } catch {
         likedPlaces = previous;
         populateCategoryFilter();
         filterLikedPlaces();
+        showToast('Could not remove like', 'error');
       }
+    }
+
+    function showToast(message, kind = 'success') {
+      let host = document.getElementById('toastHost');
+      if (!host) {
+        host = document.createElement('div');
+        host.id = 'toastHost';
+        host.className = 'toast-host';
+        document.body.appendChild(host);
+      }
+      const toast = document.createElement('div');
+      toast.className = `toast toast--${kind}`;
+      toast.innerHTML = `<i class="fas fa-${kind === 'error' ? 'circle-exclamation' : 'check'}"></i><span>${message}</span>`;
+      host.appendChild(toast);
+      requestAnimationFrame(() => toast.classList.add('toast--show'));
+      setTimeout(() => {
+        toast.classList.remove('toast--show');
+        setTimeout(() => toast.remove(), 280);
+      }, 2200);
     }
 
     document.getElementById('likedSearch').addEventListener('input', filterLikedPlaces);

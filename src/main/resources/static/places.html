@@ -216,12 +216,16 @@
             <button class="pc-action pc-bookmark ${bookmarkedPlaceIds.has(p.placeId) ? 'active' : ''}"
                     title="Bookmark"
                     aria-label="Bookmark ${p.name}"
+                    data-place-id="${p.placeId}"
+                    data-action="bookmark"
                     onclick="event.stopPropagation(); toggleBookmark(${p.placeId})">
               <i class="fas fa-bookmark"></i>
             </button>
             <button class="pc-action pc-like ${likedPlaceIds.has(p.placeId) ? 'active' : ''}"
                     title="Like"
                     aria-label="Like ${p.name}"
+                    data-place-id="${p.placeId}"
+                    data-action="like"
                     onclick="event.stopPropagation(); toggleLike(${p.placeId})">
               <i class="fas fa-heart"></i>
             </button>
@@ -407,11 +411,18 @@
               <h1>${place.name}</h1>
               <p>${place.description || 'No description available.'}</p>
               <div class="place-actions">
-                <button class="action-btn bookmark ${bookmarkedPlaceIds.has(place.placeId) ? 'active' : ''}" onclick="toggleBookmark(${place.placeId})">
-                  <i class="fas fa-bookmark"></i> Bookmark
+                <button class="action-btn bookmark ${bookmarkedPlaceIds.has(place.placeId) ? 'active' : ''}"
+                        data-place-id="${place.placeId}" data-action="bookmark"
+                        onclick="toggleBookmark(${place.placeId})">
+                  <i class="fas fa-bookmark"></i> <span class="btn-label">${bookmarkedPlaceIds.has(place.placeId) ? 'Bookmarked' : 'Bookmark'}</span>
                 </button>
-                <button class="action-btn like ${likedPlaceIds.has(place.placeId) ? 'active' : ''}" onclick="toggleLike(${place.placeId})">
-                  <i class="fas fa-heart"></i> Like
+                <button class="action-btn like ${likedPlaceIds.has(place.placeId) ? 'active' : ''}"
+                        data-place-id="${place.placeId}" data-action="like"
+                        onclick="toggleLike(${place.placeId})">
+                  <i class="fas fa-heart"></i> <span class="btn-label">${likedPlaceIds.has(place.placeId) ? 'Liked' : 'Like'}</span>
+                </button>
+                <button class="action-btn share" data-place-id="${place.placeId}" onclick="sharePlace(${place.placeId})">
+                  <i class="fas fa-share-nodes"></i> <span class="btn-label">Share</span>
                 </button>
               </div>
               <div class="detail-meta">
@@ -539,17 +550,39 @@
       likedPlaceIds = new Set(liked.map(p => p.placeId));
     }
 
+    function syncPlaceButtons(placeId) {
+      const isBookmarked = bookmarkedPlaceIds.has(placeId);
+      const isLiked = likedPlaceIds.has(placeId);
+      document.querySelectorAll(`[data-place-id="${placeId}"][data-action="bookmark"]`).forEach(btn => {
+        btn.classList.toggle('active', isBookmarked);
+        const label = btn.querySelector('.btn-label');
+        if (label) label.textContent = isBookmarked ? 'Bookmarked' : 'Bookmark';
+      });
+      document.querySelectorAll(`[data-place-id="${placeId}"][data-action="like"]`).forEach(btn => {
+        btn.classList.toggle('active', isLiked);
+        const label = btn.querySelector('.btn-label');
+        if (label) label.textContent = isLiked ? 'Liked' : 'Like';
+      });
+    }
+
+    function pulseButton(placeId, action) {
+      document.querySelectorAll(`[data-place-id="${placeId}"][data-action="${action}"]`).forEach(btn => {
+        btn.classList.remove('pulse');
+        void btn.offsetWidth;
+        btn.classList.add('pulse');
+      });
+    }
+
     async function toggleBookmark(placeId) {
       if (!requireLogin()) return;
       const userId = getCurrentUserId();
+      const wasBookmarked = bookmarkedPlaceIds.has(placeId);
+
+      wasBookmarked ? bookmarkedPlaceIds.delete(placeId) : bookmarkedPlaceIds.add(placeId);
+      syncPlaceButtons(placeId);
+      pulseButton(placeId, 'bookmark');
 
       try {
-        const status = await fetch(`${BASE}/bookmark/user/${userId}/place/${placeId}`);
-        const wasBookmarked = status.ok;
-
-        wasBookmarked ? bookmarkedPlaceIds.delete(placeId) : bookmarkedPlaceIds.add(placeId);
-        applyFilters();
-
         const response = wasBookmarked
           ? await fetch(`${BASE}/bookmark/user/${userId}/place/${placeId}`, { method: 'DELETE' })
           : await fetch(`${BASE}/bookmark`, {
@@ -558,33 +591,68 @@
               body: JSON.stringify({ userId, placeId })
             });
         if (!response.ok) throw new Error('Bookmark update failed');
+        showToast(wasBookmarked ? 'Removed from bookmarks' : 'Saved to bookmarks');
       } catch {
-        await loadUserPlaceActions();
-        applyFilters();
-        alert('Could not update bookmark. Please try again.');
+        wasBookmarked ? bookmarkedPlaceIds.add(placeId) : bookmarkedPlaceIds.delete(placeId);
+        syncPlaceButtons(placeId);
+        showToast('Could not update bookmark', 'error');
       }
     }
 
     async function toggleLike(placeId) {
       if (!requireLogin()) return;
       const userId = getCurrentUserId();
+      const wasLiked = likedPlaceIds.has(placeId);
+
+      wasLiked ? likedPlaceIds.delete(placeId) : likedPlaceIds.add(placeId);
+      syncPlaceButtons(placeId);
+      pulseButton(placeId, 'like');
 
       try {
-        const wasLiked = likedPlaceIds.has(placeId);
-        wasLiked ? likedPlaceIds.delete(placeId) : likedPlaceIds.add(placeId);
-        applyFilters();
-
         const response = await fetch(`${BASE}/liked/toggle/user/${userId}/place/${placeId}`, { method: 'POST' });
         if (!response.ok) throw new Error('Like update failed');
         const data = await response.json().catch(() => null);
         if (data?.liked === true) likedPlaceIds.add(placeId);
         if (data?.liked === false) likedPlaceIds.delete(placeId);
-        applyFilters();
+        syncPlaceButtons(placeId);
+        showToast(likedPlaceIds.has(placeId) ? 'Added to liked places' : 'Removed from liked');
       } catch {
-        await loadUserPlaceActions();
-        applyFilters();
-        alert('Could not update like. Please try again.');
+        wasLiked ? likedPlaceIds.add(placeId) : likedPlaceIds.delete(placeId);
+        syncPlaceButtons(placeId);
+        showToast('Could not update like', 'error');
       }
+    }
+
+    function sharePlace(placeId) {
+      const url = `${location.origin}${location.pathname}?place=${placeId}`;
+      const place = [...basePlaces, ...allPlaces].find(p => p.placeId === placeId);
+      const title = place?.name ? `Manzil - ${place.name}` : 'Manzil';
+      if (navigator.share) {
+        navigator.share({ title, url }).catch(() => {});
+        return;
+      }
+      navigator.clipboard?.writeText(url)
+        .then(() => showToast('Link copied to clipboard'))
+        .catch(() => showToast('Could not copy link', 'error'));
+    }
+
+    function showToast(message, kind = 'success') {
+      let host = document.getElementById('toastHost');
+      if (!host) {
+        host = document.createElement('div');
+        host.id = 'toastHost';
+        host.className = 'toast-host';
+        document.body.appendChild(host);
+      }
+      const toast = document.createElement('div');
+      toast.className = `toast toast--${kind}`;
+      toast.innerHTML = `<i class="fas fa-${kind === 'error' ? 'circle-exclamation' : 'check'}"></i><span>${message}</span>`;
+      host.appendChild(toast);
+      requestAnimationFrame(() => toast.classList.add('toast--show'));
+      setTimeout(() => {
+        toast.classList.remove('toast--show');
+        setTimeout(() => toast.remove(), 280);
+      }, 2200);
     }
 
     function updateRange() {
