@@ -76,7 +76,8 @@ const AuthService = {
   },
 
   getUserId() {
-    return this.getCurrentUser()?.userId || null;
+    const user = this.getCurrentUser();
+    return user?.userId || user?.id || null;
   }
 };
 

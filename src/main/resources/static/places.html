@@ -216,13 +216,13 @@
                     title="Bookmark"
                     aria-label="Bookmark ${p.name}"
                     onclick="event.stopPropagation(); toggleBookmark(${p.placeId})">
-              <i class="fa-${bookmarkedPlaceIds.has(p.placeId) ? 'solid' : 'regular'} fa-bookmark"></i>
+              <i class="fas fa-bookmark"></i>
             </button>
             <button class="pc-action pc-like ${likedPlaceIds.has(p.placeId) ? 'active' : ''}"
                     title="Like"
                     aria-label="Like ${p.name}"
                     onclick="event.stopPropagation(); toggleLike(${p.placeId})">
-              <i class="fa-${likedPlaceIds.has(p.placeId) ? 'solid' : 'regular'} fa-heart"></i>
+              <i class="fas fa-heart"></i>
             </button>
           </div>
           <div class="pc-body">
@@ -315,7 +315,7 @@
     }
 
     function loadCityFilters() {
-      const cities = [...new Set(basePlaces.map(p => p.city).filter(Boolean))].sort();
+      const cities = [...new Set(['Karachi', 'Islamabad', 'Lahore', ...basePlaces.map(p => p.city).filter(Boolean)])].sort();
       document.getElementById('cityChips').innerHTML = `
         <button class="city-chip active" data-city="">All Cities</button>
         ${cities.map(city => `<button class="city-chip" data-city="${city}">${city}</button>`).join('')}
@@ -390,7 +390,9 @@
 
     function getCurrentUserId() {
       const user = localStorage.getItem('manzilUser');
-      return user ? JSON.parse(user).userId : null;
+      if (!user) return null;
+      const parsed = JSON.parse(user);
+      return parsed.userId || parsed.id || null;
     }
 
     function requireLogin() {
@@ -415,12 +417,14 @@
     async function toggleBookmark(placeId) {
       if (!requireLogin()) return;
       const userId = getCurrentUserId();
-      const wasBookmarked = bookmarkedPlaceIds.has(placeId);
-
-      wasBookmarked ? bookmarkedPlaceIds.delete(placeId) : bookmarkedPlaceIds.add(placeId);
-      applyFilters();
 
       try {
+        const status = await fetch(`${BASE}/bookmark/user/${userId}/place/${placeId}`);
+        const wasBookmarked = status.ok;
+
+        wasBookmarked ? bookmarkedPlaceIds.delete(placeId) : bookmarkedPlaceIds.add(placeId);
+        applyFilters();
+
         const response = wasBookmarked
           ? await fetch(`${BASE}/bookmark/user/${userId}/place/${placeId}`, { method: 'DELETE' })
           : await fetch(`${BASE}/bookmark`, {
@@ -430,20 +434,21 @@
             });
         if (!response.ok) throw new Error('Bookmark update failed');
       } catch {
-        wasBookmarked ? bookmarkedPlaceIds.add(placeId) : bookmarkedPlaceIds.delete(placeId);
+        await loadUserPlaceActions();
         applyFilters();
+        alert('Could not update bookmark. Please try again.');
       }
     }
 
     async function toggleLike(placeId) {
       if (!requireLogin()) return;
       const userId = getCurrentUserId();
-      const wasLiked = likedPlaceIds.has(placeId);
-
-      wasLiked ? likedPlaceIds.delete(placeId) : likedPlaceIds.add(placeId);
-      applyFilters();
 
       try {
+        const wasLiked = likedPlaceIds.has(placeId);
+        wasLiked ? likedPlaceIds.delete(placeId) : likedPlaceIds.add(placeId);
+        applyFilters();
+
         const response = await fetch(`${BASE}/liked/toggle/user/${userId}/place/${placeId}`, { method: 'POST' });
         if (!response.ok) throw new Error('Like update failed');
         const data = await response.json().catch(() => null);
@@ -451,8 +456,9 @@
         if (data?.liked === false) likedPlaceIds.delete(placeId);
         applyFilters();
       } catch {
-        wasLiked ? likedPlaceIds.add(placeId) : likedPlaceIds.delete(placeId);
+        await loadUserPlaceActions();
         applyFilters();
+        alert('Could not update like. Please try again.');
       }
     }
 
@@ -506,6 +512,9 @@
         navRight.innerHTML = `
           <a href="bookmarks.html" class="nav-links" style="color: var(--moss); font-weight: 500; display: flex; align-items: center; gap: 0.5rem;">
             <i class="fas fa-bookmark"></i> Bookmarks
+          </a>
+          <a href="likedplaces.html" class="nav-links" style="color: var(--moss); font-weight: 500; display: flex; align-items: center; gap: 0.5rem;">
+            <i class="fas fa-heart"></i> Liked
           </a>
           <a href="profile.html" class="nav-links" style="color: var(--moss); font-weight: 500; display: flex; align-items: center; gap: 0.5rem;">
             <i class="fas fa-user"></i> ${userName}
