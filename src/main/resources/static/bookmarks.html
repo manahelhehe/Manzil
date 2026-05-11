@@ -109,7 +109,7 @@
       }
 
       grid.innerHTML = items.map(bookmark => `
-        <div class="bookmark-card" onclick="location.href='place.html?id=${bookmark.placeId}'">
+        <div class="bookmark-card" onclick="location.href='places.html?place=${bookmark.placeId}'">
           <div class="bookmark-image">
             <img src="${placeImage(bookmark)}" alt="${bookmark.name}"/>
             <button class="bookmark-remove" onclick="event.stopPropagation(); removeBookmark(${bookmark.placeId})">
@@ -122,7 +122,7 @@
               <span class="bookmark-city"><i class="fas fa-map-marker-alt"></i> ${bookmark.city || '-'}</span>
               ${bookmark.category ? `<span class="bookmark-vibe"><i class="fas fa-tag"></i> ${bookmark.category}</span>` : ''}
             </div>
-            <a href="place.html?id=${bookmark.placeId}" class="bookmark-visit">Visit Place</a>
+            <a href="places.html?place=${bookmark.placeId}" class="bookmark-visit">Visit Place</a>
           </div>
         </div>
       `).join('');

@@ -209,7 +209,7 @@
       }
 
       grid.innerHTML = places.map(p => `
-        <div class="place-card" onclick="location.href='place.html?id=${p.placeId}'">
+        <div class="place-card" onclick="location.href='places.html?place=${p.placeId}'">
           <div class="pc-img-wrap">
             <img src="${placeImage(p)}" alt="${p.name}" loading="lazy"/>
             ${stars(p)}
@@ -356,6 +356,10 @@
     async function loadPlaces() {
       try {
         const url = new URLSearchParams(window.location.search);
+        if (url.get('place') || url.get('id')) {
+          await loadPlaceDetail(Number(url.get('place') || url.get('id')));
+          return;
+        }
         const places = await fetch(`${BASE}/places`).then(r => r.json());
         places.forEach((place, index) => place.order = index);
         basePlaces = await hydratePlaces(places);
@@ -386,6 +390,126 @@
       } catch {
         document.getElementById('placesGrid').innerHTML = '<p class="err-msg">Could not load places right now.</p>';
         document.getElementById('resultsCount').textContent = '0 places';
+      }
+    }
+
+    function renderPlaceDetail(place, reviews = []) {
+      document.title = `Manzil - ${place.name}`;
+      document.querySelector('.page-layout').innerHTML = `
+        <main class="place-detail-page">
+          <button class="clear-btn detail-back" onclick="location.href='places.html'"><i class="fa fa-arrow-left"></i> Back to Explore</button>
+          <section class="detail-hero">
+            <div class="detail-image">
+              <img src="${place.imgUrls?.[0] || place.imageUrl || FALLBACK_IMG}" alt="${place.name}"/>
+            </div>
+            <div class="detail-summary">
+              <div class="filter-label">${place.cName || place.category || 'Place'}</div>
+              <h1>${place.name}</h1>
+              <p>${place.description || 'No description available.'}</p>
+              <div class="place-actions">
+                <button class="action-btn bookmark ${bookmarkedPlaceIds.has(place.placeId) ? 'active' : ''}" onclick="toggleBookmark(${place.placeId})">
+                  <i class="fas fa-bookmark"></i> Bookmark
+                </button>
+                <button class="action-btn like ${likedPlaceIds.has(place.placeId) ? 'active' : ''}" onclick="toggleLike(${place.placeId})">
+                  <i class="fas fa-heart"></i> Like
+                </button>
+              </div>
+              <div class="detail-meta">
+                <div><span>City</span><strong>${place.city || '-'}</strong></div>
+                <div><span>Rating</span><strong><i class="fa fa-star"></i> ${Number(place.avgRating) > 0 ? Number(place.avgRating).toFixed(1) : 'No ratings'}</strong></div>
+                <div><span>Cost</span><strong>${cost(place) || 'Not listed'}</strong></div>
+                <div><span>Hours</span><strong>${place.openingTime || '-'} - ${place.closingTime || '-'}</strong></div>
+              </div>
+            </div>
+          </section>
+          <section class="detail-content">
+            <div class="detail-panel">
+              <h2>Full Description</h2>
+              <p>${place.description || 'No full description available.'}</p>
+              <div class="vibe-list">${(place.vibes || []).map(v => `<span class="vibe-chip">${v}</span>`).join('') || '<span class="empty-note">No vibes listed.</span>'}</div>
+            </div>
+            <div class="detail-panel">
+              <h2>Reviews</h2>
+              <form class="review-form" id="reviewForm">
+                <select id="ratingScore" required>
+                  <option value="">Rating</option>
+                  <option value="5">5 - Excellent</option>
+                  <option value="4">4 - Good</option>
+                  <option value="3">3 - Okay</option>
+                  <option value="2">2 - Poor</option>
+                  <option value="1">1 - Bad</option>
+                </select>
+                <textarea id="reviewComments" placeholder="Share your experience..." required></textarea>
+                <button class="apply-btn" type="submit">Post Review</button>
+              </form>
+              <div class="review-list" id="reviewList">
+                ${reviews.length ? reviews.map(renderReview).join('') : '<p class="empty-note">No reviews yet. Be the first to review this place.</p>'}
+              </div>
+            </div>
+          </section>
+        </main>
+      `;
+
+      document.getElementById('reviewForm').addEventListener('submit', async event => {
+        event.preventDefault();
+        if (!requireLogin()) return;
+        const userId = getCurrentUserId();
+        const ratingScore = Number(document.getElementById('ratingScore').value);
+        const comments = document.getElementById('reviewComments').value.trim();
+        if (!ratingScore || !comments) return;
+
+        try {
+          const response = await fetch(`${BASE}/reviews`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId, placeId: place.placeId, ratingScore, comments })
+          });
+          if (!response.ok) throw new Error('Review failed');
+          await loadPlaceDetail(place.placeId);
+        } catch {
+          alert('Could not post review. Please try again.');
+        }
+      });
+    }
+
+    function renderReview(review) {
+      return `
+        <article class="review-card">
+          <div class="review-top">
+            <div>
+              <strong>${review.userName || 'Manzil user'}</strong>
+              <span>${review.reviewDate || ''}</span>
+            </div>
+            <strong><i class="fa fa-star"></i> ${review.ratingScore || 0}/5</strong>
+          </div>
+          <p>${review.comments || ''}</p>
+          <button class="review-like" onclick="likeReview(${review.reviewId})"><i class="fas fa-thumbs-up"></i> ${review.likesCount || 0}</button>
+        </article>
+      `;
+    }
+
+    async function likeReview(reviewId) {
+      await fetch(`${BASE}/reviews/${reviewId}/like`, { method: 'PUT' }).catch(() => {});
+      const url = new URLSearchParams(window.location.search);
+      await loadPlaceDetail(Number(url.get('place') || url.get('id')));
+    }
+
+    async function loadPlaceDetail(id) {
+      if (!id) {
+        document.querySelector('.page-layout').innerHTML = '<main class="results-area"><p class="err-msg">Missing place id.</p></main>';
+        return;
+      }
+      try {
+        const place = await fetch(`${BASE}/places/${id}`).then(r => {
+          if (!r.ok) throw new Error('Place not found');
+          return r.json();
+        });
+        const userId = getCurrentUserId();
+        if (userId) await loadUserPlaceActions();
+        const reviews = await fetch(`${BASE}/reviews/place/${id}`).then(r => r.ok ? r.json() : []).catch(() => []);
+        renderPlaceDetail(place, reviews);
+      } catch {
+        document.querySelector('.page-layout').innerHTML = '<main class="results-area"><p class="err-msg">Could not load this place.</p></main>';
       }
     }
 
