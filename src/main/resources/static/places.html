@@ -153,7 +153,19 @@
 
 <script>
   const BASE = 'https://manzil-production-73bf.up.railway.app/api';
-  const IMG  = 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=700&q=80';
+  const FALLBACK_IMG  = 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=700&q=80';
+  const placeImage = p => p.imageUrl || p.imgUrl || p.imgUrls?.[0] || FALLBACK_IMG;
+  async function hydrateImages(places) {
+    return Promise.all(places.map(async p => {
+      if (p.imageUrl || p.imgUrl || p.imgUrls?.[0]) return p;
+      try {
+        const detail = await fetch(`${BASE}/places/${p.placeId}`).then(r => r.ok ? r.json() : null);
+        return detail?.imgUrls?.length ? { ...p, imageUrl: detail.imgUrls[0] } : p;
+      } catch {
+        return p;
+      }
+    }));
+  }
 
   let allPlaces = [];
   let selectedCity    = '';
@@ -192,11 +204,12 @@ const stars = p => p.avgRating > 0
         places = await fetch(`${BASE}/places`).then(r => r.json());
       }
 
+      places = await hydrateImages(places);
       allPlaces = places;
       renderPlaces(allPlaces);
       loadVibeFilters();
     } catch {
-      document.getElementById('placesGrid').innerHTML = '<p class="err-msg">Could not load places. Bilals busy eating Haleem?</p>';
+      document.getElementById('placesGrid').innerHTML = '<p class="err-msg">Could not load places right now.</p>';
       document.getElementById('resultsCount').textContent = '0 places';
     }
   }
@@ -214,7 +227,7 @@ function renderPlaces(places) {
   grid.innerHTML = places.map(p => `
     <div class="place-card" onclick="location.href='place.html?id=${p.placeId}'">
       <div class="pc-img-wrap">
-        <img src="${IMG}" alt="${p.name}" loading="lazy"/>
+        <img src="${placeImage(p)}" alt="${p.name}" loading="lazy"/>
         <button class="pc-bookmark" onclick="event.stopPropagation(); toggleBookmark(${p.placeId}, this)">
           <i class="fa-regular fa-bookmark"></i>
         </button>
@@ -283,8 +296,8 @@ function renderPlaces(places) {
         // re-fetch places for this vibe
         const places = await fetch(`${BASE}/places/vibe?vibeID=${btn.dataset.vibeId}`)
           .then(r => r.json()).catch(() => []);
-        allPlaces = places;
-        renderPlaces(places);
+        allPlaces = await hydrateImages(places);
+        renderPlaces(allPlaces);
       });
     });
   } catch {}
@@ -356,7 +369,7 @@ document.querySelectorAll('[data-cat-name]').forEach(btn => {
     navigator.geolocation.getCurrentPosition(async pos => {
       const {latitude:lat, longitude:lng} = pos.coords;
       try {
-        const nearby = await fetch(`${BASE}/places/near?lat=${lat}&lng=${lng}&radius=5000`).then(r=>r.json());
+        const nearby = await fetch(`${BASE}/places/near?lat=${lat}&lng=${lng}&radius=5000`).then(r=>r.json()).then(hydrateImages);
         allPlaces = nearby;
         document.getElementById('resultsTitle').textContent = 'Near You';
         renderPlaces(nearby);

@@ -39,7 +39,10 @@ public class PlaceService
         dto.setName(p.getName());
         dto.setPlaceId(p.getPlaceId());
         dto.setCity(p.getCity());
-        dto.setCategory(p.getCategory().getName());
+        if (p.getCategory() != null)
+            dto.setCategory(p.getCategory().getName());
+        if (p.getImages() != null && !p.getImages().isEmpty())
+            dto.setImageUrl(p.getImages().get(0).getUrl());
 
         return dto;
     }

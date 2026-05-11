@@ -9,4 +9,5 @@ public class PlaceCardDTO
     private String name;
     private String city;
     private String category;
+    private String imageUrl;
 }
