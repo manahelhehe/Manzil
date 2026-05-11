@@ -22,7 +22,7 @@
       <a href="profile.html">My Profile</a>
     </div>
     <div class="nav-right">
-      <button class="nav-btn-ghost" onclick="handleLogout()">Log out</button>
+      <button class="nav-btn-ghost" id="logoutBtn" onclick="handleLogout()">Log out</button>
     </div>
   </nav>
 
@@ -62,7 +62,11 @@
     };
 
     function checkLogin() {
-      if (!getCurrentUserId()) window.location.href = 'login.html';
+      if (!getCurrentUserId()) {
+        document.getElementById('logoutBtn').textContent = 'Log in';
+        document.getElementById('logoutBtn').onclick = () => window.location.href = 'login.html';
+        window.location.href = 'login.html';
+      }
     }
 
     function handleLogout() {
