@@ -191,6 +191,7 @@
 
   const BASE = 'https://manzil-production-73bf.up.railway.app/api';
   const VIBE_ICONS = ['✨','🔥','🌙','🌿','🎉','💎','🌊','🏔️'];
+  const VIBE_LABELS = ['Trendy', 'Casual', 'Peaceful', 'Aesthetic', 'Androon', 'Foodie', 'Romantic', 'Study Friendly'];
   const FALLBACK_IMG = 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=700&q=80';
   const placeImage = p => p.imageUrl || p.imgUrl || p.imgUrls?.[0] || FALLBACK_IMG;
   const bgImage = p => `background-image:url('${placeImage(p)}')`;
@@ -386,7 +387,7 @@
   async function loadVibes() {
     try {
       const results = await Promise.all(
-        Array.from({length:6},(_,i) =>
+        Array.from({length:8},(_,i) =>
           fetch(`${BASE}/places/vibe?vibeID=${i+1}`).then(r=>r.json()).catch(()=>[])
         )
       );
@@ -396,8 +397,8 @@
       }));
 
       // vibe pills
-      document.getElementById('vibePills').innerHTML = vibes.slice(0,5).map(v => {
-        const name = v.p[0].vibe?.find(vi=>vi.vibeId===v.id)?.name || `Vibe ${v.id}`;
+      document.getElementById('vibePills').innerHTML = vibes.slice(0,6).map(v => {
+        const name = VIBE_LABELS[v.id - 1] || `Vibe ${v.id}`;
         return `<span class="vibe-pill" onclick="window.location.href='places.html?vibe=${v.id}'">${VIBE_ICONS[v.id-1]||'✨'} ${name}</span>`;
       }).join('');
 
@@ -407,7 +408,7 @@
       }
 
       document.getElementById('vibesRow').innerHTML = vibes.slice(0,3).map((v,i) => {
-        const name = v.p[0].vibe?.find(vi=>vi.vibeId===v.id)?.name || `Vibe ${v.id}`;
+        const name = VIBE_LABELS[v.id - 1] || `Vibe ${v.id}`;
         return `
           <div class="vibe-card ${i===1?'vibe-card--mid':''}"
                onclick="window.location.href='places.html?vibe=${v.id}'"
