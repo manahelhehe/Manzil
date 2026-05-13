@@ -3,14 +3,13 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Manzil — Explore Places</title>
+  <title>Manzil - Explore Places</title>
   <link rel="stylesheet" href="shared.css"/>
   <link rel="stylesheet" href="places.css"/>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 </head>
 <body>
-
   <div class="grain"></div>
 
   <nav class="nav" id="nav">
@@ -20,6 +19,7 @@
       <a href="places.html" class="active">Explore</a>
       <a href="places.html?open=true">Open Now</a>
       <a href="places.html?nearby=true">Near Me</a>
+      <a href="likedplaces.html"><i class="fas fa-heart"></i> Liked</a>
     </div>
     <div class="nav-right" id="navRight">
       <button class="nav-btn-ghost" onclick="location.href='login.html'">Log in</button>
@@ -28,16 +28,13 @@
   </nav>
 
   <div class="page-layout">
-
     <aside class="sidebar">
       <div class="sidebar-inner">
-
         <div class="filter-header">
           <h2>Filters</h2>
           <button class="clear-btn" id="clearAll">Clear all</button>
         </div>
 
-        
         <div class="filter-group">
           <label class="filter-label">Search</label>
           <div class="filter-search">
@@ -46,7 +43,6 @@
           </div>
         </div>
 
-        <!-- CITY -->
         <div class="filter-group">
           <label class="filter-label">City</label>
           <div class="city-chips" id="cityChips">
@@ -59,12 +55,11 @@
           </div>
         </div>
 
-        <!-- COST RANGE -->
         <div class="filter-group">
           <label class="filter-label">Cost Range</label>
           <div class="range-display">
             <span id="minCostLabel">PKR 0</span>
-            <span>—</span>
+            <span>-</span>
             <span id="maxCostLabel">PKR 50,000</span>
           </div>
           <div class="dual-range">
@@ -76,8 +71,6 @@
           </div>
         </div>
 
-  
-        <!-- VIBES -->
         <div class="filter-group">
           <label class="filter-label">Vibe</label>
           <div class="tag-grid" id="vibeFilters">
@@ -86,27 +79,14 @@
           </div>
         </div>
 
-        <!-- CATEGORIES -->
         <div class="filter-group">
           <label class="filter-label">Category</label>
           <div class="tag-grid" id="catFilters">
-            <!-- static cats + abandoned buildings -->
-            <button class="tag-btn" data-cat-name="Cafes"> Cafes</button>
-<button class="tag-btn" data-cat-name="Hotels"> Hotels</button>
-<button class="tag-btn" data-cat-name="Camping"> Camping</button>
-<button class="tag-btn" data-cat-name="Historical"> Historical</button>
-<button class="tag-btn" data-cat-name="Abandoned"> Abandoned</button>
-<button class="tag-btn" data-cat-name="Restaurants"> Restaurants</button>
-<button class="tag-btn" data-cat-name="Museums"> Museums</button>
-<button class="tag-btn" data-cat-name="Androon Gems"> Androon Gems</button>
-<button class="tag-btn" data-cat-name="Beaches"> Beaches</button>
-<button class="tag-btn" data-cat-name="Chai Spots"> Chai Spots</button>
-
-
+            <div class="tag-skel"></div><div class="tag-skel"></div>
+            <div class="tag-skel"></div><div class="tag-skel"></div>
           </div>
         </div>
 
-        <!-- OPEN NOW -->
         <div class="filter-group">
           <label class="filter-label">Availability</label>
           <label class="toggle-label">
@@ -120,7 +100,6 @@
       </div>
     </aside>
 
-    <!-- ── RESULTS ── -->
     <main class="results-area">
       <div class="results-header">
         <div>
@@ -138,8 +117,7 @@
         </div>
       </div>
 
-      <p class="results-count" id="resultsCount">Loading…</p>
-
+      <p class="results-count" id="resultsCount">Loading...</p>
       <div class="places-grid" id="placesGrid">
         <div class="skel skel-place"></div>
         <div class="skel skel-place"></div>
@@ -151,276 +129,648 @@
     </main>
   </div>
 
-<script>
-  const BASE = 'https://manzil-production-73bf.up.railway.app/api';
-  const IMG  = 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=700&q=80';
+  <script>
+    const BASE = 'https://manzil-production-73bf.up.railway.app/api';
+    const FALLBACK_IMG = 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=700&q=80';
+    const VIBE_LABELS = ['Androon', 'Aesthetic', 'Casual', 'Cosy', 'Trendy', 'Peaceful', 'Romantic', 'Study Friendly'];
+    const VIBE_ICONS = ['✨','🔥','🌙','🌿','🎉','💎','🌊','🏔️'];
 
-  let allPlaces = [];
-  let selectedCity    = '';
-  let selectedVibes   = new Set();
-  let selectedCats    = new Set();
-  let openNow         = false;
-const cost = p => p.minCost && p.minCost > 0 && p.maxCost && p.maxCost > 0
-  ? `PKR ${p.minCost.toLocaleString()} – ${p.maxCost.toLocaleString()}` : '';
-const stars = p => p.avgRating > 0
-  ? `<span class="p-badge">★ ${p.avgRating.toFixed(1)}</span>` : '';
+    let basePlaces = [];
+    let allPlaces = [];
+    let vibeOptions = [];
+    let bookmarkedPlaceIds = new Set();
+    let likedPlaceIds = new Set();
+    let selectedCity = '';
+    let selectedVibes = new Set();
+    let selectedCats = new Set();
 
-  // ── LOAD ALL PLACES ──
-  async function loadPlaces() {
-    try {
-      const url = new URLSearchParams(window.location.search);
-      let places;
+    const placeImage = p => p.imageUrl || p.imgUrl || p.imgUrls?.[0] || FALLBACK_IMG;
+    const hasNumber = value => Number.isFinite(Number(value));
+    const money = value => Number(value).toLocaleString();
+    const cost = p => hasNumber(p.minCost) && hasNumber(p.maxCost)
+      ? (Number(p.minCost) === 0 && Number(p.maxCost) === 0 ? 'Free' : `PKR ${money(p.minCost)} - ${money(p.maxCost)}`)
+      : '';
+    const stars = p => Number(p.avgRating) > 0
+      ? `<span class="pc-rating"><i class="fa fa-star"></i> ${Number(p.avgRating).toFixed(1)}</span>`
+      : '';
 
-      if (url.get('vibe')) {
-        places = await fetch(`${BASE}/places/vibe?vibeID=${url.get('vibe')}`).then(r => r.json());
-      } else if (url.get('category')) {
-        places = await fetch(`${BASE}/places/category/${url.get('category')}`).then(r => r.json());
-      } else if (url.get('open')) {
-        // From "Open Now" nav link
-        places = await fetch(`${BASE}/places/open`).then(r => r.json());
-        document.getElementById('openNowToggle').checked = true;
-        document.getElementById('resultsTitle').textContent = 'Open Now';
-      } else if (url.get('nearby')) {
-        // From "Near Me" nav link — trigger location
-        places = await fetch(`${BASE}/places`).then(r => r.json());
-        requestNearby();
-      } else if (url.get('vibes')) {
-        // From "Vibes" nav link — show all, vibes filter active
-        places = await fetch(`${BASE}/places`).then(r => r.json());
-        document.getElementById('resultsTitle').textContent = 'Browse by Vibe';
-      } else {
-        places = await fetch(`${BASE}/places`).then(r => r.json());
+    const minutes = time => {
+      if (!time) return null;
+      const [hours, mins] = time.split(':').map(Number);
+      return Number.isFinite(hours) && Number.isFinite(mins) ? hours * 60 + mins : null;
+    };
+
+    const isOpenNow = p => {
+      const open = minutes(p.openingTime);
+      const close = minutes(p.closingTime);
+      if (open == null || close == null) return false;
+      const now = new Date();
+      const current = now.getHours() * 60 + now.getMinutes();
+      return close <= open ? current >= open || current <= close : current >= open && current <= close;
+    };
+
+    const overlapsCost = (p, min, max) => {
+      const placeMin = hasNumber(p.minCost) ? Number(p.minCost) : 0;
+      const placeMax = hasNumber(p.maxCost) ? Number(p.maxCost) : placeMin;
+      return placeMax >= min && placeMin <= max;
+    };
+
+    async function hydratePlaces(places) {
+      return Promise.all(places.map(async p => {
+        try {
+          const detail = await fetch(`${BASE}/places/${p.placeId}`).then(r => r.ok ? r.json() : null);
+          return {
+            ...p,
+            description: detail?.description || p.description || '',
+            openingTime: detail?.openingTime || p.openingTime,
+            closingTime: detail?.closingTime || p.closingTime,
+            minCost: detail?.minCost ?? p.minCost,
+            maxCost: detail?.maxCost ?? p.maxCost,
+        avgRating: detail?.avgRating ?? p.avgRating,
+        vibes: detail?.vibes || p.vibes || [],
+        category: p.category || detail?.cName,
+        imageUrl: p.imageUrl || p.imgUrl || p.imgUrls?.[0] || detail?.imgUrls?.[0],
+        order: p.order
+          };
+        } catch {
+          return p;
+        }
+      }));
+    }
+
+    function renderPlaces(places) {
+      const grid = document.getElementById('placesGrid');
+      document.getElementById('resultsCount').textContent =
+        `${places.length} place${places.length !== 1 ? 's' : ''} found`;
+
+      if (!places.length) {
+        grid.innerHTML = '<p class="err-msg">No places match your filters.</p>';
+        return;
       }
 
-      allPlaces = places;
-      renderPlaces(allPlaces);
-      loadVibeFilters();
-    } catch {
-      document.getElementById('placesGrid').innerHTML = '<p class="err-msg">Could not load places. Bilals busy eating Haleem?</p>';
-      document.getElementById('resultsCount').textContent = '0 places';
-    }
-  }
-
-function renderPlaces(places) {
-  const grid = document.getElementById('placesGrid');
-  document.getElementById('resultsCount').textContent =
-    `${places.length} place${places.length !== 1 ? 's' : ''} found`;
-
-  if (!places.length) {
-    grid.innerHTML = '<p class="err-msg">No places match your filters.</p>';
-    return;
-  }
-
-  grid.innerHTML = places.map(p => `
-    <div class="place-card" onclick="location.href='place.html?id=${p.placeId}'">
-      <div class="pc-img-wrap">
-        <img src="${IMG}" alt="${p.name}" loading="lazy"/>
-        <button class="pc-bookmark" onclick="event.stopPropagation(); toggleBookmark(${p.placeId}, this)">
-          <i class="fa-regular fa-bookmark"></i>
-        </button>
-      </div>
-      <div class="pc-body">
-        <div class="pc-meta">
-          <span class="pc-city"><i class="fa fa-location-dot"></i> ${p.city || '—'}</span>
-          ${p.category ? `<span class="pc-cat">${p.category}</span>` : ''}
+      grid.innerHTML = places.map(p => `
+        <div class="place-card" onclick="location.href='places.html?place=${p.placeId}'">
+          <div class="pc-img-wrap">
+            <img src="${placeImage(p)}" alt="${p.name}" loading="lazy"/>
+            ${stars(p)}
+            <button class="pc-action pc-bookmark ${bookmarkedPlaceIds.has(p.placeId) ? 'active' : ''}"
+                    title="Bookmark"
+                    aria-label="Bookmark ${p.name}"
+                    data-place-id="${p.placeId}"
+                    data-action="bookmark"
+                    onclick="event.stopPropagation(); toggleBookmark(${p.placeId})">
+              <i class="fas fa-bookmark"></i>
+            </button>
+            <button class="pc-action pc-like ${likedPlaceIds.has(p.placeId) ? 'active' : ''}"
+                    title="Like"
+                    aria-label="Like ${p.name}"
+                    data-place-id="${p.placeId}"
+                    data-action="like"
+                    onclick="event.stopPropagation(); toggleLike(${p.placeId})">
+              <i class="fas fa-heart"></i>
+            </button>
+          </div>
+          <div class="pc-body">
+            <div class="pc-meta">
+              <span class="pc-city"><i class="fa fa-location-dot"></i> ${p.city || '-'}</span>
+              ${p.category ? `<span class="pc-cat">${p.category}</span>` : ''}
+            </div>
+            <h3 class="pc-name">${p.name}</h3>
+            ${p.description ? `<p class="pc-desc">${p.description}</p>` : ''}
+            <div class="pc-footer">
+              ${cost(p) ? `<span class="pc-cost">${cost(p)}</span>` : '<span></span>'}
+              ${p.openingTime && p.closingTime ? `<span class="pc-hours">${isOpenNow(p) ? 'Open now' : 'Closed'}</span>` : ''}
+            </div>
+          </div>
         </div>
-        <h3 class="pc-name">${p.name}</h3>
-      </div>
-    </div>
-  `).join('');
-}
-  // ── FILTERS ──
-  function applyFilters() {
-  const q    = document.getElementById('searchQ').value.trim().toLowerCase();
-  openNow    = document.getElementById('openNowToggle').checked;
+      `).join('');
+    }
 
-  let filtered = [...allPlaces];
+    function placeMatchesVibes(p) {
+      if (!selectedVibes.size) return true;
+      return [...selectedVibes].every(id => vibeOptions.find(v => v.id === id)?.placeIds.has(p.placeId));
+    }
 
-  // only name and city exist on PlaceCardDTO
-  if (q) filtered = filtered.filter(p =>
-    p.name.toLowerCase().includes(q) || p.city?.toLowerCase().includes(q)
-  );
-  if (selectedCity) filtered = filtered.filter(p => p.city === selectedCity);
+    function applyFilters() {
+      const q = document.getElementById('searchQ').value.trim().toLowerCase();
+      const min = Number(document.getElementById('minCost').value);
+      const max = Number(document.getElementById('maxCost').value);
+      const openOnly = document.getElementById('openNowToggle').checked;
+      const sort = document.getElementById('sortSelect').value;
 
-  // category is a String now, not an object
-  if (selectedCats.size) filtered = filtered.filter(p =>
-    p.category && selectedCats.has(p.category)
-  );
+      let filtered = [...allPlaces];
 
-  // vibes, cost, openNow don't exist on PlaceCardDTO — skip those filters
-  // they only work on PlaceDetailDTO (single place page)
+      if (q) {
+        filtered = filtered.filter(p =>
+          p.name?.toLowerCase().includes(q) ||
+          p.city?.toLowerCase().includes(q) ||
+          p.category?.toLowerCase().includes(q) ||
+          p.description?.toLowerCase().includes(q) ||
+          p.vibes?.some(v => v.toLowerCase().includes(q))
+        );
+      }
+      if (selectedCity) filtered = filtered.filter(p => p.city === selectedCity);
+      if (selectedCats.size) filtered = filtered.filter(p => selectedCats.has(p.category));
+      filtered = filtered.filter(p => overlapsCost(p, min, max));
+      if (openOnly) filtered = filtered.filter(isOpenNow);
+      filtered = filtered.filter(placeMatchesVibes);
 
-  const sort = document.getElementById('sortSelect').value;
-  // avgRating and minCost don't exist on PlaceCardDTO so sorting won't work
-  // remove those options or leave them as no-ops for now
-
-  const title = selectedCity || (q ? `"${q}"` : 'All Places');
-  document.getElementById('resultsTitle').textContent = title;
-  renderPlaces(filtered);
-}
-
-  
-
- async function loadVibeFilters() {
-  try {
-    const results = await Promise.all(
-      Array.from({length:8}, (_,i) =>
-        fetch(`${BASE}/places/vibe?vibeID=${i+1}`).then(r=>r.json()).catch(()=>[])
-      )
-    );
-    const vibes = results.map((p,i) => ({places: p, id: i+1})).filter(v => v.places.length);
-    const ICONS = ['✨','🔥','🌙','🌿','🎉','💎','🌊','🏔️'];
-
-    document.getElementById('vibeFilters').innerHTML = vibes.map(v => {
-      // PlaceCardDTO has no vibe field — use vibe ID to re-fetch when selected
-      return `<button class="tag-btn" data-vibe-id="${v.id}">${ICONS[v.id-1]||'✨'} Vibe ${v.id}</button>`;
-    }).join('');
-
-    document.querySelectorAll('[data-vibe-id]').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        document.querySelectorAll('[data-vibe-id]').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        // re-fetch places for this vibe
-        const places = await fetch(`${BASE}/places/vibe?vibeID=${btn.dataset.vibeId}`)
-          .then(r => r.json()).catch(() => []);
-        allPlaces = places;
-        renderPlaces(places);
+      filtered.sort((a, b) => {
+        if (sort === 'rating') return (Number(b.avgRating) || 0) - (Number(a.avgRating) || 0);
+        if (sort === 'cost-asc') return (Number(a.minCost) || 0) - (Number(b.minCost) || 0);
+        if (sort === 'cost-desc') return (Number(b.maxCost) || 0) - (Number(a.maxCost) || 0);
+        return (a.order ?? 0) - (b.order ?? 0);
       });
-    });
-  } catch {}
-}
 
-  // ── BOOKMARK ──
-  function toggleBookmark(placeId, btn) {
-    btn.innerHTML = '<i class="fa-solid fa-bookmark"></i>';
-    btn.style.color = 'var(--moss)';
-    // POST /bookmark — needs userId from session/localStorage once auth is implemented
-    console.log('Bookmark toggled for place', placeId);
-  }
+      const active = [];
+      if (selectedCity) active.push(selectedCity);
+      if (selectedCats.size) active.push([...selectedCats].join(', '));
+      if (selectedVibes.size) {
+        active.push([...selectedVibes].map(id => vibeOptions.find(v => v.id === id)?.label).filter(Boolean).join(', '));
+      }
+      if (openOnly) active.push('Open Now');
+      if (q) active.push(`"${q}"`);
+      document.getElementById('resultsTitle').textContent = active.filter(Boolean).join(' / ') || 'All Places';
 
-  // ── RANGE SLIDER ──
-  function updateRange() {
-    const min = parseInt(document.getElementById('minCost').value);
-    const max = parseInt(document.getElementById('maxCost').value);
-    if (min > max) return;
-    document.getElementById('minCostLabel').textContent = `PKR ${min.toLocaleString()}`;
-    document.getElementById('maxCostLabel').textContent = `PKR ${max.toLocaleString()}`;
-    const pct1 = (min / 50000) * 100;
-    const pct2 = (max / 50000) * 100;
-    document.getElementById('rangeFill').style.left  = pct1 + '%';
-    document.getElementById('rangeFill').style.width = (pct2 - pct1) + '%';
-  }
+      renderPlaces(filtered);
+    }
 
-  // ── CITY CHIPS ──
-  document.getElementById('cityChips').addEventListener('click', e => {
-    const btn = e.target.closest('.city-chip');
-    if (!btn) return;
-    document.querySelectorAll('.city-chip').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    selectedCity = btn.dataset.city;
-  });
-
-// Change tag buttons to use name instead of id
-// In HTML change to data-cat-name instead of data-cat-id:
-// <button class="tag-btn" data-cat-name="Cafes">Cafes</button>
-
-document.querySelectorAll('[data-cat-name]').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const name = btn.dataset.catName;
-    selectedCats.has(name) ? selectedCats.delete(name) : selectedCats.add(name);
-    btn.classList.toggle('active');
-  });
-});
-
-  document.getElementById('minCost').addEventListener('input', updateRange);
-  document.getElementById('maxCost').addEventListener('input', updateRange);
-  document.getElementById('applyFilters').addEventListener('click', applyFilters);
-  document.getElementById('sortSelect').addEventListener('change', applyFilters);
-  document.getElementById('searchQ').addEventListener('keydown', e => e.key === 'Enter' && applyFilters());
-  document.getElementById('clearAll').addEventListener('click', () => {
-    selectedCity = ''; selectedVibes.clear(); selectedCats.clear();
-    document.getElementById('searchQ').value = '';
-    document.getElementById('minCost').value = 0;
-    document.getElementById('maxCost').value = 50000;
-    document.getElementById('openNowToggle').checked = false;
-    document.querySelectorAll('.city-chip').forEach(b => b.classList.remove('active'));
-    document.querySelector('[data-city=""]').classList.add('active');
-    document.querySelectorAll('.tag-btn').forEach(b => b.classList.remove('active'));
-    updateRange();
-    renderPlaces(allPlaces);
-    document.getElementById('resultsTitle').textContent = 'All Places';
-  });
-
-  // ── NEARBY helper (from Near Me nav link) ──
-  function requestNearby() {
-    navigator.geolocation.getCurrentPosition(async pos => {
-      const {latitude:lat, longitude:lng} = pos.coords;
+    async function loadCategoryFilters() {
       try {
-        const nearby = await fetch(`${BASE}/places/near?lat=${lat}&lng=${lng}&radius=5000`).then(r=>r.json());
-        allPlaces = nearby;
-        document.getElementById('resultsTitle').textContent = 'Near You';
-        renderPlaces(nearby);
-      } catch {}
-    }, () => {
-      document.getElementById('resultsTitle').textContent = 'Near You (location denied)';
-    });
-  }
+        const categories = await fetch(`${BASE}/categories`).then(r => r.ok ? r.json() : []);
+        const fallback = [...new Set(basePlaces.map(p => p.category).filter(Boolean))]
+          .map((name, index) => ({ categoryId: index + 1, name }));
+        const source = categories.length ? categories : fallback;
 
-  function updateNavBar() {
-    const user = localStorage.getItem('manzilUser');
-    const navLinks = document.getElementById('navLinks');
-    const navRight = document.getElementById('navRight');
+        document.getElementById('catFilters').innerHTML = source.map(c =>
+          `<button class="tag-btn" data-cat-id="${c.categoryId}" data-cat-name="${c.name}">${c.name}</button>`
+        ).join('');
 
-    if (user) {
-      const userData = JSON.parse(user);
-      const userName = userData.fullname || userData.email.split('@')[0];
-      navLinks.innerHTML = `
-        <a href="index.html">Home</a>
-        <a href="places.html" class="active">Explore</a>
-        <a href="places.html?open=true">Open Now</a>
-        <a href="places.html?nearby=true">Near Me</a>
-        <a href="places.html?vibes=true">Vibes</a>
-      `;
-      navRight.innerHTML = `
-        <a href="bookmarks.html" class="nav-links" style="color: var(--moss); font-weight: 500; display: flex; align-items: center; gap: 0.5rem;">
-          <i class="fas fa-bookmark"></i> Bookmarks
-        </a>
-        <a href="profile.html" class="nav-links" style="color: var(--moss); font-weight: 500; display: flex; align-items: center; gap: 0.5rem;">
-          <i class="fas fa-user"></i> ${userName}
-        </a>
-        <button class="nav-btn-ghost" onclick="handleLogout()">Log out</button>
-      `;
-    } else {
-      navRight.innerHTML = `
-        <button class="nav-btn-ghost" onclick="location.href='login.html'">Log in</button>
-        <button class="nav-btn-solid" onclick="location.href='signup.html'">Join Free</button>
+        document.querySelectorAll('[data-cat-name]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const name = btn.dataset.catName;
+            selectedCats.has(name) ? selectedCats.delete(name) : selectedCats.add(name);
+            btn.classList.toggle('active');
+            applyFilters();
+          });
+        });
+      } catch {
+        document.getElementById('catFilters').innerHTML = '<p class="err-msg">Could not load categories.</p>';
+      }
+    }
+
+    function loadCityFilters() {
+      const cities = [...new Set(['Karachi', 'Islamabad', 'Lahore', ...basePlaces.map(p => p.city).filter(Boolean)])].sort();
+      document.getElementById('cityChips').innerHTML = `
+        <button class="city-chip active" data-city="">All Cities</button>
+        ${cities.map(city => `<button class="city-chip" data-city="${city}">${city}</button>`).join('')}
       `;
     }
-  }
 
-  function handleLogout() {
-    localStorage.removeItem('manzilUser');
-    window.location.href = 'login.html';
-  }
+    async function loadVibeFilters() {
+      try {
+        const results = await Promise.all(
+          Array.from({length:8}, (_, i) =>
+            fetch(`${BASE}/places/vibe?vibeID=${i + 1}`).then(r => r.json()).catch(() => [])
+          )
+        );
+        vibeOptions = results.map((places, index) => ({
+          id: index + 1,
+          label: VIBE_LABELS[index] || 'Cosy',
+          placeIds: new Set(places.map(p => p.placeId))
+        })).filter(v => v.placeIds.size);
 
-  window.addEventListener('scroll', () => {
-    document.getElementById('nav').classList.toggle('nav--scrolled', window.scrollY > 20);
-  });
+        document.getElementById('vibeFilters').innerHTML = vibeOptions.map(v =>
+          `<button class="tag-btn" data-vibe-id="${v.id}">${VIBE_ICONS[v.id - 1] || '✨'} ${v.label}</button>`
+        ).join('');
 
-  window.addEventListener('DOMContentLoaded', updateNavBar);
-  updateRange();
-  loadPlaces();
-</script>
+        document.querySelectorAll('[data-vibe-id]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const id = Number(btn.dataset.vibeId);
+            selectedVibes.has(id) ? selectedVibes.delete(id) : selectedVibes.add(id);
+            btn.classList.toggle('active');
+            applyFilters();
+          });
+        });
+      } catch {
+        document.getElementById('vibeFilters').innerHTML = '<p class="err-msg">Could not load vibes.</p>';
+      }
+    }
+
+    async function loadPlaces() {
+      try {
+        const url = new URLSearchParams(window.location.search);
+        if (url.get('place') || url.get('id')) {
+          await loadPlaceDetail(Number(url.get('place') || url.get('id')));
+          return;
+        }
+        const places = await fetch(`${BASE}/places`).then(r => r.json());
+        places.forEach((place, index) => place.order = index);
+        basePlaces = await hydratePlaces(places);
+        allPlaces = [...basePlaces];
+
+        loadCityFilters();
+        await Promise.all([loadCategoryFilters(), loadVibeFilters()]);
+        await loadUserPlaceActions();
+
+        if (url.get('open')) document.getElementById('openNowToggle').checked = true;
+        if (url.get('vibe')) {
+          const vibeId = Number(url.get('vibe'));
+          if (vibeId) {
+            selectedVibes.add(vibeId);
+            document.querySelector(`[data-vibe-id="${vibeId}"]`)?.classList.add('active');
+          }
+        }
+        if (url.get('category')) {
+          const catButton = document.querySelector(`[data-cat-id="${url.get('category')}"]`);
+          if (catButton) {
+            selectedCats.add(catButton.dataset.catName);
+            catButton.classList.add('active');
+          }
+        }
+        if (url.get('nearby')) requestNearby();
+
+        applyFilters();
+      } catch {
+        document.getElementById('placesGrid').innerHTML = '<p class="err-msg">Could not load places right now.</p>';
+        document.getElementById('resultsCount').textContent = '0 places';
+      }
+    }
+
+    function renderPlaceDetail(place, reviews = []) {
+      document.title = `Manzil - ${place.name}`;
+      document.querySelector('.page-layout').innerHTML = `
+        <main class="place-detail-page">
+          <button class="clear-btn detail-back" onclick="location.href='places.html'"><i class="fa fa-arrow-left"></i> Back to Explore</button>
+          <section class="detail-hero">
+            <div class="detail-image">
+              <img src="${place.imgUrls?.[0] || place.imageUrl || FALLBACK_IMG}" alt="${place.name}"/>
+            </div>
+            <div class="detail-summary">
+              <div class="filter-label">${place.cName || place.category || 'Place'}</div>
+              <h1>${place.name}</h1>
+              <p>${place.description || 'No description available.'}</p>
+              <div class="place-actions">
+                <button class="action-btn bookmark ${bookmarkedPlaceIds.has(place.placeId) ? 'active' : ''}"
+                        data-place-id="${place.placeId}" data-action="bookmark"
+                        onclick="toggleBookmark(${place.placeId})">
+                  <i class="fas fa-bookmark"></i> <span class="btn-label">${bookmarkedPlaceIds.has(place.placeId) ? 'Bookmarked' : 'Bookmark'}</span>
+                </button>
+                <button class="action-btn like ${likedPlaceIds.has(place.placeId) ? 'active' : ''}"
+                        data-place-id="${place.placeId}" data-action="like"
+                        onclick="toggleLike(${place.placeId})">
+                  <i class="fas fa-heart"></i> <span class="btn-label">${likedPlaceIds.has(place.placeId) ? 'Liked' : 'Like'}</span>
+                </button>
+                <button class="action-btn share" data-place-id="${place.placeId}" onclick="sharePlace(${place.placeId})">
+                  <i class="fas fa-share-nodes"></i> <span class="btn-label">Share</span>
+                </button>
+              </div>
+              <div class="detail-meta">
+                <div><span>City</span><strong>${place.city || '-'}</strong></div>
+                <div><span>Rating</span><strong><i class="fa fa-star"></i> ${Number(place.avgRating) > 0 ? Number(place.avgRating).toFixed(1) : 'No ratings'}</strong></div>
+                <div><span>Cost</span><strong>${cost(place) || 'Not listed'}</strong></div>
+                <div><span>Hours</span><strong>${place.openingTime || '-'} - ${place.closingTime || '-'}</strong></div>
+              </div>
+            </div>
+          </section>
+          <section class="detail-content">
+            <div class="detail-panel">
+              <h2>Full Description</h2>
+              <p>${place.description || 'No full description available.'}</p>
+              <div class="vibe-list">${(place.vibes || []).map(v => `<span class="vibe-chip">${v}</span>`).join('') || '<span class="empty-note">No vibes listed.</span>'}</div>
+            </div>
+            <div class="detail-panel">
+              <h2>Reviews</h2>
+              <form class="review-form" id="reviewForm">
+                <select id="ratingScore" required>
+                  <option value="">Rating</option>
+                  <option value="5">5 - Excellent</option>
+                  <option value="4">4 - Good</option>
+                  <option value="3">3 - Okay</option>
+                  <option value="2">2 - Poor</option>
+                  <option value="1">1 - Bad</option>
+                </select>
+                <textarea id="reviewComments" placeholder="Share your experience..." required></textarea>
+                <button class="apply-btn" type="submit">Post Review</button>
+              </form>
+              <div class="review-list" id="reviewList">
+                ${reviews.length ? reviews.map(renderReview).join('') : '<p class="empty-note">No reviews yet. Be the first to review this place.</p>'}
+              </div>
+            </div>
+          </section>
+        </main>
+      `;
+
+      document.getElementById('reviewForm').addEventListener('submit', async event => {
+        event.preventDefault();
+        if (!requireLogin()) return;
+        const userId = getCurrentUserId();
+        const ratingScore = Number(document.getElementById('ratingScore').value);
+        const comments = document.getElementById('reviewComments').value.trim();
+        if (!ratingScore || !comments) return;
+
+        try {
+          const response = await fetch(`${BASE}/reviews`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId, placeId: place.placeId, ratingScore, comments })
+          });
+          if (!response.ok) throw new Error('Review failed');
+          await loadPlaceDetail(place.placeId);
+        } catch {
+          alert('Could not post review. Please try again.');
+        }
+      });
+    }
+
+    function renderReview(review) {
+      return `
+        <article class="review-card">
+          <div class="review-top">
+            <div>
+              <strong>${review.userName || 'Manzil user'}</strong>
+              <span>${review.reviewDate || ''}</span>
+            </div>
+            <strong><i class="fa fa-star"></i> ${review.ratingScore || 0}/5</strong>
+          </div>
+          <p>${review.comments || ''}</p>
+          <button class="review-like" onclick="likeReview(${review.reviewId})"><i class="fas fa-thumbs-up"></i> ${review.likesCount || 0}</button>
+        </article>
+      `;
+    }
+
+    async function likeReview(reviewId) {
+      await fetch(`${BASE}/reviews/${reviewId}/like`, { method: 'PUT' }).catch(() => {});
+      const url = new URLSearchParams(window.location.search);
+      await loadPlaceDetail(Number(url.get('place') || url.get('id')));
+    }
+
+    async function loadPlaceDetail(id) {
+      if (!id) {
+        document.querySelector('.page-layout').innerHTML = '<main class="results-area"><p class="err-msg">Missing place id.</p></main>';
+        return;
+      }
+      try {
+        const place = await fetch(`${BASE}/places/${id}`).then(r => {
+          if (!r.ok) throw new Error('Place not found');
+          return r.json();
+        });
+        const userId = getCurrentUserId();
+        if (userId) await loadUserPlaceActions();
+        const reviews = await fetch(`${BASE}/reviews/place/${id}`).then(r => r.ok ? r.json() : []).catch(() => []);
+        renderPlaceDetail(place, reviews);
+      } catch {
+        document.querySelector('.page-layout').innerHTML = '<main class="results-area"><p class="err-msg">Could not load this place.</p></main>';
+      }
+    }
+
+    function getCurrentUserId() {
+      const user = localStorage.getItem('manzilUser');
+      if (!user) return null;
+      const parsed = JSON.parse(user);
+      return parsed.userId || parsed.id || null;
+    }
+
+    function requireLogin() {
+      if (getCurrentUserId()) return true;
+      window.location.href = 'login.html';
+      return false;
+    }
+
+    async function loadUserPlaceActions() {
+      const userId = getCurrentUserId();
+      if (!userId) return;
+
+      const [bookmarks, liked] = await Promise.all([
+        fetch(`${BASE}/bookmark/user/${userId}`).then(r => r.ok ? r.json() : []).catch(() => []),
+        fetch(`${BASE}/liked/user/${userId}`).then(r => r.ok ? r.json() : []).catch(() => [])
+      ]);
+
+      bookmarkedPlaceIds = new Set(bookmarks.map(p => p.placeId));
+      likedPlaceIds = new Set(liked.map(p => p.placeId));
+    }
+
+    function syncPlaceButtons(placeId) {
+      const isBookmarked = bookmarkedPlaceIds.has(placeId);
+      const isLiked = likedPlaceIds.has(placeId);
+      document.querySelectorAll(`[data-place-id="${placeId}"][data-action="bookmark"]`).forEach(btn => {
+        btn.classList.toggle('active', isBookmarked);
+        const label = btn.querySelector('.btn-label');
+        if (label) label.textContent = isBookmarked ? 'Bookmarked' : 'Bookmark';
+      });
+      document.querySelectorAll(`[data-place-id="${placeId}"][data-action="like"]`).forEach(btn => {
+        btn.classList.toggle('active', isLiked);
+        const label = btn.querySelector('.btn-label');
+        if (label) label.textContent = isLiked ? 'Liked' : 'Like';
+      });
+    }
+
+    function pulseButton(placeId, action) {
+      document.querySelectorAll(`[data-place-id="${placeId}"][data-action="${action}"]`).forEach(btn => {
+        btn.classList.remove('pulse');
+        void btn.offsetWidth;
+        btn.classList.add('pulse');
+      });
+    }
+
+    async function toggleBookmark(placeId) {
+      if (!requireLogin()) return;
+      const userId = getCurrentUserId();
+      const wasBookmarked = bookmarkedPlaceIds.has(placeId);
+
+      wasBookmarked ? bookmarkedPlaceIds.delete(placeId) : bookmarkedPlaceIds.add(placeId);
+      syncPlaceButtons(placeId);
+      pulseButton(placeId, 'bookmark');
+
+      try {
+        const response = wasBookmarked
+          ? await fetch(`${BASE}/bookmark/user/${userId}/place/${placeId}`, { method: 'DELETE' })
+          : await fetch(`${BASE}/bookmark`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ userId, placeId })
+            });
+        if (!response.ok) throw new Error('Bookmark update failed');
+        showToast(wasBookmarked ? 'Removed from bookmarks' : 'Saved to bookmarks');
+      } catch {
+        wasBookmarked ? bookmarkedPlaceIds.add(placeId) : bookmarkedPlaceIds.delete(placeId);
+        syncPlaceButtons(placeId);
+        showToast('Could not update bookmark', 'error');
+      }
+    }
+
+    async function toggleLike(placeId) {
+      if (!requireLogin()) return;
+      const userId = getCurrentUserId();
+      const wasLiked = likedPlaceIds.has(placeId);
+
+      wasLiked ? likedPlaceIds.delete(placeId) : likedPlaceIds.add(placeId);
+      syncPlaceButtons(placeId);
+      pulseButton(placeId, 'like');
+
+      try {
+        const response = await fetch(`${BASE}/liked/toggle/user/${userId}/place/${placeId}`, { method: 'POST' });
+        if (!response.ok) throw new Error('Like update failed');
+        const data = await response.json().catch(() => null);
+        if (data?.liked === true) likedPlaceIds.add(placeId);
+        if (data?.liked === false) likedPlaceIds.delete(placeId);
+        syncPlaceButtons(placeId);
+        showToast(likedPlaceIds.has(placeId) ? 'Added to liked places' : 'Removed from liked');
+      } catch {
+        wasLiked ? likedPlaceIds.add(placeId) : likedPlaceIds.delete(placeId);
+        syncPlaceButtons(placeId);
+        showToast('Could not update like', 'error');
+      }
+    }
+
+    function sharePlace(placeId) {
+      const url = `${location.origin}${location.pathname}?place=${placeId}`;
+      const place = [...basePlaces, ...allPlaces].find(p => p.placeId === placeId);
+      const title = place?.name ? `Manzil - ${place.name}` : 'Manzil';
+      if (navigator.share) {
+        navigator.share({ title, url }).catch(() => {});
+        return;
+      }
+      navigator.clipboard?.writeText(url)
+        .then(() => showToast('Link copied to clipboard'))
+        .catch(() => showToast('Could not copy link', 'error'));
+    }
+
+    function showToast(message, kind = 'success') {
+      let host = document.getElementById('toastHost');
+      if (!host) {
+        host = document.createElement('div');
+        host.id = 'toastHost';
+        host.className = 'toast-host';
+        document.body.appendChild(host);
+      }
+      const toast = document.createElement('div');
+      toast.className = `toast toast--${kind}`;
+      toast.innerHTML = `<i class="fas fa-${kind === 'error' ? 'circle-exclamation' : 'check'}"></i><span>${message}</span>`;
+      host.appendChild(toast);
+      requestAnimationFrame(() => toast.classList.add('toast--show'));
+      setTimeout(() => {
+        toast.classList.remove('toast--show');
+        setTimeout(() => toast.remove(), 280);
+      }, 2200);
+    }
+
+    function updateRange() {
+      const minInput = document.getElementById('minCost');
+      const maxInput = document.getElementById('maxCost');
+      let min = Number(minInput.value);
+      let max = Number(maxInput.value);
+      if (min > max) {
+        [min, max] = [max, min];
+        minInput.value = min;
+        maxInput.value = max;
+      }
+      document.getElementById('minCostLabel').textContent = `PKR ${min.toLocaleString()}`;
+      document.getElementById('maxCostLabel').textContent = `PKR ${max.toLocaleString()}`;
+      const pct1 = (min / 50000) * 100;
+      const pct2 = (max / 50000) * 100;
+      document.getElementById('rangeFill').style.left = pct1 + '%';
+      document.getElementById('rangeFill').style.width = (pct2 - pct1) + '%';
+    }
+
+    function requestNearby() {
+      navigator.geolocation.getCurrentPosition(async pos => {
+        const {latitude: lat, longitude: lng} = pos.coords;
+        try {
+          const nearby = await fetch(`${BASE}/places/near?lat=${lat}&lng=${lng}&radius=5000`)
+            .then(r => r.json())
+            .then(hydratePlaces);
+          allPlaces = nearby;
+          applyFilters();
+        } catch {}
+      }, () => {
+        document.getElementById('resultsTitle').textContent = 'Near You (location denied)';
+      });
+    }
+
+    function updateNavBar() {
+      const user = localStorage.getItem('manzilUser');
+      const navLinks = document.getElementById('navLinks');
+      const navRight = document.getElementById('navRight');
+
+      if (user) {
+        const userData = JSON.parse(user);
+        const userName = userData.name || userData.fullname || userData.email.split('@')[0];
+        navLinks.innerHTML = `
+          <a href="index.html">Home</a>
+          <a href="places.html" class="active">Explore</a>
+          <a href="places.html?open=true">Open Now</a>
+          <a href="places.html?nearby=true">Near Me</a>
+          <a href="likedplaces.html"><i class="fas fa-heart"></i> Liked</a>
+        `;
+        navRight.innerHTML = `
+          <a href="bookmarks.html" class="nav-links" style="color: var(--moss); font-weight: 500; display: flex; align-items: center; gap: 0.5rem;">
+            <i class="fas fa-bookmark"></i> Bookmarks
+          </a>
+          <a href="likedplaces.html" class="nav-links" style="color: var(--moss); font-weight: 500; display: flex; align-items: center; gap: 0.5rem;">
+            <i class="fas fa-heart"></i> Liked
+          </a>
+          <a href="profile.html" class="nav-links" style="color: var(--moss); font-weight: 500; display: flex; align-items: center; gap: 0.5rem;">
+            <i class="fas fa-user"></i> ${userName}
+          </a>
+          <button class="nav-btn-ghost" onclick="handleLogout()">Log out</button>
+        `;
+      }
+    }
+
+    function handleLogout() {
+      localStorage.removeItem('manzilUser');
+      window.location.href = 'login.html';
+    }
+
+    document.getElementById('cityChips').addEventListener('click', e => {
+      const btn = e.target.closest('.city-chip');
+      if (!btn) return;
+      document.querySelectorAll('.city-chip').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      selectedCity = btn.dataset.city;
+      applyFilters();
+    });
+
+    document.getElementById('minCost').addEventListener('input', () => { updateRange(); applyFilters(); });
+    document.getElementById('maxCost').addEventListener('input', () => { updateRange(); applyFilters(); });
+    document.getElementById('openNowToggle').addEventListener('change', applyFilters);
+    document.getElementById('applyFilters').addEventListener('click', applyFilters);
+    document.getElementById('sortSelect').addEventListener('change', applyFilters);
+    document.getElementById('searchQ').addEventListener('input', applyFilters);
+    document.getElementById('searchQ').addEventListener('keydown', e => e.key === 'Enter' && applyFilters());
+    document.getElementById('clearAll').addEventListener('click', () => {
+      selectedCity = '';
+      selectedVibes.clear();
+      selectedCats.clear();
+      allPlaces = [...basePlaces];
+      document.getElementById('searchQ').value = '';
+      document.getElementById('minCost').value = 0;
+      document.getElementById('maxCost').value = 50000;
+      document.getElementById('openNowToggle').checked = false;
+      document.getElementById('sortSelect').value = 'default';
+      document.querySelectorAll('.city-chip').forEach(b => b.classList.remove('active'));
+      document.querySelector('[data-city=""]').classList.add('active');
+      document.querySelectorAll('.tag-btn').forEach(b => b.classList.remove('active'));
+      updateRange();
+      applyFilters();
+    });
+
+    window.addEventListener('scroll', () => {
+      document.getElementById('nav').classList.toggle('nav--scrolled', window.scrollY > 20);
+    });
+
+    window.addEventListener('DOMContentLoaded', updateNavBar);
+    updateRange();
+    loadPlaces();
   </script>
 
-  <!-- ── FOOTER ── -->
   <footer class="footer">
     <div class="footer-inner">
       <div class="footer-brand">
         <span class="nav-logo footer-logo">M<span>anzil</span></span>
         <p>Curating the world's most memorable spaces, one city at a time.</p>
       </div>
-
       <div class="footer-cols">
         <div>
           <h5>Discover</h5>
@@ -429,34 +779,21 @@ document.querySelectorAll('[data-cat-name]').forEach(btn => {
           <a href="places.html?nearby=true">Near Me</a>
           <a href="places.html">Top Rated</a>
         </div>
-
         <div>
           <h5>Company</h5>
           <a href="about.html">About</a>
           <a href="contact.html">Contact</a>
           <a href="privacy.html">Privacy</a>
           <a href="#">For Businesses</a>
-
-          <a href="mailto:manzilit.pk@gmail.com">
-            <i class="fa fa-envelope"></i>
-            manzilit.pk@gmail.com
-          </a>
-
-          <a href="https://www.instagram.com/manzilit/" target="_blank">
-            <i class="fa-brands fa-instagram"></i>
-            @manzilit
-          </a>
+          <a href="mailto:manzilit.pk@gmail.com"><i class="fa fa-envelope"></i> manzilit.pk@gmail.com</a>
+          <a href="https://www.instagram.com/manzilit/" target="_blank"><i class="fa-brands fa-instagram"></i> @manzilit</a>
         </div>
       </div>
     </div>
-
     <div class="footer-bottom">
       <span>© 2026 Manzil</span>
       <span>All rights reserved</span>
     </div>
   </footer>
-
-</body>
-</html>
 </body>
 </html>

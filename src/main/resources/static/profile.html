@@ -11,33 +11,31 @@
 </head>
 <body>
 
-  <!-- Grain texture overlay -->
   <div class="grain"></div>
 
-  <!-- ── NAV ── -->
   <nav class="nav" id="nav">
     <a href="index.html" class="nav-logo">M<span>anzil</span></a>
     <div class="nav-links" id="navLinks">
       <a href="index.html">Home</a>
       <a href="places.html">Explore</a>
       <a href="bookmarks.html">My Bookmarks</a>
-      <a href="profile.html">My Profile</a>
+      <a href="likedplaces.html">Liked Places</a>
+      <a href="profile.html" class="active">My Profile</a>
     </div>
     <div class="nav-right">
       <button class="nav-btn-ghost" onclick="handleLogout()">Log out</button>
     </div>
   </nav>
 
-  <!-- Profile Section -->
   <main class="profile-container">
     <div class="profile-header">
       <div class="profile-avatar">
         <i class="fas fa-user-circle"></i>
       </div>
       <div class="profile-info">
-        <h1 class="profile-name" id="profileName">User Name</h1>
-        <p class="profile-email" id="profileEmail">user@email.com</p>
-        <p class="profile-joined" id="profileJoined">Joined recently</p>
+        <h1 class="profile-name" id="profileName">Loading...</h1>
+        <p class="profile-email" id="profileEmail">—</p>
+        <p class="profile-joined" id="profileJoined">—</p>
       </div>
       <button class="profile-edit-btn" onclick="editProfile()">
         <i class="fas fa-edit"></i> Edit Profile
@@ -45,96 +43,72 @@
     </div>
 
     <div class="profile-grid">
-      <!-- Stats Section -->
       <section class="profile-card">
         <h2 class="card-title">Your Activity</h2>
         <div class="stats-grid">
           <div class="stat">
-            <div class="stat-value" id="reviewCount">0</div>
+            <div class="stat-value" id="reviewCount">—</div>
             <div class="stat-label">Reviews</div>
           </div>
           <div class="stat">
-            <div class="stat-value" id="bookmarkCount">0</div>
+            <div class="stat-value" id="bookmarkCount">—</div>
             <div class="stat-label">Bookmarks</div>
           </div>
           <div class="stat">
-            <div class="stat-value" id="visitCount">0</div>
-            <div class="stat-label">Places Visited</div>
+            <div class="stat-value" id="likedCount">—</div>
+            <div class="stat-label">Liked Places</div>
           </div>
         </div>
       </section>
 
-      <!-- Account Settings -->
+      <section class="profile-card">
+        <h2 class="card-title">Recent Reviews</h2>
+        <div class="recent-reviews" id="recentReviews">
+          <p class="empty-note">Loading your reviews...</p>
+        </div>
+      </section>
+
       <section class="profile-card">
         <h2 class="card-title">Account Settings</h2>
         <div class="settings-list">
           <div class="setting-item">
             <div class="setting-label">Email Notifications</div>
-            <input type="checkbox" class="setting-toggle" checked/>
+            <input type="checkbox" class="setting-toggle" id="setting-notifications" checked/>
           </div>
           <div class="setting-item">
             <div class="setting-label">Newsletter Subscription</div>
-            <input type="checkbox" class="setting-toggle"/>
+            <input type="checkbox" class="setting-toggle" id="setting-newsletter"/>
           </div>
           <div class="setting-item">
             <div class="setting-label">Two-Factor Authentication</div>
-            <input type="checkbox" class="setting-toggle"/>
+            <input type="checkbox" class="setting-toggle" id="setting-2fa"/>
           </div>
         </div>
       </section>
 
-      <!-- Preferences -->
-      <section class="profile-card">
-        <h2 class="card-title">Preferences</h2>
-        <div class="preferences-grid">
-          <div class="pref-item">
-            <span class="pref-label">Favorite Vibe</span>
-            <select class="pref-select">
-              <option>Cozy & Intimate</option>
-              <option>Trendy & Modern</option>
-              <option>Casual & Relaxed</option>
-            </select>
+      <section class="profile-card danger-card">
+        <h2 class="card-title">Danger Zone</h2>
+        <div class="danger-row">
+          <div>
+            <strong>Delete account</strong>
+            <p class="empty-note">This permanently removes your account, bookmarks, likes, and reviews.</p>
           </div>
-          <div class="pref-item">
-            <span class="pref-label">Price Range</span>
-            <select class="pref-select">
-              <option>Budget-Friendly</option>
-              <option>Mid-Range</option>
-              <option>Premium</option>
-            </select>
-          </div>
-        </div>
-      </section>
-
-      <section class="profile-card">
-        <h2 class="card-title">We'll miss you</h2>
-        <div class="details-card">
-          <div class="detail-row">
-            <div class="detail-key"><i class="fa fa-trash-alt"></i> Delete account</div>
-            <div class="detail-val">This is the end. Really wanna do this?</div>
-          </div>
-          <div class="detail-row">
-            <button class="danger-btn" onclick="deleteAccount()">Delete Account</button>
-          </div>
+          <button class="danger-btn" onclick="deleteAccount()">Delete Account</button>
         </div>
       </section>
     </div>
   </main>
 
   <script>
-    // Check login status
-    function checkLogin() {
+    const BASE = 'https://manzil-production-73bf.up.railway.app/api';
+
+    function getCurrentUser() {
       const user = localStorage.getItem('manzilUser');
-      if (!user) {
-        window.location.href = 'login.html';
-        return;
-      }
-      const userData = JSON.parse(user);
-      document.getElementById('profileEmail').textContent = userData.email;
-      const userName = userData.fullname || userData.email.split('@')[0];
-      document.getElementById('profileName').textContent = userName;
-      const joinedDate = new Date(userData.signupTime || userData.loginTime);
-      document.getElementById('profileJoined').textContent = `Joined ${joinedDate.toLocaleDateString()}`;
+      return user ? JSON.parse(user) : null;
+    }
+    function getCurrentUserId() {
+      const user = getCurrentUser();
+      return user?.userId || user?.id || null;
     }
 
     function handleLogout() {
@@ -142,19 +116,176 @@
       window.location.href = 'login.html';
     }
 
-    function editProfile() {
-      alert('Edit profile functionality coming soon!');
+    function showToast(message, kind = 'success') {
+      let host = document.getElementById('toastHost');
+      if (!host) {
+        host = document.createElement('div');
+        host.id = 'toastHost';
+        host.className = 'toast-host';
+        document.body.appendChild(host);
+      }
+      const toast = document.createElement('div');
+      toast.className = `toast toast--${kind}`;
+      toast.innerHTML = `<i class="fas fa-${kind === 'error' ? 'circle-exclamation' : 'check'}"></i><span>${message}</span>`;
+      host.appendChild(toast);
+      requestAnimationFrame(() => toast.classList.add('toast--show'));
+      setTimeout(() => {
+        toast.classList.remove('toast--show');
+        setTimeout(() => toast.remove(), 280);
+      }, 2200);
     }
 
-    function deleteAccount() {
-      if (confirm('Are you sure you want to permanently delete your account?')) {
-        localStorage.removeItem('manzilUser');
-        alert('Your account has been deleted.');
-        window.location.href = 'signup.html';
+    function formatJoined(dateValue) {
+      if (!dateValue) return 'Joined recently';
+      const date = new Date(dateValue);
+      if (Number.isNaN(date.getTime())) return 'Joined recently';
+      return `Joined ${date.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}`;
+    }
+
+    async function loadProfile() {
+      const userId = getCurrentUserId();
+      if (!userId) {
+        window.location.href = 'login.html';
+        return;
+      }
+      const local = getCurrentUser();
+      const fallbackName = local?.name || local?.fullname || local?.email?.split('@')[0] || 'Manzil User';
+      document.getElementById('profileName').textContent = fallbackName;
+      document.getElementById('profileEmail').textContent = local?.email || '—';
+
+      try {
+        const user = await fetch(`${BASE}/users/${userId}`).then(r => r.ok ? r.json() : null);
+        if (user) {
+          document.getElementById('profileName').textContent = user.name || fallbackName;
+          document.getElementById('profileEmail').textContent = user.email || local?.email || '—';
+          document.getElementById('profileJoined').textContent = formatJoined(user.dateJoined);
+          const merged = { ...(local || {}), ...user, loggedIn: true };
+          localStorage.setItem('manzilUser', JSON.stringify(merged));
+        } else {
+          document.getElementById('profileJoined').textContent = 'Joined recently';
+        }
+      } catch {
+        document.getElementById('profileJoined').textContent = 'Joined recently';
+      }
+
+      loadSettingsFromStorage();
+    }
+
+    async function loadStats() {
+      const userId = getCurrentUserId();
+      if (!userId) return;
+
+      const [reviews, bookmarks, liked, places] = await Promise.all([
+        fetch(`${BASE}/reviews/user/${userId}`).then(r => r.ok ? r.json() : []).catch(() => []),
+        fetch(`${BASE}/bookmark/user/${userId}`).then(r => r.ok ? r.json() : []).catch(() => []),
+        fetch(`${BASE}/liked/user/${userId}`).then(r => r.ok ? r.json() : []).catch(() => []),
+        fetch(`${BASE}/places`).then(r => r.ok ? r.json() : []).catch(() => [])
+      ]);
+
+      document.getElementById('reviewCount').textContent = reviews.length;
+      document.getElementById('bookmarkCount').textContent = bookmarks.length;
+      document.getElementById('likedCount').textContent = liked.length;
+
+      const placeNames = new Map(places.map(p => [p.placeId, p.name]));
+      renderRecentReviews(reviews, placeNames);
+    }
+
+    function renderRecentReviews(reviews, placeNames) {
+      const list = document.getElementById('recentReviews');
+      if (!reviews.length) {
+        list.innerHTML = '<p class="empty-note">You haven\'t reviewed any places yet. <a href="places.html">Explore</a> to share your experiences.</p>';
+        return;
+      }
+      const recent = [...reviews]
+        .sort((a, b) => new Date(b.reviewDate || 0) - new Date(a.reviewDate || 0))
+        .slice(0, 4);
+      list.innerHTML = recent.map(r => {
+        const placeName = placeNames?.get(r.placeId) || `Place #${r.placeId}`;
+        return `
+        <article class="recent-review">
+          <div class="recent-review-top">
+            <a class="recent-review-place" href="places.html?place=${r.placeId}"><strong>${placeName}</strong></a>
+            <span><i class="fa fa-star"></i> ${r.ratingScore || 0}/5</span>
+          </div>
+          <p>${r.comments || ''}</p>
+          <span class="recent-review-date">${r.reviewDate || ''}</span>
+        </article>`;
+      }).join('');
+    }
+
+    function loadSettingsFromStorage() {
+      const settings = JSON.parse(localStorage.getItem('manzilSettings') || '{}');
+      ['notifications', 'newsletter', '2fa'].forEach(key => {
+        const el = document.getElementById('setting-' + key);
+        if (el && settings[key] !== undefined) el.checked = !!settings[key];
+      });
+    }
+
+    function saveSettings() {
+      const settings = {
+        notifications: document.getElementById('setting-notifications').checked,
+        newsletter: document.getElementById('setting-newsletter').checked,
+        '2fa': document.getElementById('setting-2fa').checked
+      };
+      localStorage.setItem('manzilSettings', JSON.stringify(settings));
+      showToast('Preferences saved');
+    }
+
+    async function editProfile() {
+      const userId = getCurrentUserId();
+      const current = getCurrentUser() || {};
+      const name = prompt('Update your display name:', current.name || '');
+      if (name === null) return;
+      const trimmed = name.trim();
+      if (!trimmed) {
+        showToast('Name cannot be empty', 'error');
+        return;
+      }
+      try {
+        const response = await fetch(`${BASE}/users/${userId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: trimmed,
+            email: current.email,
+            phone: current.phone,
+            profilePhoto: current.profilePhoto || null,
+            favouriteCategories: current.favouriteCategories || []
+          })
+        });
+        if (!response.ok) throw new Error('Update failed');
+        const data = await response.json();
+        localStorage.setItem('manzilUser', JSON.stringify({ ...current, ...data, loggedIn: true }));
+        document.getElementById('profileName').textContent = data.name || trimmed;
+        showToast('Profile updated');
+      } catch {
+        showToast('Could not update profile', 'error');
       }
     }
 
-    window.addEventListener('DOMContentLoaded', checkLogin);
+    async function deleteAccount() {
+      const userId = getCurrentUserId();
+      if (!userId) return;
+      if (!confirm('Permanently delete your account? This cannot be undone.')) return;
+      try {
+        const response = await fetch(`${BASE}/users/${userId}`, { method: 'DELETE' });
+        if (!response.ok && response.status !== 204) throw new Error('Delete failed');
+        localStorage.removeItem('manzilUser');
+        showToast('Account deleted. Redirecting...');
+        setTimeout(() => { window.location.href = 'signup.html'; }, 1200);
+      } catch {
+        showToast('Could not delete account', 'error');
+      }
+    }
+
+    document.addEventListener('change', e => {
+      if (e.target.classList.contains('setting-toggle')) saveSettings();
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+      loadProfile();
+      loadStats();
+    });
   </script>
 
 </body>

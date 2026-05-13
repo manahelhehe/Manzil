@@ -19,6 +19,7 @@
       <a href="places.html">Explore</a>
       <a href="places.html?open=true">Open Now</a>
       <a href="places.html?nearby=true">Near Me</a>
+      <a href="likedplaces.html"><i class="fas fa-heart"></i> Liked</a>
     </div>
     <div class="nav-right" id="navRight">
       <button class="nav-btn-ghost" onclick="location.href='login.html'">Log in</button>
@@ -150,7 +151,7 @@
       </div>
     </div>
     <div class="footer-bottom">
-      <span>© 2025 Manzil</span>
+      <span>© 2026 Manzil</span>
       <span>All rights reserved</span>
     </div>
   </footer>
@@ -169,10 +170,14 @@
         <a href="places.html">Explore</a>
         <a href="places.html?open=true">Open Now</a>
         <a href="places.html?nearby=true">Near Me</a>
+        <a href="likedplaces.html"><i class="fas fa-heart"></i> Liked</a>
       `;
       navRight.innerHTML = `
         <a href="bookmarks.html" style="color:var(--moss);font-weight:500;display:flex;align-items:center;gap:.5rem;text-decoration:none;">
           <i class="fas fa-bookmark"></i> Bookmarks
+        </a>
+        <a href="likedplaces.html" style="color:var(--moss);font-weight:500;display:flex;align-items:center;gap:.5rem;text-decoration:none;">
+          <i class="fas fa-heart"></i> Liked
         </a>
         <a href="profile.html" style="color:var(--moss);font-weight:500;display:flex;align-items:center;gap:.5rem;text-decoration:none;">
           <i class="fas fa-user"></i> ${userName}
@@ -191,9 +196,25 @@
 
   const BASE = 'https://manzil-production-73bf.up.railway.app/api';
   const VIBE_ICONS = ['✨','🔥','🌙','🌿','🎉','💎','🌊','🏔️'];
-  const IMG = 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=700&q=80';
+  const VIBE_LABELS = ['Androon', 'Aesthetic', 'Casual', 'Cosy', 'Trendy', 'Peaceful', 'Romantic', 'Study Friendly'];
+  const FALLBACK_IMG = 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=700&q=80';
+  const placeImage = p => p.imageUrl || p.imgUrl || p.imgUrls?.[0] || FALLBACK_IMG;
+  const bgImage = p => `background-image:url('${placeImage(p)}')`;
+  let nearbyLoadedFromLocation = false;
+  async function hydrateImages(places, limit = places.length) {
+    const enriched = await Promise.all(places.slice(0, limit).map(async p => {
+      if (p.imageUrl || p.imgUrl || p.imgUrls?.[0]) return p;
+      try {
+        const detail = await fetch(`${BASE}/places/${p.placeId}`).then(r => r.ok ? r.json() : null);
+        return detail?.imgUrls?.length ? { ...p, imageUrl: detail.imgUrls[0] } : p;
+      } catch {
+        return p;
+      }
+    }));
+    return places.map((p, i) => i < enriched.length ? enriched[i] : p);
+  }
 
-  // PlaceCardDTO only has: placeId, name, city, category (String)
+  // PlaceCardDTO has: placeId, name, city, category, imageUrl
   const cost = p => p.minCost && p.minCost > 0
     ? `From PKR ${p.minCost.toLocaleString()}` : '';
   const stars = p => p.avgRating > 0
@@ -218,7 +239,7 @@
       box.innerHTML = !data.length
         ? '<p class="sr-loading">No results found.</p>'
         : data.slice(0,6).map(p => `
-            <div class="sr-item" onclick="window.location.href='place.html?id=${p.placeId}'">
+            <div class="sr-item" onclick="window.location.href='places.html?place=${p.placeId}'">
               <div>
                 <strong>${p.name}</strong>
                 <span>${p.city}${p.category ? ' · ' + p.category : ''}</span>
@@ -240,7 +261,7 @@
   // ── FEATURED PLACES: GET /api/places ──
   async function loadFeatured() {
     try {
-      const places = await fetch(`${BASE}/places`).then(r => r.json());
+      const places = await fetch(`${BASE}/places`).then(r => r.json()).then(p => hydrateImages(p, 6));
 
       // place count
       const countEl = document.getElementById('placeCount');
@@ -250,8 +271,8 @@
       const aside = document.getElementById('heroAside');
       if (aside) {
         aside.innerHTML = places.slice(0,3).map(p => `
-          <div class="ha-card" onclick="window.location.href='place.html?id=${p.placeId}'">
-            <img src="${IMG}" alt="${p.name}"/>
+          <div class="ha-card" onclick="window.location.href='places.html?place=${p.placeId}'">
+            <img src="${placeImage(p)}" alt="${p.name}"/>
             <div class="ha-info">
               <strong>${p.name}</strong>
               <span>${p.city}</span>
@@ -282,9 +303,9 @@
 
       document.getElementById('featGrid').innerHTML = places.slice(0,4).map((p,i) => `
         <div class="feat-card ${i===0?'feat-card--lg':''}"
-             onclick="window.location.href='place.html?id=${p.placeId}'"
+             onclick="window.location.href='places.html?place=${p.placeId}'"
              style="cursor:pointer;">
-          <img src="${IMG}" alt="${p.name}" loading="lazy"/>
+          <img src="${placeImage(p)}" alt="${p.name}" loading="lazy"/>
           <div class="feat-overlay">
             <div class="feat-chips"></div>
             <h3>${p.name}</h3>
@@ -305,7 +326,7 @@
     if (!userId) return;
 
     try {
-      const places = await fetch(`${BASE}/places/recommendations/user/${userId}`).then(r => r.json());
+      const places = await fetch(`${BASE}/places/recommendations/user/${userId}`).then(r => r.json()).then(p => hydrateImages(p, 6));
       if (!places.length) return;
 
       // inject personalized section after featured
@@ -320,12 +341,16 @@
           <div class="nearby-grid" id="persGrid"></div>
         `;
         const recSection = document.getElementById('recSection');
-        recSection?.insertAdjacentElement('afterend', persSection);
+        if (recSection) {
+          recSection.insertAdjacentElement('afterend', persSection);
+        } else {
+          document.querySelector('.sect-vibes')?.insertAdjacentElement('beforebegin', persSection);
+        }
       }
 
       document.getElementById('persGrid').innerHTML = places.slice(0,6).map(p => `
-        <div class="nearby-card" onclick="window.location.href='place.html?id=${p.placeId}'" style="cursor:pointer;">
-          <div class="nc-img" style="background-image:url('${IMG}')"></div>
+        <div class="nearby-card" onclick="window.location.href='places.html?place=${p.placeId}'" style="cursor:pointer;">
+          <div class="nc-img" style="${bgImage(p)}"></div>
           <div class="nc-body">
             <h4>${p.name}</h4>
             <span><i class="fa fa-location-dot"></i> ${p.city}</span>
@@ -335,19 +360,50 @@
     } catch {}
   }
 
+  async function loadRecommendations() {
+    const user = localStorage.getItem('manzilUser');
+    const parsed = user ? JSON.parse(user) : null;
+    const url = parsed?.userId
+      ? `${BASE}/places/recommendations/user/${parsed.userId}`
+      : `${BASE}/places`;
+
+    try {
+      const places = await fetch(url).then(r => r.json()).then(p => hydrateImages(p, 6));
+      if (!places.length) {
+        document.getElementById('nearbyGrid').innerHTML = '<p class="err-msg">No recommendations yet.</p>';
+        return;
+      }
+      if (nearbyLoadedFromLocation) return;
+      document.getElementById('nearbyGrid').innerHTML = places.slice(0,6).map(p => `
+        <div class="nearby-card" onclick="window.location.href='places.html?place=${p.placeId}'" style="cursor:pointer;">
+          <div class="nc-img" style="${bgImage(p)}"></div>
+          <div class="nc-body">
+            <h4>${p.name}</h4>
+            <span><i class="fa fa-location-dot"></i> ${p.city || ''}</span>
+            ${p.category ? `<span class="nc-cat">${p.category}</span>` : ''}
+          </div>
+        </div>`).join('');
+    } catch {
+      document.getElementById('nearbyGrid').innerHTML = '<p class="err-msg">Could not load recommendations.</p>';
+    }
+  }
+
   // ── VIBES: GET /api/places/vibe?vibeID= ──
   async function loadVibes() {
     try {
       const results = await Promise.all(
-        Array.from({length:6},(_,i) =>
+        Array.from({length:8},(_,i) =>
           fetch(`${BASE}/places/vibe?vibeID=${i+1}`).then(r=>r.json()).catch(()=>[])
         )
       );
       const vibes = results.map((p,i)=>({p,id:i+1})).filter(v=>v.p.length);
+      await Promise.all(vibes.map(async v => {
+        v.p = await hydrateImages(v.p, 1);
+      }));
 
       // vibe pills
-      document.getElementById('vibePills').innerHTML = vibes.slice(0,5).map(v => {
-        const name = v.p[0].vibe?.find(vi=>vi.vibeId===v.id)?.name || `Vibe ${v.id}`;
+      document.getElementById('vibePills').innerHTML = vibes.slice(0,6).map(v => {
+        const name = VIBE_LABELS[v.id - 1] || 'Cosy';
         return `<span class="vibe-pill" onclick="window.location.href='places.html?vibe=${v.id}'">${VIBE_ICONS[v.id-1]||'✨'} ${name}</span>`;
       }).join('');
 
@@ -357,12 +413,12 @@
       }
 
       document.getElementById('vibesRow').innerHTML = vibes.slice(0,3).map((v,i) => {
-        const name = v.p[0].vibe?.find(vi=>vi.vibeId===v.id)?.name || `Vibe ${v.id}`;
+        const name = VIBE_LABELS[v.id - 1] || 'Cosy';
         return `
           <div class="vibe-card ${i===1?'vibe-card--mid':''}"
                onclick="window.location.href='places.html?vibe=${v.id}'"
                style="cursor:pointer;">
-            <div class="vc-img" style="background-image:url('${IMG}')"></div>
+            <div class="vc-img" style="${bgImage(v.p[0])}"></div>
             <div class="vc-body">
               <span class="vc-tag">${VIBE_ICONS[i]} Trending</span>
               <h3>${name}</h3>
@@ -381,15 +437,16 @@
     navigator.geolocation.getCurrentPosition(async pos => {
       const {latitude:lat, longitude:lng} = pos.coords;
       try {
-        const places = await fetch(`${BASE}/places/near?lat=${lat}&lng=${lng}&radius=5000`).then(r=>r.json());
+        const places = await fetch(`${BASE}/places/near?lat=${lat}&lng=${lng}&radius=5000`).then(r=>r.json()).then(p => hydrateImages(p, 6));
         document.getElementById('locDenied').style.display = 'none';
         if (!places.length) {
           document.getElementById('nearbyGrid').innerHTML = '<p class="err-msg">Nothing nearby yet.</p>';
           return;
         }
+        nearbyLoadedFromLocation = true;
         document.getElementById('nearbyGrid').innerHTML = places.slice(0,6).map(p => `
-          <div class="nearby-card" onclick="window.location.href='place.html?id=${p.placeId}'" style="cursor:pointer;">
-            <div class="nc-img" style="background-image:url('${IMG}')"></div>
+          <div class="nearby-card" onclick="window.location.href='places.html?place=${p.placeId}'" style="cursor:pointer;">
+            <div class="nc-img" style="${bgImage(p)}"></div>
             <div class="nc-body">
               <h4>${p.name}</h4>
               <span><i class="fa fa-location-dot"></i> ${p.city}</span>
@@ -399,7 +456,6 @@
         document.getElementById('nearbyGrid').innerHTML = '<p class="err-msg">Could not load.</p>';
       }
     }, () => {
-      document.getElementById('nearbyGrid').innerHTML = '';
       document.getElementById('locDenied').style.display = 'flex';
     });
   }
@@ -407,14 +463,14 @@
   // ── OPEN NOW: GET /api/places/open ──
   async function loadOpenNow() {
     try {
-      const places = await fetch(`${BASE}/places/open`).then(r=>r.json());
+      const places = await fetch(`${BASE}/places/open`).then(r=>r.json()).then(p => hydrateImages(p, 5));
       if (!places.length) {
         document.getElementById('openList').innerHTML = '<p class="err-msg">Nothing open right now.</p>';
         return;
       }
       document.getElementById('openList').innerHTML = places.slice(0,5).map(p => `
-        <div class="open-card" onclick="window.location.href='place.html?id=${p.placeId}'" style="cursor:pointer;">
-          <div class="oc-img" style="background-image:url('${IMG}')"></div>
+        <div class="open-card" onclick="window.location.href='places.html?place=${p.placeId}'" style="cursor:pointer;">
+          <div class="oc-img" style="${bgImage(p)}"></div>
           <div class="oc-body">
             <div class="oc-top">
               <h4>${p.name}</h4>
@@ -434,10 +490,10 @@
     document.getElementById('nav').classList.toggle('nav--scrolled', window.scrollY > 40);
   });
 
-  loadFeatured();
+  loadFeatured().then(loadPersonalized);
   loadVibes();
   loadOpenNow();
-  loadPersonalized();
+  loadRecommendations();
   requestLocation();
 </script>
 </body>

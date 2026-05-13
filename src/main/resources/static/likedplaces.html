@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Manzil - My Bookmarks</title>
+  <title>Manzil - Liked Places</title>
   <link rel="stylesheet" href="shared.css"/>
   <link rel="stylesheet" href="bookmarks.css"/>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet"/>
@@ -22,27 +22,27 @@
       <a href="profile.html">My Profile</a>
     </div>
     <div class="nav-right">
-      <button class="nav-btn-ghost" onclick="handleLogout()">Log out</button>
+      <button class="nav-btn-ghost" id="logoutBtn" onclick="handleLogout()">Log out</button>
     </div>
   </nav>
 
   <main class="bookmarks-container">
     <header class="bookmarks-header">
-      <h1>My Bookmarks</h1>
-      <p class="bookmarks-subtitle">Places you want to revisit</p>
+      <h1>Liked Places</h1>
+      <p class="bookmarks-subtitle">Places you have liked</p>
     </header>
 
     <div class="bookmarks-controls">
-      <input type="text" class="bookmarks-search" id="bookmarksSearch" placeholder="Search your bookmarks..."/>
+      <input type="text" class="bookmarks-search" id="likedSearch" placeholder="Search liked places..."/>
       <select class="bookmarks-filter" id="categoryFilter">
         <option value="">All Categories</option>
       </select>
     </div>
 
-    <div class="bookmarks-grid" id="bookmarksGrid">
+    <div class="bookmarks-grid" id="likedGrid">
       <div class="empty-state">
-        <i class="fas fa-bookmark"></i>
-        <h3>Loading bookmarks</h3>
+        <i class="fas fa-heart"></i>
+        <h3>Loading liked places</h3>
         <p>Please wait...</p>
       </div>
     </div>
@@ -51,7 +51,7 @@
   <script>
     const BASE = 'https://manzil-production-73bf.up.railway.app/api';
     const FALLBACK_IMG = 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=700&q=80';
-    let bookmarks = [];
+    let likedPlaces = [];
 
     const placeImage = p => p.imageUrl || p.imgUrl || p.imgUrls?.[0] || FALLBACK_IMG;
     const getCurrentUserId = () => {
@@ -62,7 +62,11 @@
     };
 
     function checkLogin() {
-      if (!getCurrentUserId()) window.location.href = 'login.html';
+      if (!getCurrentUserId()) {
+        document.getElementById('logoutBtn').textContent = 'Log in';
+        document.getElementById('logoutBtn').onclick = () => window.location.href = 'login.html';
+        window.location.href = 'login.html';
+      }
     }
 
     function handleLogout() {
@@ -89,93 +93,93 @@
 
     function populateCategoryFilter() {
       const select = document.getElementById('categoryFilter');
-      const categories = [...new Set(bookmarks.map(b => b.category).filter(Boolean))].sort();
+      const categories = [...new Set(likedPlaces.map(p => p.category).filter(Boolean))].sort();
       select.innerHTML = '<option value="">All Categories</option>' +
         categories.map(category => `<option value="${category}">${category}</option>`).join('');
     }
 
-    function renderBookmarks(items) {
-      const grid = document.getElementById('bookmarksGrid');
+    function renderLikedPlaces(items) {
+      const grid = document.getElementById('likedGrid');
       if (!items.length) {
         grid.innerHTML = `
           <div class="empty-state">
-            <i class="fas fa-bookmark"></i>
-            <h3>No bookmarks found</h3>
-            <p>Start exploring and bookmark your favorite places.</p>
+            <i class="fas fa-heart"></i>
+            <h3>No liked places found</h3>
+            <p>Use the heart icon on Explore to like places.</p>
             <a href="places.html" class="btn-explore">Explore Places</a>
           </div>
         `;
         return;
       }
 
-      grid.innerHTML = items.map(bookmark => `
-        <div class="bookmark-card" onclick="location.href='places.html?place=${bookmark.placeId}'">
+      grid.innerHTML = items.map(place => `
+        <div class="bookmark-card" onclick="location.href='places.html?place=${place.placeId}'">
           <div class="bookmark-image">
-            <img src="${placeImage(bookmark)}" alt="${bookmark.name}"/>
-            <button class="bookmark-remove" onclick="event.stopPropagation(); removeBookmark(${bookmark.placeId})">
-              <i class="fas fa-trash"></i>
+            <img src="${placeImage(place)}" alt="${place.name}"/>
+            <button class="bookmark-remove" onclick="event.stopPropagation(); removeLike(${place.placeId})">
+              <i class="fas fa-heart-crack"></i>
             </button>
           </div>
           <div class="bookmark-content">
-            <h3 class="bookmark-name">${bookmark.name}</h3>
+            <h3 class="bookmark-name">${place.name}</h3>
             <div class="bookmark-meta">
-              <span class="bookmark-city"><i class="fas fa-map-marker-alt"></i> ${bookmark.city || '-'}</span>
-              ${bookmark.category ? `<span class="bookmark-vibe"><i class="fas fa-tag"></i> ${bookmark.category}</span>` : ''}
+              <span class="bookmark-city"><i class="fas fa-map-marker-alt"></i> ${place.city || '-'}</span>
+              ${place.category ? `<span class="bookmark-vibe"><i class="fas fa-tag"></i> ${place.category}</span>` : ''}
             </div>
-            <a href="places.html?place=${bookmark.placeId}" class="bookmark-visit">Visit Place</a>
+            <a href="places.html?place=${place.placeId}" class="bookmark-visit">Visit Place</a>
           </div>
         </div>
       `).join('');
     }
 
-    function filterBookmarks() {
-      const searchTerm = document.getElementById('bookmarksSearch').value.toLowerCase();
+    function filterLikedPlaces() {
+      const searchTerm = document.getElementById('likedSearch').value.toLowerCase();
       const category = document.getElementById('categoryFilter').value;
-      const filtered = bookmarks.filter(bookmark => {
+      const filtered = likedPlaces.filter(place => {
         const matchesSearch =
-          bookmark.name?.toLowerCase().includes(searchTerm) ||
-          bookmark.city?.toLowerCase().includes(searchTerm) ||
-          bookmark.category?.toLowerCase().includes(searchTerm);
-        const matchesCategory = !category || bookmark.category === category;
+          place.name?.toLowerCase().includes(searchTerm) ||
+          place.city?.toLowerCase().includes(searchTerm) ||
+          place.category?.toLowerCase().includes(searchTerm);
+        const matchesCategory = !category || place.category === category;
         return matchesSearch && matchesCategory;
       });
-      renderBookmarks(filtered);
+      renderLikedPlaces(filtered);
     }
 
-    async function loadBookmarks() {
+    async function loadLikedPlaces() {
       const userId = getCurrentUserId();
       try {
-        const data = await fetch(`${BASE}/bookmark/user/${userId}`).then(r => r.ok ? r.json() : []);
-        bookmarks = await hydratePlaces(data);
+        const data = await fetch(`${BASE}/liked/user/${userId}`).then(r => r.ok ? r.json() : []);
+        likedPlaces = await hydratePlaces(data);
         populateCategoryFilter();
-        filterBookmarks();
+        filterLikedPlaces();
       } catch {
-        document.getElementById('bookmarksGrid').innerHTML = `
+        document.getElementById('likedGrid').innerHTML = `
           <div class="empty-state">
-            <i class="fas fa-bookmark"></i>
-            <h3>Could not load bookmarks</h3>
+            <i class="fas fa-heart"></i>
+            <h3>Could not load liked places</h3>
             <p>Please try again later.</p>
           </div>
         `;
       }
     }
 
-    async function removeBookmark(placeId) {
+    async function removeLike(placeId) {
       const userId = getCurrentUserId();
-      const previous = [...bookmarks];
-      bookmarks = bookmarks.filter(bookmark => bookmark.placeId !== placeId);
+      const previous = [...likedPlaces];
+      likedPlaces = likedPlaces.filter(place => place.placeId !== placeId);
       populateCategoryFilter();
-      filterBookmarks();
+      filterLikedPlaces();
 
       try {
-        const response = await fetch(`${BASE}/bookmark/user/${userId}/place/${placeId}`, { method: 'DELETE' });
+        const response = await fetch(`${BASE}/liked/toggle/user/${userId}/place/${placeId}`, { method: 'POST' });
         if (!response.ok) throw new Error('Remove failed');
-        showToast('Bookmark removed');
+        showToast('Removed from liked places');
       } catch {
-        bookmarks = previous;
+        likedPlaces = previous;
         populateCategoryFilter();
-        filterBookmarks();
-        showToast('Could not remove bookmark', 'error');
+        filterLikedPlaces();
+        showToast('Could not remove like', 'error');
       }
     }
 
@@ -198,12 +202,12 @@
       }, 2200);
     }
 
-    document.getElementById('bookmarksSearch').addEventListener('input', filterBookmarks);
-    document.getElementById('categoryFilter').addEventListener('change', filterBookmarks);
+    document.getElementById('likedSearch').addEventListener('input', filterLikedPlaces);
+    document.getElementById('categoryFilter').addEventListener('change', filterLikedPlaces);
 
     window.addEventListener('DOMContentLoaded', () => {
       checkLogin();
-      loadBookmarks();
+      loadLikedPlaces();
     });
   </script>
 

@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Manzil - Place Details</title>
+  <link rel="stylesheet" href="shared.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    .place-shell { background: var(--cream); min-height: calc(100vh - var(--nav-h)); }
+    .place-hero { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(320px, .9fr); gap: 2rem; padding: 2.5rem 6vw; align-items: stretch; }
+    .place-media { min-height: 460px; border-radius: var(--r-lg); overflow: hidden; background: var(--cream-dk); border: 1px solid var(--cream-dk); }
+    .place-media img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .place-summary { background: var(--white); border: 1px solid var(--cream-dk); border-radius: var(--r-lg); padding: 2rem; display: flex; flex-direction: column; justify-content: center; }
+    .place-kicker { color: var(--brown); font-size: .74rem; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; margin-bottom: .5rem; }
+    .place-title { font-family: var(--serif); font-size: clamp(2.4rem, 5vw, 4.2rem); line-height: .98; font-weight: 600; margin-bottom: 1rem; }
+    .place-desc { color: var(--ink-soft); font-size: 1rem; line-height: 1.8; margin-bottom: 1.4rem; }
+    .place-actions { display: flex; gap: .7rem; flex-wrap: wrap; margin-bottom: 1.3rem; }
+    .action-btn { border: 1.5px solid var(--cream-dk); background: var(--cream); color: var(--ink-soft); border-radius: 100px; padding: .55rem 1rem; font-family: var(--sans); font-size: .86rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: .45rem; }
+    .action-btn.active.bookmark { color: var(--moss); border-color: var(--moss); background: var(--moss-pale); }
+    .action-btn.active.like { color: #b94a48; border-color: #d9aaa8; background: #fff1f0; }
+    .meta-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; }
+    .meta-item { background: var(--cream); border: 1px solid var(--cream-dk); border-radius: var(--r-sm); padding: .85rem; }
+    .meta-label { color: var(--brown); display: block; font-size: .68rem; letter-spacing: .1em; text-transform: uppercase; font-weight: 600; margin-bottom: .2rem; }
+    .meta-value { color: var(--ink); font-weight: 600; font-size: .92rem; }
+    .detail-wrap { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 1.4rem; padding: 0 6vw 4rem; }
+    .panel { background: var(--white); border: 1px solid var(--cream-dk); border-radius: var(--r-lg); padding: 1.6rem; }
+    .panel h2 { font-family: var(--serif); font-size: 1.8rem; line-height: 1.1; margin-bottom: 1rem; }
+    .vibe-list { display: flex; flex-wrap: wrap; gap: .5rem; }
+    .vibe-chip { background: var(--moss-pale); color: var(--moss); border-radius: 100px; padding: .32rem .8rem; font-size: .82rem; font-weight: 600; }
+    .review-form { display: grid; gap: .8rem; margin-top: 1rem; }
+    .review-form textarea, .review-form select { width: 100%; border: 1.5px solid var(--cream-dk); background: var(--cream); border-radius: var(--r-sm); padding: .75rem; font-family: var(--sans); color: var(--ink); }
+    .review-form textarea { min-height: 110px; resize: vertical; }
+    .submit-btn { background: var(--moss); color: var(--white); border: none; border-radius: 100px; padding: .7rem 1.2rem; font-family: var(--sans); font-weight: 700; cursor: pointer; justify-self: start; }
+    .review-list { display: grid; gap: .8rem; margin-top: 1rem; }
+    .review-card { border: 1px solid var(--cream-dk); background: var(--cream); border-radius: var(--r-md); padding: 1rem; }
+    .review-top { display: flex; justify-content: space-between; gap: 1rem; align-items: center; margin-bottom: .45rem; }
+    .review-user { font-weight: 700; color: var(--ink); }
+    .review-rating { color: var(--brown); font-weight: 700; font-size: .86rem; }
+    .review-date { color: var(--ink-soft); font-size: .78rem; }
+    .review-text { color: var(--ink-soft); line-height: 1.65; }
+    .review-like { border: none; background: none; color: var(--moss); cursor: pointer; font-family: var(--sans); font-weight: 600; margin-top: .5rem; padding: 0; }
+    .empty-note, .error-note { color: var(--ink-soft); font-size: .92rem; }
+    .error-note { color: #9b3b3b; }
+    @media (max-width: 900px) {
+      .place-hero, .detail-wrap { grid-template-columns: 1fr; }
+      .place-media { min-height: 320px; }
+    }
+    @media (max-width: 560px) {
+      .place-hero { padding: 1.25rem 4vw; }
+      .detail-wrap { padding: 0 4vw 3rem; }
+      .meta-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="grain"></div>
+
+  <nav class="nav" id="nav">
+    <a href="index.html" class="nav-logo">M<span>anzil</span></a>
+    <div class="nav-links" id="navLinks">
+      <a href="index.html">Home</a>
+      <a href="places.html">Explore</a>
+      <a href="places.html?open=true">Open Now</a>
+      <a href="places.html?nearby=true">Near Me</a>
+      <a href="likedplaces.html"><i class="fas fa-heart"></i> Liked</a>
+    </div>
+    <div class="nav-right" id="navRight">
+      <button class="nav-btn-ghost" onclick="location.href='login.html'">Log in</button>
+      <button class="nav-btn-solid" onclick="location.href='signup.html'">Join Free</button>
+    </div>
+  </nav>
+
+  <main class="place-shell">
+    <section class="place-hero" id="placeHero">
+      <div class="place-media"><div class="skel" style="height:100%;"></div></div>
+      <div class="place-summary">
+        <p class="place-kicker">Loading</p>
+        <h1 class="place-title">Place details</h1>
+        <p class="place-desc">Loading place information...</p>
+      </div>
+    </section>
+
+    <section class="detail-wrap">
+      <div class="panel">
+        <h2>About</h2>
+        <p class="place-desc" id="fullDescription">Loading...</p>
+        <div class="vibe-list" id="vibeList"></div>
+      </div>
+
+      <aside class="panel">
+        <h2>Reviews</h2>
+        <div id="reviewSummary" class="empty-note">Loading reviews...</div>
+        <form class="review-form" id="reviewForm">
+          <select id="ratingScore" required>
+            <option value="">Rating</option>
+            <option value="5">5 - Excellent</option>
+            <option value="4">4 - Good</option>
+            <option value="3">3 - Okay</option>
+            <option value="2">2 - Poor</option>
+            <option value="1">1 - Bad</option>
+          </select>
+          <textarea id="reviewComments" placeholder="Share your experience..." required></textarea>
+          <button class="submit-btn" type="submit">Post Review</button>
+        </form>
+        <div class="review-list" id="reviewList"></div>
+      </aside>
+    </section>
+  </main>
+
+  <script>
+    const BASE = 'https://manzil-production-73bf.up.railway.app/api';
+    const FALLBACK_IMG = 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200&q=80';
+    const params = new URLSearchParams(window.location.search);
+    const placeId = Number(params.get('id'));
+    let currentPlace = null;
+    let bookmarked = false;
+    let liked = false;
+
+    const getCurrentUser = () => {
+      const user = localStorage.getItem('manzilUser');
+      return user ? JSON.parse(user) : null;
+    };
+    const getCurrentUserId = () => {
+      const user = getCurrentUser();
+      return user?.userId || user?.id || null;
+    };
+    const placeImage = p => p?.imgUrls?.[0] || p?.imageUrl || FALLBACK_IMG;
+    const money = value => Number(value).toLocaleString();
+    const costText = p => Number.isFinite(Number(p.minCost)) && Number.isFinite(Number(p.maxCost))
+      ? (Number(p.minCost) === 0 && Number(p.maxCost) === 0 ? 'Free' : `PKR ${money(p.minCost)} - ${money(p.maxCost)}`)
+      : 'Not listed';
+    const ratingText = rating => Number(rating) > 0 ? Number(rating).toFixed(1) : 'No ratings yet';
+
+    function updateNavBar() {
+      const user = getCurrentUser();
+      if (!user) return;
+      const userName = user.name || user.fullname || user.email?.split('@')[0] || 'Profile';
+      document.getElementById('navRight').innerHTML = `
+        <a href="bookmarks.html" style="color:var(--moss);font-weight:500;display:flex;align-items:center;gap:.5rem;text-decoration:none;">
+          <i class="fas fa-bookmark"></i> Bookmarks
+        </a>
+        <a href="likedplaces.html" style="color:var(--moss);font-weight:500;display:flex;align-items:center;gap:.5rem;text-decoration:none;">
+          <i class="fas fa-heart"></i> Liked
+        </a>
+        <a href="profile.html" style="color:var(--moss);font-weight:500;display:flex;align-items:center;gap:.5rem;text-decoration:none;">
+          <i class="fas fa-user"></i> ${userName}
+        </a>
+        <button class="nav-btn-ghost" onclick="handleLogout()">Log out</button>
+      `;
+    }
+
+    function handleLogout() {
+      localStorage.removeItem('manzilUser');
+      window.location.href = 'login.html';
+    }
+
+    function requireLogin() {
+      if (getCurrentUserId()) return true;
+      window.location.href = 'login.html';
+      return false;
+    }
+
+    async function loadPlace() {
+      if (!placeId) {
+        document.getElementById('placeHero').innerHTML = '<div class="panel error-note">Missing place id.</div>';
+        return;
+      }
+
+      try {
+        currentPlace = await fetch(`${BASE}/places/${placeId}`).then(r => {
+          if (!r.ok) throw new Error('Place not found');
+          return r.json();
+        });
+        document.title = `Manzil - ${currentPlace.name}`;
+        renderPlace(currentPlace);
+        await Promise.all([loadActions(), loadReviews()]);
+      } catch {
+        document.getElementById('placeHero').innerHTML = '<div class="panel error-note">Could not load this place.</div>';
+      }
+    }
+
+    function renderPlace(place) {
+      document.getElementById('placeHero').innerHTML = `
+        <div class="place-media">
+          <img src="${placeImage(place)}" alt="${place.name}"/>
+        </div>
+        <div class="place-summary">
+          <p class="place-kicker">${place.cName || 'Place'}</p>
+          <h1 class="place-title">${place.name}</h1>
+          <p class="place-desc">${place.description || 'No description available.'}</p>
+          <div class="place-actions">
+            <button class="action-btn bookmark ${bookmarked ? 'active' : ''}" id="bookmarkBtn" onclick="toggleBookmark()">
+              <i class="fas fa-bookmark"></i> Bookmark
+            </button>
+            <button class="action-btn like ${liked ? 'active' : ''}" id="likeBtn" onclick="toggleLike()">
+              <i class="fas fa-heart"></i> Like
+            </button>
+          </div>
+          <div class="meta-grid">
+            <div class="meta-item"><span class="meta-label">City</span><span class="meta-value">${place.city || '-'}</span></div>
+            <div class="meta-item"><span class="meta-label">Rating</span><span class="meta-value"><i class="fa fa-star"></i> ${ratingText(place.avgRating)}</span></div>
+            <div class="meta-item"><span class="meta-label">Cost</span><span class="meta-value">${costText(place)}</span></div>
+            <div class="meta-item"><span class="meta-label">Hours</span><span class="meta-value">${place.openingTime || '-'} - ${place.closingTime || '-'}</span></div>
+          </div>
+        </div>
+      `;
+      document.getElementById('fullDescription').textContent = place.description || 'No full description available.';
+      document.getElementById('vibeList').innerHTML = (place.vibes || []).length
+        ? place.vibes.map(vibe => `<span class="vibe-chip">${vibe}</span>`).join('')
+        : '<p class="empty-note">No vibes listed.</p>';
+    }
+
+    function updateActionButtons() {
+      document.getElementById('bookmarkBtn')?.classList.toggle('active', bookmarked);
+      document.getElementById('likeBtn')?.classList.toggle('active', liked);
+    }
+
+    async function loadActions() {
+      const userId = getCurrentUserId();
+      if (!userId) return;
+      const [bookmarkStatus, likedStatus] = await Promise.all([
+        fetch(`${BASE}/bookmark/user/${userId}/place/${placeId}`).then(r => r.ok).catch(() => false),
+        fetch(`${BASE}/liked/user/${userId}/place/${placeId}`).then(r => r.ok).catch(() => false)
+      ]);
+      bookmarked = bookmarkStatus;
+      liked = likedStatus;
+      updateActionButtons();
+    }
+
+    async function toggleBookmark() {
+      if (!requireLogin()) return;
+      const userId = getCurrentUserId();
+      const wasBookmarked = await fetch(`${BASE}/bookmark/user/${userId}/place/${placeId}`).then(r => r.ok).catch(() => bookmarked);
+      bookmarked = !wasBookmarked;
+      updateActionButtons();
+      try {
+        const response = wasBookmarked
+          ? await fetch(`${BASE}/bookmark/user/${userId}/place/${placeId}`, { method: 'DELETE' })
+          : await fetch(`${BASE}/bookmark`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ userId, placeId })
+            });
+        if (!response.ok) throw new Error('Bookmark failed');
+      } catch {
+        bookmarked = wasBookmarked;
+        updateActionButtons();
+        alert('Could not update bookmark. Please try again.');
+      }
+    }
+
+    async function toggleLike() {
+      if (!requireLogin()) return;
+      const userId = getCurrentUserId();
+      liked = !liked;
+      updateActionButtons();
+      try {
+        const response = await fetch(`${BASE}/liked/toggle/user/${userId}/place/${placeId}`, { method: 'POST' });
+        if (!response.ok) throw new Error('Like failed');
+        const data = await response.json().catch(() => null);
+        if (data?.liked === true) liked = true;
+        if (data?.liked === false) liked = false;
+        updateActionButtons();
+      } catch {
+        liked = !liked;
+        updateActionButtons();
+        alert('Could not update like. Please try again.');
+      }
+    }
+
+    async function loadReviews() {
+      try {
+        const reviews = await fetch(`${BASE}/reviews/place/${placeId}`).then(r => r.ok ? r.json() : []);
+        renderReviews(reviews);
+      } catch {
+        document.getElementById('reviewList').innerHTML = '<p class="error-note">Could not load reviews.</p>';
+      }
+    }
+
+    function renderReviews(reviews) {
+      const list = document.getElementById('reviewList');
+      document.getElementById('reviewSummary').textContent = reviews.length
+        ? `${reviews.length} review${reviews.length === 1 ? '' : 's'}`
+        : 'No reviews yet.';
+
+      if (!reviews.length) {
+        list.innerHTML = '<p class="empty-note">Be the first to review this place.</p>';
+        return;
+      }
+
+      list.innerHTML = reviews.map(review => `
+        <article class="review-card">
+          <div class="review-top">
+            <div>
+              <div class="review-user">${review.userName || 'Manzil user'}</div>
+              <div class="review-date">${review.reviewDate || ''}</div>
+            </div>
+            <div class="review-rating"><i class="fa fa-star"></i> ${review.ratingScore || 0}/5</div>
+          </div>
+          <p class="review-text">${review.comments || ''}</p>
+          <button class="review-like" onclick="likeReview(${review.reviewId})">
+            <i class="fas fa-thumbs-up"></i> ${review.likesCount || 0}
+          </button>
+        </article>
+      `).join('');
+    }
+
+    async function likeReview(reviewId) {
+      try {
+        await fetch(`${BASE}/reviews/${reviewId}/like`, { method: 'PUT' });
+        loadReviews();
+      } catch {}
+    }
+
+    document.getElementById('reviewForm').addEventListener('submit', async event => {
+      event.preventDefault();
+      if (!requireLogin()) return;
+
+      const userId = getCurrentUserId();
+      const ratingScore = Number(document.getElementById('ratingScore').value);
+      const comments = document.getElementById('reviewComments').value.trim();
+      if (!ratingScore || !comments) return;
+
+      try {
+        const response = await fetch(`${BASE}/reviews`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId, placeId, ratingScore, comments })
+        });
+        if (!response.ok) throw new Error('Review failed');
+        document.getElementById('reviewForm').reset();
+        await Promise.all([loadPlace(), loadReviews()]);
+      } catch {
+        alert('Could not post review. Please try again.');
+      }
+    });
+
+    updateNavBar();
+    loadPlace();
+  </script>
+</body>
+</html>
