@@ -43,7 +43,7 @@ public class ManzilUserService {
 
         RegisteredUser user = new RegisteredUser();
         user.setName(dto.getName());
-        user.setEmail(dto.getEmail());
+        user.setEmail(dto.getEmail().toLowerCase());
         user.setPhone(dto.getPhone());
         user.setFavouriteCategories(cService.mapCategories(dto.getFavouriteCategories()));
         user.setDateJoined(LocalDate.now()); // Ensure the member-since feature works!
