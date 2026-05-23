@@ -56,6 +56,7 @@ The platform combines **location-based discovery**, **social recommendations**, 
 | 👤 **Guest Access** | Browse and get recommendations without signing up |
 | ➕ **Suggest a Place** | Registered users can submit new places for admin review |
 
+Discount Offers and Google Maps Integration yet to be implemented
 ---
 
 ## 🛠️ Tech Stack
@@ -80,7 +81,7 @@ The platform combines **location-based discovery**, **social recommendations**, 
 
 ### Entity-Relationship Model
 
-The Manzil ER model captures 7 core entities, 1 weak entity, 3 associative entities, 6 subclasses, and 1 multivalued attribute — all mapped to a 18-relation relational schema using a systematic 8-step ER-to-Relational mapping process.
+The Manzil ER model captures 6 core entities, 1 weak entity, 4 associative entities, 2 subclasses, and 1 multivalued attribute — all mapped to a 13-relation relational schema using a systematic 8-step ER-to-Relational mapping process.
 
 > 📌 *ER Diagram image to be added here*
 
@@ -97,31 +98,30 @@ The Manzil ER model captures 7 core entities, 1 weak entity, 3 associative entit
 | **Review** | review_id, rating_score, comments, review_date, likes_count | User (M:1), Place (M:1) |
 | **Category** | category_id, name, icon, description | Place (M:M) |
 | **Vibe** | vibe_id, name, description | Place (M:M) |
-| **GuestSession** | guest_session_id, start_session, expiry_time, temp_preferences | Recommendation (1:M) |
-| **DiscountOffer** | discount_id, status, percentage, min_spend, valid_from, valid_to | Place (1:M) |
 
 ### Weak Entity
 
-| Entity | Identifying Entities | Composite PK |
+| Entity | Identifying Entity | Composite PK |
 |---|---|---|
-| **Recommendation** | User, Place | (user_id, place_id, recommendations_id) |
+| **PlaceImages** | Place | (Order, Place_ID) |
 
 ### Associative (Junction) Tables (3)
 
 | Table | Resolves |
 |---|---|
 | **Bookmark** | RegisteredUser ↔ Place |
+| **LikedPlaces** | RegisteredUser ↔ Place |
 | **PlaceANDVibe** | Place ↔ Vibe |
 | **PlaceCategory** | Place ↔ Category |
 
-### Subclasses (6)
+### Subclasses (2)
 
 ```
 User
 ├── RegisteredUser  (preferences, join_date)
 └── Admin           (role, permission)
 
-DiscountOffer
+DiscountOffer(Implementation in Future)
 ├── GroupDiscount        (min_group_size)
 ├── UniversityDiscount   (universityName, availableFor)
 ├── TimeBasedDiscount    (start_time, end_time)
@@ -132,11 +132,11 @@ DiscountOffer
 
 | Step | Type | Applied |
 |---|---|---|
-| 1 | Regular Entities | 7 core tables created |
-| 2 | Weak Entities | Recommendation table with composite PK |
+| 1 | Regular Entities | 6 core tables created |
+| 2 | Weak Entities | PlaceImages table with composite PK |
 | 3 | 1:1 Relationships | None — skipped |
-| 4 | 1:N Relationships | FKs added to Place, Review, Recommendation, DiscountOffer |
-| 5 | M:N Relationships | 3 junction tables: Bookmark, PlaceANDVibe, UserANDRecommendation |
+| 4 | 1:N Relationships | FKs added to Place, Review, DiscountOffer |
+| 5 | M:N Relationships | 3 junction tables: LikedPlaces, Bookmark, PlaceANDVibe, UserANDRecommendation |
 | 6 | N-ary Relationships | None — skipped |
 | 7 | Multivalued Attributes | UserName relation extracted from User |
 | 8 | Generalization | 6 subclass tables (User → 2, DiscountOffer → 4) |
@@ -145,7 +145,7 @@ DiscountOffer
 
 ## ✅ Normalization
 
-All 18 relations satisfy **BCNF** — the highest standard of relational normalization.
+All 13 relations satisfy **BCNF** — the highest standard of relational normalization.
 
 | Normal Form | Status | Notes |
 |---|---|---|
@@ -236,15 +236,15 @@ manzil/
 | Name | Role |
 |---|---|
 | **Maisam Samir** | Database Design, Backend |
-| **Manahel Zulqarnain** | Database Design, Backend |
+| **Manahel Zulqarnain** | Database Design, Frontend |
 | **Muhammad Bilal** | Database Design, Backend |
 
-> *Database Systems — CS220 | 09 May, 2026*
+> *Database Systems — CS220 | 20 May, 2026*
 
 ---
 
 <div align="center">
 
-Made with ❤️ in Islamabad 🇵🇰
+Made for Pakistan in Pakistan
 
 </div>
