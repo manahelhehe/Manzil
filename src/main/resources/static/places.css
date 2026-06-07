@@ -460,6 +460,22 @@ body { min-height: 100vh; display: flex; flex-direction: column; }
 .empty-note {
   color: var(--ink-soft);
 }
+.location-coords {
+  font-family: var(--mono, monospace);
+  color: var(--ink-soft);
+  margin: .4rem 0 1rem;
+  letter-spacing: .02em;
+}
+.location-coords i {
+  color: var(--moss);
+  margin-right: .4rem;
+}
+.location-link {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  text-decoration: none;
+}
 
 @media (max-width: 860px) {
   .detail-hero,

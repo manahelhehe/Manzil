@@ -439,6 +439,7 @@
               <p>${place.description || 'No full description available.'}</p>
               <div class="vibe-list">${(place.vibes || []).map(v => `<span class="vibe-chip">${v}</span>`).join('') || '<span class="empty-note">No vibes listed.</span>'}</div>
             </div>
+            ${renderLocationPanel(place)}
             <div class="detail-panel">
               <h2>Reviews</h2>
               <form class="review-form" id="reviewForm">
@@ -481,6 +482,29 @@
           alert('Could not post review. Please try again.');
         }
       });
+    }
+
+    function renderLocationPanel(place) {
+      const lat = Number(place.latitude);
+      const lng = Number(place.longitude);
+      if (!Number.isFinite(lat) || !Number.isFinite(lng) || (lat === 0 && lng === 0)) {
+        return `
+          <div class="detail-panel">
+            <h2>Location</h2>
+            <p class="empty-note">Location not available for this place.</p>
+          </div>
+        `;
+      }
+      const mapsUrl = `https://www.google.com/maps?q=${lat},${lng}`;
+      return `
+        <div class="detail-panel location-panel">
+          <h2>Location</h2>
+          <p class="location-coords"><i class="fa fa-location-dot"></i> ${lat.toFixed(6)}, ${lng.toFixed(6)}</p>
+          <a class="action-btn location-link" href="${mapsUrl}" target="_blank" rel="noopener">
+            <i class="fas fa-map-location-dot"></i> <span class="btn-label">Open in Google Maps</span>
+          </a>
+        </div>
+      `;
     }
 
     function renderReview(review) {
