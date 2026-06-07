@@ -716,6 +716,24 @@
           <button class="nav-btn-ghost" onclick="handleLogout()">Log out</button>
         `;
       }
+      setActiveNavTab();
+    }
+
+    function setActiveNavTab() {
+      const params = new URLSearchParams(window.location.search);
+      const navLinks = document.getElementById('navLinks');
+      if (!navLinks) return;
+      const links = navLinks.querySelectorAll('a');
+      links.forEach(a => a.classList.remove('active'));
+      let target;
+      if (params.get('open') === 'true') {
+        target = navLinks.querySelector('a[href="places.html?open=true"]');
+      } else if (params.get('nearby') === 'true') {
+        target = navLinks.querySelector('a[href="places.html?nearby=true"]');
+      } else {
+        target = navLinks.querySelector('a[href="places.html"]');
+      }
+      target?.classList.add('active');
     }
 
     function handleLogout() {
@@ -760,7 +778,10 @@
       document.getElementById('nav').classList.toggle('nav--scrolled', window.scrollY > 20);
     });
 
-    window.addEventListener('DOMContentLoaded', updateNavBar);
+    window.addEventListener('DOMContentLoaded', () => {
+      updateNavBar();
+      setActiveNavTab();
+    });
     updateRange();
     loadPlaces();
   </script>
