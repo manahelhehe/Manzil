@@ -15,4 +15,6 @@ public class PlaceCardDTO
     private Double avgRating;
     private String openingTime;
     private String closingTime;
+    private Double latitude;
+    private Double longitude;
 }

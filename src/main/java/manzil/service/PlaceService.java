@@ -50,6 +50,11 @@ public class PlaceService
             dto.setOpeningTime(p.getOpeningTime().toString());
         if (p.getClosingTime() != null)
             dto.setClosingTime(p.getClosingTime().toString());
+        if (p.getLocation() != null)
+        {
+            dto.setLongitude(p.getLocation().getX());
+            dto.setLatitude(p.getLocation().getY());
+        }
 
         return dto;
     }

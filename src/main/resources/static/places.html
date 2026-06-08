@@ -16,7 +16,7 @@
     <a href="index.html" class="nav-logo">M<span>anzil</span></a>
     <div class="nav-links" id="navLinks">
       <a href="index.html">Home</a>
-      <a href="places.html" class="active">Explore</a>
+      <a href="places.html">Explore</a>
       <a href="places.html?open=true">Open Now</a>
       <a href="places.html?nearby=true">Near Me</a>
       <a href="likedplaces.html"><i class="fas fa-heart"></i> Liked</a>
@@ -154,6 +154,21 @@
       ? `<span class="pc-rating"><i class="fa fa-star"></i> ${Number(p.avgRating).toFixed(1)}</span>`
       : '';
 
+    const mapsLinkButton = p => {
+      const lat = Number(p.latitude);
+      const lng = Number(p.longitude);
+      if (!Number.isFinite(lat) || !Number.isFinite(lng) || (lat === 0 && lng === 0)) return '';
+      return `<a class="pc-action pc-maps"
+                 title="Open in Google Maps"
+                 aria-label="Open ${p.name} in Google Maps"
+                 href="https://www.google.com/maps?q=${lat},${lng}"
+                 target="_blank"
+                 rel="noopener"
+                 onclick="event.stopPropagation()">
+                <i class="fas fa-map-location-dot"></i>
+              </a>`;
+    };
+
     const minutes = time => {
       if (!time) return null;
       const [hours, mins] = time.split(':').map(Number);
@@ -229,6 +244,7 @@
                     onclick="event.stopPropagation(); toggleLike(${p.placeId})">
               <i class="fas fa-heart"></i>
             </button>
+            ${mapsLinkButton(p)}
           </div>
           <div class="pc-body">
             <div class="pc-meta">
@@ -722,7 +738,7 @@
         const userName = userData.name || userData.fullname || userData.email.split('@')[0];
         navLinks.innerHTML = `
           <a href="index.html">Home</a>
-          <a href="places.html" class="active">Explore</a>
+          <a href="places.html">Explore</a>
           <a href="places.html?open=true">Open Now</a>
           <a href="places.html?nearby=true">Near Me</a>
           <a href="likedplaces.html"><i class="fas fa-heart"></i> Liked</a>
@@ -744,20 +760,19 @@
     }
 
     function setActiveNavTab() {
-      const params = new URLSearchParams(window.location.search);
       const navLinks = document.getElementById('navLinks');
       if (!navLinks) return;
-      const links = navLinks.querySelectorAll('a');
-      links.forEach(a => a.classList.remove('active'));
-      let target;
-      if (params.get('open') === 'true') {
-        target = navLinks.querySelector('a[href="places.html?open=true"]');
-      } else if (params.get('nearby') === 'true') {
-        target = navLinks.querySelector('a[href="places.html?nearby=true"]');
-      } else {
-        target = navLinks.querySelector('a[href="places.html"]');
-      }
-      target?.classList.add('active');
+      const params = new URLSearchParams(window.location.search);
+      const mode = params.get('open') === 'true' ? 'open'
+                 : params.get('nearby') === 'true' ? 'nearby'
+                 : 'explore';
+      navLinks.querySelectorAll('a').forEach(a => {
+        a.classList.remove('active');
+        const href = a.getAttribute('href') || '';
+        if (mode === 'open' && href.includes('open=true')) a.classList.add('active');
+        else if (mode === 'nearby' && href.includes('nearby=true')) a.classList.add('active');
+        else if (mode === 'explore' && /^places\.html(\?|$)/.test(href) && !href.includes('=')) a.classList.add('active');
+      });
     }
 
     function handleLogout() {
@@ -802,10 +817,8 @@
       document.getElementById('nav').classList.toggle('nav--scrolled', window.scrollY > 20);
     });
 
-    window.addEventListener('DOMContentLoaded', () => {
-      updateNavBar();
-      setActiveNavTab();
-    });
+    updateNavBar();
+    setActiveNavTab();
     updateRange();
     loadPlaces();
   </script>
